@@ -1,12 +1,19 @@
-import { Line } from "./line";
+import Line from "./line";
+import MapIdDelta from "./map-id-delta";
 
-export interface Stop {
+
+export default interface Stop {
   id: number;
+
   road: string;
   city: string;
+
   lat: number;
   lon: number;
+
   name: string;
+
   lines: Line[];
-  lineIds: { [key: number]: number };
+
+  lineIds: MapIdDelta[];
 }

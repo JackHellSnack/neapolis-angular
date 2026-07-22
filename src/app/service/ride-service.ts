@@ -1,7 +1,7 @@
 import { Service, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { RideData } from '../model/ride-data';
+import  RideData  from '../model/ride-data';
 
 @Service()
 export class RideService {

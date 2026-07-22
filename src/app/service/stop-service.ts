@@ -2,7 +2,7 @@
 import { Service, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Stop } from '../model/stop';
+import Stop from '../model/stop';
 import { AreaSearch } from '../model/area-search';
 
 @Service()
