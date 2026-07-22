@@ -3,13 +3,13 @@ import RideData from "./ride-data";
 
 
 export default interface Line {
-  id: number;
+  id?: number;
   name: string;
   type: string;
   provider: string;
 
-  stopInfo: string[];
-  stopIds: MapIdDelta[];
+  stopInfo?: string[];
+  stopIds?: MapIdDelta[];
 
-  data: RideData[];
+  data?: RideData[];
 }

@@ -1,43 +1,134 @@
 <!-- src/app/component/stop-form/stop-form.html -->
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="stop-form">
-  <h2>Nuova stazione</h2>
 
-  <label>
-    Nome
-    <input type="text" formControlName="name" />
-  </label>
-  @if (form.get('name')?.invalid && form.get('name')?.touched) {
-    <span class="error">Il nome è obbligatorio.</span>
+<div class="container" style="margin-top: 30px;">
+  <div class="w3-card-4 w3-white" style="max-width: 600px; margin: 0 auto; border-radius: 4px;">
+    
+    <div class="w3-container w3-border-bottom w3-padding-16">
+      <h2 class="w3-text-brianza" style="margin: 0;">
+        Nuova Stop NeaPolis
+      </h2>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="w3-container w3-padding-24">
+
+      @if (successMessage) {
+        <div class="w3-panel w3-pale-green w3-border w3-border-green w3-padding-small w3-margin-bottom">
+          <p>{{ successMessage }}</p>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="w3-panel w3-pale-red w3-border w3-border-red w3-padding-small w3-margin-bottom">
+          <p>{{ errorMessage }}</p>
+        </div>
+      }
+
+
+      <div class="w3-margin-bottom">
+        <label class="w3-text-brianza">
+          <b>Nome Stazione</b>
+        </label>
+
+        <input 
+          class="w3-input w3-border"
+          type="text"
+          formControlName="name"
+          placeholder="Es. Monza, Carnate-Usmate...">
+
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <span class="w3-text-red w3-small">
+            Il nome della stazione è obbligatorio.
+          </span>
+        }
+      </div>
+
+
+      <div class="w3-margin-bottom">
+        <label class="w3-text-brianza">
+          <b>Via</b>
+        </label>
+
+        <input 
+          class="w3-input w3-border"
+          type="text"
+          formControlName="road"
+          placeholder="Es. Via Roma 10">
+      </div>
+
+
+      <div class="w3-margin-bottom">
+        <label class="w3-text-brianza">
+          <b>Città / Comune</b>
+        </label>
+
+        <input 
+          class="w3-input w3-border"
+          type="text"
+          formControlName="city"
+          placeholder="Es. Monza, Seregno...">
+      </div>
+
+
+      <div formArrayName="lineEntries">
+
+  @for (entry of lineEntries.controls; track $index) {
+    <div [formGroupName]="$index" class="w3-row w3-margin-bottom" style="display:flex; align-items:center; gap:8px;">
+
+      <div style="flex: 2;">
+        <app-line-picker (lineChange)="onLineSelected($event, $index)"></app-line-picker>
+      </div>
+
+      <div style="flex: 1;">
+        <input
+          class="w3-input w3-border"
+          type="number"
+          formControlName="delta"
+          placeholder="Delta">
+      </div>
+
+      @if (lineEntries.length > 1) {
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="removeLineEntry($index)">
+          &minus;
+        </button>
+      }
+
+    </div>
   }
 
-  <label>
-    Via
-    <input type="text" formControlName="road" />
-  </label>
-
-  <label>
-    Città
-    <input type="text" formControlName="city" />
-  </label>
-
-  <label>
-    Latitudine
-    <input type="number" step="any" formControlName="lat" />
-  </label>
-
-  <label>
-    Longitudine
-    <input type="number" step="any" formControlName="lon" />
-  </label>
-
-  <button type="submit" [disabled]="submitting">
-    {{ submitting ? 'Salvataggio...' : 'Salva stazione' }}
+  <button
+    type="button"
+    class="btn btn-secondary"
+    (click)="addLineEntry()">
+    +
   </button>
 
-  @if (successMessage) {
-    <p class="success">{{ successMessage }}</p>
-  }
-  @if (errorMessage) {
-    <p class="error">{{ errorMessage }}</p>
-  }
-</form>
+</div>
+
+
+      <div class="w3-padding-16 w3-right-align">
+
+        <button
+          type="button"
+          class="btn btn-secondary w3-margin-right"
+          (click)="resetForm()">
+          Svuota
+        </button>
+
+        <button 
+          type="submit"
+          class="btn btn-primary w3-brianza"
+          [disabled]="form.invalid || submitting">
+
+          {{ submitting ? 'Salvataggio...' : 'Salva Stazione' }}
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+</div>

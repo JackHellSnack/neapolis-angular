@@ -3,7 +3,7 @@ import MapIdDelta from "./map-id-delta";
 
 
 export default interface Stop {
-  id: number;
+  id?: number;
 
   road: string;
   city: string;
@@ -13,7 +13,7 @@ export default interface Stop {
 
   name: string;
 
-  lines: Line[];
+  lines?: Line[];
 
-  lineIds: MapIdDelta[];
+  lineIds?: MapIdDelta[];
 }

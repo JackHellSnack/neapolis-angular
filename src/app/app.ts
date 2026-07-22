@@ -5,7 +5,7 @@ import { StopForm } from './component/stop-form/stop-form';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, StopForm],
+  imports: [RouterOutlet, StopForm, StopMap],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

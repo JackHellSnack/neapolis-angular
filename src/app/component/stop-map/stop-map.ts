@@ -63,7 +63,7 @@ export class StopMap implements OnInit {
     }).subscribe({
       next: ({ stops, lines }) => {
         stops.forEach(stop => {
-          this.stopsById.set(stop.id, stop);
+          this.stopsById.set(stop.id!, stop);
           this.addStopMarker(stop, this.allStopsLayer);
         });
 
@@ -144,7 +144,7 @@ export class StopMap implements OnInit {
     const path: L.LatLngExpression[] = orderedStops.map(s => [s.lat, s.lon]);
 
     L.polyline(path, {
-      color: this.colorForLine(line.id),
+      color: this.colorForLine(line.id!),
       weight: 4,
       opacity: 0.7
     })

@@ -1,4 +1,4 @@
-export default interface RideSearchDto {
+export default interface RideSearch{
   startTime: string;      // formato HH:mm:ss
   arrivalTime: string;    // formato HH:mm:ss
 
