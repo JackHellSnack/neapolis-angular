@@ -1,0 +1,134 @@
+.np-header {
+  background: var(--blu-golfo);
+  color: var(--carta);
+}
+
+.np-nav {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 28px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.np-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Fraunces', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.np-logo-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: conic-gradient(from 45deg, var(--maiolica), var(--sole), var(--azzurro), var(--maiolica));
+}
+
+.np-nav-links {
+  display: flex;
+  gap: 28px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.np-nav-links a {
+  opacity: 0.85;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.np-nav-links a:hover {
+  opacity: 1;
+}
+
+.np-hero {
+  position: relative;
+  background: var(--blu-golfo);
+  color: var(--carta);
+  padding: 56px 28px 120px;
+  overflow: hidden;
+}
+
+.np-hero::after {
+  content: "";
+  position: absolute;
+  right: -80px;
+  top: -80px;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(44, 143, 191, 0.5), transparent 70%);
+}
+
+.np-hero-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.np-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: var(--sole);
+  margin-bottom: 14px;
+  display: inline-block;
+}
+
+.np-hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  line-height: 1.05;
+  max-width: 14ch;
+}
+
+.np-hero h1 em {
+  font-style: normal;
+  color: var(--sole);
+}
+
+.np-hero p {
+  max-width: 46ch;
+  margin-top: 18px;
+  font-size: 1.05rem;
+  color: rgba(255, 253, 249, 0.8);
+  line-height: 1.6;
+}
+
+.np-search-card {
+  max-width: 1180px;
+  margin: -84px auto 0;
+  padding: 0 28px;
+  position: relative;
+  z-index: 3;
+}
+
+.np-map-section {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 56px 28px 80px;
+}
+
+.np-section-head {
+  margin-bottom: 28px;
+}
+
+.np-section-head h2 {
+  font-size: 1.8rem;
+}
+
+.np-section-head p {
+  color: var(--grigio-testo);
+  margin-top: 8px;
+}
+
+@media (max-width: 820px) {
+  .np-nav-links {
+    display: none;
+  }
+}
