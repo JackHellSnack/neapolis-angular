@@ -1,13 +1,15 @@
 // src/app/component/line-form/line-form.ts
 import { Component, inject, output } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormArray, FormGroup, Validators } from '@angular/forms';
 import { LineService } from '../../service/line-service';
+import { StopPicker } from '../stop-picker/stop-picker';
 import Line from '../../model/line';
+import Stop from '../../model/stop';
 
 @Component({
   selector: 'app-line-form',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, StopPicker],
   templateUrl: './line-form.html',
   styleUrl: './line-form.css',
 })
@@ -24,28 +26,32 @@ export class LineForm {
     name: ['', Validators.required],
     type: ['', Validators.required],
     provider: [''],
-    stopIds: this.fb.array([this.newStopIdRow()]),
+    stopEntries: this.fb.array([this.newStopEntry()]),
   });
 
-  private newStopIdRow() {
+  private newStopEntry(): FormGroup {
     return this.fb.group({
-      id: [null as number | null, Validators.required],
+      stopId: [null as number | null, Validators.required],
       delta: [null as number | null, Validators.required],
     });
   }
 
-  get stopIds() {
-    return this.form.get('stopIds') as import('@angular/forms').FormArray;
+  get stopEntries(): FormArray {
+    return this.form.get('stopEntries') as FormArray;
   }
 
   addStopRow() {
-    this.stopIds.push(this.newStopIdRow());
+    this.stopEntries.push(this.newStopEntry());
   }
 
   removeStopRow(index: number) {
-    if (this.stopIds.length > 1) {
-      this.stopIds.removeAt(index);
+    if (this.stopEntries.length > 1) {
+      this.stopEntries.removeAt(index);
     }
+  }
+
+  onStopSelected(stop: Stop | null, index: number): void {
+    this.stopEntries.at(index).patchValue({ stopId: stop ? stop.id : null });
   }
 
   onSubmit() {
@@ -58,11 +64,18 @@ export class LineForm {
     this.errorMessage = '';
     this.successMessage = '';
 
+    const stopIds = this.stopEntries.controls
+      .map(ctrl => ({
+        id: ctrl.value.stopId,
+        delta: ctrl.value.delta
+      }))
+      .filter(entry => entry.id != null);
+
     const payload = {
       name: this.form.value.name!,
       type: this.form.value.type!,
       provider: this.form.value.provider ?? '',
-      stopIds: this.form.value.stopIds as { id: number; delta: number }[],
+      stopIds,
     } as unknown as Line;
 
     this.lineService.save(payload).subscribe({
@@ -71,9 +84,10 @@ export class LineForm {
         this.successMessage = `Linea "${line.name}" creata con successo.`;
         this.created.emit(line);
         this.form.reset();
-        while (this.stopIds.length > 1) {
-          this.stopIds.removeAt(1);
+        while (this.stopEntries.length > 1) {
+          this.stopEntries.removeAt(1);
         }
+        this.stopEntries.at(0).reset({ stopId: null, delta: null });
       },
       error: err => {
         this.submitting = false;

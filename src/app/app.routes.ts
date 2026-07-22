@@ -1,17 +1,36 @@
 import { Routes } from '@angular/router';
 import { StopMap } from './component/stop-map/stop-map';
+import { StopForm } from './component/stop-form/stop-form';
+import { LineForm } from './component/line-form/line-form';
+import { Login } from './component/login/login';
+import { Map } from './component/map/map';
 
 export const routes: Routes = [
-  // --- ROTTA DI DEFAULT (Reindirizza alla lista stazioni all'avvio) ---
-  { 
-    path: '', 
-    redirectTo: 'login', 
-    pathMatch: 'full' 
+  // --- ROTTA DI DEFAULT ---
+  {
+    path: '',
+    redirectTo: 'stop-map',
+    pathMatch: 'full'
   },
-  // --- ROTTE PER LE STAZIONI ---
-  { 
-    path: 'test', 
+  {
+    path: 'login',
+    component: Login
+  },
+  {
+    path: 'stop-map',
     component: StopMap,
-    canActivate:[]
+    canActivate: []
+  },
+  {
+    path: 'stop-form',
+    component: StopForm
+  },
+  {
+    path: 'line-form',
+    component: LineForm
+  },
+  {
+    path: 'map',
+    component: Map
   }
 ];

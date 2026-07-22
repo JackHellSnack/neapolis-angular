@@ -17,14 +17,14 @@
     <input type="text" formControlName="provider" />
   </label>
 
-  <fieldset formArrayName="stopIds">
-    <legend>Stazioni della linea (id + distanza dall'origine)</legend>
+  <fieldset formArrayName="stopEntries">
+    <legend>Stazioni della linea (stazione + distanza dall'origine)</legend>
 
-    @for (row of stopIds.controls; track row; let i = $index) {
+    @for (row of stopEntries.controls; track row; let i = $index) {
       <div [formGroupName]="i" class="stop-row">
-        <input type="number" formControlName="id" placeholder="ID stazione" />
+        <app-stop-picker (stopChange)="onStopSelected($event, i)"></app-stop-picker>
         <input type="number" step="any" formControlName="delta" placeholder="Delta" />
-        <button type="button" (click)="removeStopRow(i)" [disabled]="stopIds.length === 1">
+        <button type="button" (click)="removeStopRow(i)" [disabled]="stopEntries.length === 1">
           Rimuovi
         </button>
       </div>

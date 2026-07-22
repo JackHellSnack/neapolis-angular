@@ -1,0 +1,11 @@
+<nav class="w3-bar w3-white w3-card" style="padding: 0 8px;">
+  @for (item of items; track item.path) {
+    <a
+      class="w3-bar-item w3-button"
+      [routerLink]="item.path"
+      routerLinkActive="w3-brianza w3-text-white"
+      [routerLinkActiveOptions]="{ exact: false }">
+      {{ item.label }}
+    </a>
+  }
+</nav>
