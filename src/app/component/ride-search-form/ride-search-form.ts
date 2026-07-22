@@ -1,139 +1,97 @@
-// src/app/component/ride-search-form/ride-search-form.ts
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
-import { Component, inject, output } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  Validators,
-  AbstractControl,
-  ValidationErrors,
-} from '@angular/forms';
-import { RideService } from '../../service/ride-service';
-import { StopPicker } from '../stop-picker/stop-picker';
-import RideSearch from '../../model/ride-search';
-import RideData from '../../model/ride-data';
-import Stop from '../../model/stop';
-import Line from '../../model/line';
 import { LinePicker } from '../line-picker/line-picker';
+import { StopPicker } from '../stop-picker/stop-picker';
 
-function exactlyOneTimeValidator(group: AbstractControl): ValidationErrors | null {
-  const startFilled = !!group.get('startTime')?.value;
-  const arrivalFilled = !!group.get('arrivalTime')?.value;
-
-  return startFilled !== arrivalFilled ? null : { exactlyOneTime: true };
-}
+import Line from '../../model/line';
+import Stop from '../../model/stop';
+import RideSearchRequest from '../../model/ride-search-request';
+import RideSearchResponse from '../../model/ride-search-response';
+import { RideService } from '../../service/ride-service'; // Adjust import path
 
 @Component({
   selector: 'app-ride-search-form',
   standalone: true,
-  imports: [ReactiveFormsModule, StopPicker, LinePicker],
+  imports: [CommonModule, FormsModule, LinePicker, StopPicker],
   templateUrl: './ride-search-form.html',
-  styleUrl: './ride-search-form.css',
+  styleUrls: ['./ride-search-form.css']
 })
 export class RideSearchForm {
-
-  private fb = inject(FormBuilder);
   private rideService = inject(RideService);
 
-  // Emits the results of a successful search to the parent component
-  results = output<RideData[]>();
+  // Form selections using signals
+  selectedLine = signal<Line | null>(null);
+  startStop = signal<Stop | null>(null);
+  arrivalStop = signal<Stop | null>(null);
 
-  searching = false;
-  errorMessage = '';
-  noResultsMessage = '';
+  time = signal<string>('12:00');
+  searchByArrival = signal<boolean>(false);
 
-  startStop: Stop | null = null;
-  arrivalStop: Stop | null = null;
-  line: Line | null = null;
+  // API State
+  loading = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
+  searchResults = signal<RideSearchResponse[] | null>(null);
 
-  form = this.fb.group(
-    {
-      startTime: [''],
-      arrivalTime: [''],
-    },
-    { validators: exactlyOneTimeValidator }
-  );
+  /**
+   * Resets selected stops if the selected line changes and the current stops 
+   * are no longer valid for the newly selected line.
+   */
+  onLineChange(newLine: Line | null): void {
+    /*
+    this.selectedLine.set(newLine);
 
-  onStartStopSelected(stop: Stop | null): void {
-    this.startStop = stop;
-  }
+    if (newLine?.stopIds?.length) {
+      const allowedIds = new Set(newLine.stopIds.map(s => s.id));
 
-  onArrivalStopSelected(stop: Stop | null): void {
-    this.arrivalStop = stop;
-  }
-
-  onLineSelected(line:Line | null): void {
-    this.line = line;
-  }
-
-  // Filling one time field clears the other, so it's obvious only one applies
-  onStartTimeInput(): void {
-    if (this.form.value.startTime) {
-      this.form.patchValue({ arrivalTime: '' }, { emitEvent: false });
-    }
-  }
-
-  onArrivalTimeInput(): void {
-    if (this.form.value.arrivalTime) {
-      this.form.patchValue({ startTime: '' }, { emitEvent: false });
-    }
-  }
-
-  get bothStopsSelected(): boolean {
-    return !!this.startStop && !!this.arrivalStop;
-  }
-
-  get exactlyOneTimeError(): boolean {
-    return (
-      this.form.hasError('exactlyOneTime') &&
-      (this.form.get('startTime')?.touched || this.form.get('arrivalTime')?.touched || false)
-    );
+      if (this.startStop() && !allowedIds.has(this.startStop()!.id!)) {
+        this.startStop.set(null);
+      }
+      if (this.arrivalStop() && !allowedIds.has(this.arrivalStop()!.id!)) {
+        this.arrivalStop.set(null);
+      }
+    }*/
   }
 
   onSubmit(): void {
-    this.form.markAllAsTouched();
+    this.errorMessage.set(null);
 
-    if (this.form.invalid || !this.bothStopsSelected) {
+    const start = this.startStop();
+    const arrival = this.arrivalStop();
+
+
+    // Validation
+    if (!start?.id || !arrival?.id || !this.time()) {
+      this.errorMessage.set('Please select a line, start stop, arrival stop, and time.');
       return;
     }
 
-    this.searching = true;
-    this.errorMessage = '';
-    this.noResultsMessage = '';
+    if (start.id === arrival.id) {
+      this.errorMessage.set('Start stop and arrival stop cannot be the same.');
+      return;
+    }
 
-    const rideSearch: RideSearch = {
-      startTime: this.form.value.startTime || '',
-      arrivalTime: this.form.value.arrivalTime || '',
-      lineId: this.line!.id,
-      startStopId: this.startStop!.id,
-      arrivalStopId: this.arrivalStop!.id,
-
+    const payload: RideSearchRequest = {
+      time: this.time(),
+      searchByArrival: this.searchByArrival(),
+      startStopId: start.id,
+      arrivalStopId: arrival.id,
     };
 
-    this.rideService.searchRideByTime(rideSearch).subscribe({
-      next: rides => {
-        this.searching = false;
+    this.loading.set(true);
 
-        this.noResultsMessage =
-          !rides || rides.length === 0
-            ? 'Nessuna corsa trovata per i criteri inseriti.'
-            : '';
-
-        this.results.emit(rides ?? []);
+    this.rideService.searchRideByTime(payload).subscribe({
+      next: (response) => {
+        // Normalizes single object vs array responses
+        this.searchResults.set(Array.isArray(response) ? response : [response]);
+        this.loading.set(false);
       },
-      error: err => {
-        this.searching = false;
-        this.errorMessage = 'Errore durante la ricerca della corsa. Riprova.';
-        console.error(err);
-      },
+      error: (err) => {
+        console.error('Ride search failed:', err);
+        this.errorMessage.set('Failed to search rides. Please try again.');
+        this.loading.set(false);
+      }
     });
-  }
-
-  resetForm(): void {
-    this.form.reset({ startTime: '', arrivalTime: '' });
-    this.startStop = null;
-    this.arrivalStop = null;
-    this.errorMessage = '';
-    this.noResultsMessage = '';
   }
 }

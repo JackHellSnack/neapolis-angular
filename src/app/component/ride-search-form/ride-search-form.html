@@ -1,129 +1,106 @@
-<!-- src/app/component/ride-search-form/ride-search-form.html -->
+<div class="w3-card-4 w3-white w3-round-large w3-padding" style="max-width: 500px; margin: 0 auto;">
+  <h2 class="w3-center w3-text-theme">Search Rides</h2>
 
-<div class="container" style="margin-top: 30px;">
-  <div class="w3-card-4 w3-white" style="max-width: 600px; margin: 0 auto; border-radius: 4px;">
-
-    <div class="w3-container w3-border-bottom w3-padding-16">
-      <h2 class="w3-text-brianza" style="margin: 0;">
-        Cerca una corsa
-      </h2>
+  <form (ngSubmit)="onSubmit()" class="w3-container">
+    
+    <!-- 1. Line Picker -->
+    <div class="w3-margin-bottom">
+      <label class="w3-text-grey"><b>Line</b></label>
+      <app-line-picker 
+        [line]="selectedLine()" 
+        (lineChange)="onLineChange($event)">
+      </app-line-picker>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="w3-container w3-padding-24">
+    <!-- 2. Start Stop Picker -->
+    <div class="w3-margin-bottom">
+      <label class="w3-text-grey"><b>Departure Stop</b></label>
+      <app-stop-picker 
+        [line]="selectedLine()" 
+        [(stop)]="startStop">
+      </app-stop-picker>
+    </div>
 
-      @if (noResultsMessage) {
-        <div class="w3-panel w3-pale-yellow w3-border w3-border-yellow w3-padding-small w3-margin-bottom">
-          <p>{{ noResultsMessage }}</p>
+    <!-- 3. Arrival Stop Picker -->
+    <div class="w3-margin-bottom">
+      <label class="w3-text-grey"><b>Arrival Stop</b></label>
+      <app-stop-picker 
+        [line]="selectedLine()" 
+        [(stop)]="arrivalStop">
+      </app-stop-picker>
+    </div>
+
+    <!-- 4. Time Selection & Toggle -->
+    <div class="w3-row-padding w3-margin-bottom" style="margin-left: -16px; margin-right: -16px;">
+      <div class="w3-half">
+        <label class="w3-text-grey"><b>Time</b></label>
+        <input 
+          class="w3-input w3-border w3-round" 
+          type="time" 
+          [ngModel]="time()" 
+          (ngModelChange)="time.set($event)" 
+          name="time" 
+          required>
+      </div>
+
+      <div class="w3-half w3-padding-top">
+        <label class="w3-validate" style="cursor: pointer;">
+          <input 
+            type="checkbox" 
+            class="w3-check" 
+            [ngModel]="searchByArrival()" 
+            (ngModelChange)="searchByArrival.set($event)" 
+            name="searchByArrival">
+          Search by Arrival Time
+        </label>
+      </div>
+    </div>
+
+    <!-- Error Display -->
+    @if (errorMessage()) {
+      <div class="w3-panel w3-red w3-round w3-padding-small">
+        <p class="w3-small">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- Submit Button -->
+    <button 
+      type="submit" 
+      class="w3-button w3-block w3-blue w3-round w3-margin-top" 
+      [disabled]="loading()">
+      @if (loading()) {
+        Searching...
+      } @else {
+        Search Rides
+      }
+    </button>
+  </form>
+
+  <!-- Results Section -->
+  @if (searchResults(); as results) {
+    <div class="w3-margin-top w3-border-top w3-padding-top">
+      <h4>Available Rides</h4>
+      
+      @if (results.length === 0) {
+        <p class="w3-text-grey w3-center">No rides found matching your criteria.</p>
+      } @else {
+        <div class="w3-ul w3-card-2 w3-round">
+          @for (ride of results; track $index) {
+            <li class="w3-bar w3-padding">
+              <div class="w3-row">
+                <div class="w3-half">
+                  <span class="w3-large"><b>{{ ride.startTime }}</b></span>
+                  <div class="w3-small w3-text-grey">{{ ride.startStopInfo }}</div>
+                </div>
+                <div class="w3-half w3-right-align">
+                  <span class="w3-large"><b>{{ ride.arrivalTime }}</b></span>
+                  <div class="w3-small w3-text-grey">{{ ride.arrivaStopInfo }}</div>
+                </div>
+              </div>
+            </li>
+          }
         </div>
       }
-
-      @if (errorMessage) {
-        <div class="w3-panel w3-pale-red w3-border w3-border-red w3-padding-small w3-margin-bottom">
-          <p>{{ errorMessage }}</p>
-        </div>
-      }
-
-
-      <div class="w3-margin-bottom">
-        <label class="w3-text-brianza">
-          <b>Linea</b>
-        </label>
-        <app-line-picker (lineChange)="onLineSelected($event)"></app-line-picker>
-        @if (form.touched && !arrivalStop) {
-          <span class="w3-text-red w3-small">
-            Seleziona la stazione di arrivo.
-          </span>
-        }
-      </div>
-
-      <div class="w3-margin-bottom">
-        <label class="w3-text-brianza">
-          <b>Da</b>
-        </label>
-        <app-stop-picker
-            [line]="line"
-            (stopChange)="onStartStopSelected($event)">
-        </app-stop-picker>
-        @if (form.touched && !startStop) {
-          <span class="w3-text-red w3-small">
-            Seleziona la stazione di partenza.
-          </span>
-        }
-      </div>
-
-      <div class="w3-margin-bottom">
-        <label class="w3-text-brianza">
-          <b>A</b>
-        </label>
-       
-        <app-stop-picker
-            [line]="line"
-            (stopChange)="onArrivalStopSelected($event)">
-        </app-stop-picker>
-        @if (form.touched && !arrivalStop) {
-          <span class="w3-text-red w3-small">
-            Seleziona la stazione di arrivo.
-          </span>
-        }
-      </div>
-
-      <div class="w3-row w3-margin-bottom" style="display:flex; gap:16px;">
-
-        <div style="flex:1;">
-          <label class="w3-text-brianza">
-            <b>Parti alle</b>
-          </label>
-          <input
-            class="w3-input w3-border"
-            type="time"
-            step="1"
-            formControlName="startTime"
-            (input)="onStartTimeInput()"
-            placeholder="HH:mm:ss">
-        </div>
-
-        <div style="flex:1;">
-          <label class="w3-text-brianza">
-            <b>Arriva entro</b>
-          </label>
-          <input
-            class="w3-input w3-border"
-            type="time"
-            step="1"
-            formControlName="arrivalTime"
-            (input)="onArrivalTimeInput()"
-            placeholder="HH:mm:ss">
-        </div>
-
-      </div>
-
-      @if (exactlyOneTimeError) {
-        <div class="w3-margin-bottom">
-          <span class="w3-text-red w3-small">
-            Compila solo uno tra "Parti alle" e "Arriva entro", non entrambi.
-          </span>
-        </div>
-      }
-
-      <div class="w3-padding-16 w3-right-align">
-
-        <button
-          type="button"
-          class="btn btn-secondary w3-margin-right"
-          (click)="resetForm()">
-          Svuota
-        </button>
-
-        <button
-          type="submit"
-          class="btn btn-primary w3-brianza"
-          [disabled]="form.invalid || !bothStopsSelected || searching">
-          {{ searching ? 'Ricerca...' : 'Cerca corsa' }}
-        </button>
-
-      </div>
-
-    </form>
-
-  </div>
+    </div>
+  }
 </div>
