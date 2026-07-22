@@ -1,9 +1,18 @@
-import { Component, OnInit, inject, signal, computed, model } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  model,
+  input
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { StopService } from '../../service/stop-service';
 import Stop from '../../model/stop';
-
+import Line from '../../model/line';
 
 @Component({
   selector: 'app-stop-picker',
@@ -15,6 +24,9 @@ import Stop from '../../model/stop';
 export class StopPicker implements OnInit {
 
   private stopService = inject(StopService);
+
+  // Optional selected line
+  line = input<Line | null>(null);
 
   // Two-way binding with parent
   stop = model<Stop | null>(null);
@@ -28,7 +40,25 @@ export class StopPicker implements OnInit {
   // Dropdown visibility
   showDropdown = signal(false);
 
-  // Filtered list
+  // Stops filtered by the selected line (or all if no line is selected)
+  private availableStops = computed(() => {
+    const stops = this.allStops();
+    const selectedLine = this.line();
+
+    if (!selectedLine?.stopIds?.length) {
+      return stops;
+    }
+
+    const allowedIds = new Set(
+      selectedLine.stopIds
+        .map(s => s.id)
+        .filter(id => id != null)
+    );
+
+    return stops.filter(stop => stop.id != null && allowedIds.has(stop.id));
+  });
+
+  // Stops shown in the dropdown
   filteredStops = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
 
@@ -36,7 +66,7 @@ export class StopPicker implements OnInit {
       return [];
     }
 
-    return this.allStops().filter(stop =>
+    return this.availableStops().filter(stop =>
       stop.name.toLowerCase().includes(query) ||
       stop.road?.toLowerCase().includes(query) ||
       stop.city?.toLowerCase().includes(query)
@@ -45,7 +75,7 @@ export class StopPicker implements OnInit {
 
   ngOnInit(): void {
     this.stopService.findAll().subscribe({
-      next: (data) => {
+      next: data => {
         this.allStops.set(data ?? []);
 
         const initialStop = this.stop();

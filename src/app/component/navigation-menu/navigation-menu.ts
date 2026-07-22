@@ -20,6 +20,7 @@ export class NavigationMenu {
     { path: '/map', label: 'Mappa' },
     { path: '/stop-form', label: 'Nuova fermata' },
     { path: '/line-form', label: 'Nuova linea' },
+    { path: '/ride-search', label: 'Cerca corsa' },
     { path: '/login', label: 'Login' },
   ];
 }

@@ -4,6 +4,7 @@ import { StopForm } from './component/stop-form/stop-form';
 import { LineForm } from './component/line-form/line-form';
 import { Login } from './component/login/login';
 import { Map } from './component/map/map';
+import { RideSearchForm } from './component/ride-search-form/ride-search-form';
 
 export const routes: Routes = [
   // --- ROTTA DI DEFAULT ---
@@ -32,5 +33,9 @@ export const routes: Routes = [
   {
     path: 'map',
     component: Map
+  },
+  {
+    path: 'ride-search',
+    component: RideSearchForm
   }
 ];

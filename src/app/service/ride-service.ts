@@ -7,7 +7,7 @@ import RideSearch from '../model/ride-search';
 @Service()
 export class RideService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080//neapolis/api/ridedata';
+  private apiUrl = 'http://localhost:8080/neapolis/api/ridedata';
 
   searchRideByTime(rideSearch: RideSearch): Observable<RideData[]> {
     return this.http.post<RideData[]>(
