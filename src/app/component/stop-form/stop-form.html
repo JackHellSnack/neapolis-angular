@@ -1,0 +1,43 @@
+<!-- src/app/component/stop-form/stop-form.html -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="stop-form">
+  <h2>Nuova stazione</h2>
+
+  <label>
+    Nome
+    <input type="text" formControlName="name" />
+  </label>
+  @if (form.get('name')?.invalid && form.get('name')?.touched) {
+    <span class="error">Il nome è obbligatorio.</span>
+  }
+
+  <label>
+    Via
+    <input type="text" formControlName="road" />
+  </label>
+
+  <label>
+    Città
+    <input type="text" formControlName="city" />
+  </label>
+
+  <label>
+    Latitudine
+    <input type="number" step="any" formControlName="lat" />
+  </label>
+
+  <label>
+    Longitudine
+    <input type="number" step="any" formControlName="lon" />
+  </label>
+
+  <button type="submit" [disabled]="submitting">
+    {{ submitting ? 'Salvataggio...' : 'Salva stazione' }}
+  </button>
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+</form>

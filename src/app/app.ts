@@ -1,10 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { StopMap } from './component/stop-map/stop-map';
+import { StopForm } from './component/stop-form/stop-form';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, StopMap],
+  imports: [RouterOutlet, StopForm],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

@@ -1,0 +1,46 @@
+<!-- src/app/component/line-form/line-form.html -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="line-form">
+  <h2>Nuova linea</h2>
+
+  <label>
+    Nome
+    <input type="text" formControlName="name" />
+  </label>
+
+  <label>
+    Tipo
+    <input type="text" formControlName="type" placeholder="es. bus, metro" />
+  </label>
+
+  <label>
+    Provider
+    <input type="text" formControlName="provider" />
+  </label>
+
+  <fieldset formArrayName="stopIds">
+    <legend>Stazioni della linea (id + distanza dall'origine)</legend>
+
+    @for (row of stopIds.controls; track row; let i = $index) {
+      <div [formGroupName]="i" class="stop-row">
+        <input type="number" formControlName="id" placeholder="ID stazione" />
+        <input type="number" step="any" formControlName="delta" placeholder="Delta" />
+        <button type="button" (click)="removeStopRow(i)" [disabled]="stopIds.length === 1">
+          Rimuovi
+        </button>
+      </div>
+    }
+
+    <button type="button" (click)="addStopRow()">+ Aggiungi stazione</button>
+  </fieldset>
+
+  <button type="submit" [disabled]="submitting">
+    {{ submitting ? 'Salvataggio...' : 'Salva linea' }}
+  </button>
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+</form>

@@ -1,0 +1,15 @@
+/* src/app/component/line-form/line-form.css */
+.line-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 420px;
+  padding: 1rem;
+}
+.stop-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.error { color: #c0392b; font-size: 0.85rem; }
+.success { color: #27ae60; font-size: 0.85rem; }
