@@ -14,10 +14,13 @@ const iconDefault = L.icon({
 L.Marker.prototype.options.icon = iconDefault;
 
 import { Component, OnInit, inject } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { StopService } from '../../service/stop-service';
 import { GeolocationService } from '../../service/geolocation-service';
+import { LineService } from '../../service/line-service';
 import { AreaSearch } from '../../model/area-search';
 import Stop from '../../model/stop';
+import Line from '../../model/line';
 
 @Component({
   selector: 'app-stop-map',
@@ -25,12 +28,19 @@ import Stop from '../../model/stop';
   styleUrl: './stop-map.css'
 })
 export class StopMap implements OnInit {
+
   private stopService = inject(StopService);
   private geolocationService = inject(GeolocationService);
+  private lineService = inject(LineService);
+
   private map!: L.Map;
 
   private allStopsLayer!: L.LayerGroup;
   private nearbyStopsLayer!: L.LayerGroup;
+  private linesLayer!: L.LayerGroup;
+
+  // Lookup used to resolve a stopId (from Line.stopIds) to its coordinates
+  private stopsById = new Map<number, Stop>();
 
   ngOnInit() {
 
@@ -42,10 +52,23 @@ export class StopMap implements OnInit {
 
     this.allStopsLayer = L.layerGroup().addTo(this.map);
     this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
+    this.linesLayer = L.layerGroup().addTo(this.map);
 
-    // Plot every stop, regardless of geolocation
-    this.stopService.findAll().subscribe({
-      next: stops => stops.forEach(stop => this.addStopMarker(stop, this.allStopsLayer)),
+    // Fetch stops and lines together: we need every stop's coordinates
+    // resolved BEFORE we try to draw any line, otherwise stopsById lookups
+    // inside drawLine() would fail.
+    forkJoin({
+      stops: this.stopService.findAll(),
+      lines: this.lineService.findAll()
+    }).subscribe({
+      next: ({ stops, lines }) => {
+        stops.forEach(stop => {
+          this.stopsById.set(stop.id, stop);
+          this.addStopMarker(stop, this.allStopsLayer);
+        });
+
+        lines.forEach(line => this.drawLine(line));
+      },
       error: err => console.error(err)
     });
 
@@ -93,5 +116,48 @@ export class StopMap implements OnInit {
     }
 
     return lines.join('<br>');
+  }
+
+  /**
+   * Draws a single polyline connecting the stops of a line, in order.
+   *
+   * Line.stopIds is a MapIdDelta[]: { id: stopId, delta: distance from origin }.
+   * Sorting by delta reconstructs the correct order of stops along the line
+   * (assumes a simple, non-branching line). Leaflet's polyline then connects
+   * each consecutive pair only — stop[i] to stop[i+1] and stop[i] to stop[i-1] —
+   * so no stop ends up connected to anything other than its immediate neighbors.
+   */
+  private drawLine(line: Line) {
+    if (!line.stopIds || line.stopIds.length < 2) {
+      return; // nothing to connect
+    }
+
+    const orderedStops = [...line.stopIds]
+      .sort((a, b) => a.delta - b.delta)
+      .map(entry => this.stopsById.get(entry.id))
+      .filter((s): s is Stop => !!s); // drop any stopId we couldn't resolve
+
+    if (orderedStops.length < 2) {
+      return;
+    }
+
+    const path: L.LatLngExpression[] = orderedStops.map(s => [s.lat, s.lon]);
+
+    L.polyline(path, {
+      color: this.colorForLine(line.id),
+      weight: 4,
+      opacity: 0.7
+    })
+      .addTo(this.linesLayer)
+      .bindPopup(line.name);
+  }
+
+  /**
+   * Deterministic, distinct-ish color per line id, so different lines
+   * are visually distinguishable without needing a color field from the backend.
+   */
+  private colorForLine(id: number): string {
+    const hue = (id * 47) % 360;
+    return `hsl(${hue}, 70%, 45%)`;
   }
 }

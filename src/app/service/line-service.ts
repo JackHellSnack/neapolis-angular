@@ -12,7 +12,7 @@ export class LineService {
   private http = inject(HttpClient);
 
   // Spring Boot backend endpoint
-  private apiUrl = 'http://localhost:8080/brianzatrains/api/lines';
+  private apiUrl = 'http://localhost:8080/neapolis/api/lines';
 
   /**
    * Retrieves all lines (GET)
