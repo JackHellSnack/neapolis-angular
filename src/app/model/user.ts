@@ -1,4 +1,4 @@
-export default interface UserDt{
+export default interface User{
   id: number;
   username: string;
   email: string;

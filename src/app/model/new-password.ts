@@ -1,3 +1,3 @@
-export default interface NewPasswordDto {
+export default interface NewPassword{
   password: string;
 }
