@@ -1,0 +1,67 @@
+<div class="sg-page">
+  <h1>Style guide</h1>
+
+  <section>
+    <h2>Colori</h2>
+    <div class="sg-swatches">
+      @for (c of colors; track c.name) {
+        <div class="sg-swatch">
+          <div class="sg-swatch-box" [style.background]="c.value"></div>
+          <span class="mono">{{ c.name }}</span>
+          <span class="mono">{{ c.value }}</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Tipografia</h2>
+    <h1>H1 Fraunces</h1>
+    <h2>H2 Fraunces</h2>
+    <h3>H3 Fraunces</h3>
+    <p>Paragrafo body in Manrope. Testo normale per contenuti lunghi.</p>
+    <p class="mono">Mono IBM Plex — per dati, codici, coordinate.</p>
+  </section>
+
+  <section>
+    <h2>Bottoni</h2>
+    <div class="sg-row">
+      <button class="btn btn-primary">Primario</button>
+      <button class="btn btn-primary" disabled>Primario disabled</button>
+      <button class="btn btn-ghost">Ghost</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Input</h2>
+    <div class="sg-row-col">
+      <div>
+        <label class="field-label">Nome stazione</label>
+        <input class="field-input" placeholder="Es. Piazza Garibaldi">
+      </div>
+      <span class="field-error">Campo obbligatorio.</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Card</h2>
+    <div class="card">Contenuto card con shadow-float.</div>
+  </section>
+
+  <section>
+    <h2>Banner</h2>
+    <div class="banner banner-success">Operazione completata con successo.</div>
+    <div class="banner banner-error">Errore durante l'operazione.</div>
+  </section>
+
+  <section>
+    <h2>Badge</h2>
+    <span class="badge">ADMIN</span>
+    <span class="badge">TRAVELER</span>
+  </section>
+
+  <section>
+    <h2>Tile strip</h2>
+    <div class="tile-strip"></div>
+  </section>
+</div>
