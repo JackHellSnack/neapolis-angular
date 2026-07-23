@@ -1,14 +1,19 @@
 import { Component, signal } from '@angular/core';
-import { StopForm } from '../stop-form/stop-form';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { StopMap } from '../stop-map/stop-map';
+import { RideSearchForm } from '../ride-search-form/ride-search-form';
+import { PoiSearchForm } from '../poi-search-form/poi-search-form';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [StopForm, StopMap],
+  imports: [CommonModule, RouterLink, StopMap, RideSearchForm, PoiSearchForm],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
 export class Home {
-  protected readonly title = signal('neapolis-angular');
+  activeTab = signal<'ride' | 'poi'>('ride');
+  setTab(tab: 'ride' | 'poi') { this.activeTab.set(tab); }
+  
 }

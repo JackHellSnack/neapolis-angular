@@ -1,0 +1,103 @@
+<div class="np-page">
+  <!-- Header -->
+  <div class="np-dash-header">
+    <div>
+      <h2>La mia area</h2>
+      <p class="np-dash-sub">Benvenuto, <strong>{{ authService.username() }}</strong></p>
+    </div>
+  </div>
+
+  <!-- Journey Status Card -->
+  <div class="np-card np-journey-card">
+    <div class="np-journey-head">
+      <h3>Viaggio in corso</h3>
+      @if (isJourneyActive()) {
+        <span class="np-badge np-badge-green">Attivo</span>
+      } @else {
+        <span class="np-badge np-badge-blue">Nessun viaggio</span>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="np-loading-row"><span class="np-spinner"></span> Caricamento...</div>
+    }
+
+    @if (statusError()) {
+      <div class="np-banner np-banner-error">{{ statusError() }}</div>
+    }
+
+    @if (pingSuccess()) {
+      <div class="np-banner np-banner-success">{{ pingSuccess() }}</div>
+    }
+
+    @if (isJourneyActive()) {
+      <!-- Active journey info -->
+      <div class="np-journey-info">
+        @if (journeyStatus()?.currentLeg) {
+          <div class="np-journey-leg">
+            <span class="np-leg-line">{{ journeyStatus().currentLeg.lineName }}</span>
+            <div class="np-leg-body">
+              <strong>{{ journeyStatus().currentLeg.fromStopName }} → {{ journeyStatus().currentLeg.toStopName }}</strong>
+              <span>{{ journeyStatus().currentLeg.departureTime }} → {{ journeyStatus().currentLeg.arrivalTime }}</span>
+            </div>
+          </div>
+        }
+        @if (journeyStatus()?.message) {
+          <p class="np-journey-msg">{{ journeyStatus().message }}</p>
+        }
+      </div>
+
+      <div class="np-journey-actions">
+        <button class="np-btn np-btn-accent np-btn-sm" (click)="pingNow()" [disabled]="pinging()">
+          @if (pinging()) { <span class="np-spinner" style="width:14px;height:14px;border-width:2px"></span> }
+          📍 Aggiorna posizione
+        </button>
+        <button class="np-btn np-btn-ghost np-btn-sm" (click)="endJourney()" [disabled]="ending()">
+          @if (ending()) { <span class="np-spinner" style="width:14px;height:14px;border-width:2px"></span> }
+          Termina viaggio
+        </button>
+      </div>
+    } @else {
+      <!-- Pending route -->
+      @if (journeyLegs()?.length) {
+        <div class="np-pending-route">
+          <p class="np-pending-label">Percorso pronto ({{ journeyLegs()!.length }} tratta/e)</p>
+          @for (leg of journeyLegs()!; track leg.lineId) {
+            <div class="np-leg">
+              <span class="np-leg-line">{{ leg.lineName }}</span>
+              <div class="np-leg-body">
+                <strong>{{ leg.fromStopName }} → {{ leg.toStopName }}</strong>
+                <span>{{ leg.departureTime }} → {{ leg.arrivalTime }}</span>
+              </div>
+            </div>
+          }
+          <button class="np-btn np-btn-primary" (click)="startJourney()" style="margin-top:16px">
+            🚌 Inizia viaggio
+          </button>
+        </div>
+      } @else {
+        <div class="np-no-journey">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <p>Nessun viaggio attivo.<br>Cerca un percorso dalla home per iniziare.</p>
+          <a routerLink="/home" class="np-btn np-btn-primary np-btn-sm">Cerca percorso</a>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Quick links -->
+  <div class="np-quick-grid">
+    <a routerLink="/ride-search" class="np-quick-card">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Cerca Corsa</span>
+    </a>
+    <a routerLink="/poi-search" class="np-quick-card">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>Cerca POI</span>
+    </a>
+    <a routerLink="/stop-map" class="np-quick-card">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      <span>Mappa</span>
+    </a>
+  </div>
+</div>

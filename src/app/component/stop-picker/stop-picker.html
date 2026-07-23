@@ -1,43 +1,19 @@
-<div class="w3-container" style="position: relative; max-width: 400px; padding: 0;">
-
+<div class="np-picker">
   <input
-    class="w3-input w3-border w3-round"
+    class="np-picker-input"
     type="text"
-    [ngModel]="searchQuery()"
-    (ngModelChange)="onInputChange($event)"
-    (focus)="showDropdown.set(searchQuery().trim().length > 0)"
-    (blur)="hideDropdownWithDelay()"
-    placeholder="Insert stop name...">
-
+    [value]="searchQuery()"
+    (input)="onInputChange($any($event.target).value)"
+    (blur)="hide()"
+    placeholder="Cerca fermata...">
   @if (showDropdown() && filteredStops().length > 0) {
-    <div
-      class="w3-dropdown-content w3-bar-block w3-card-4 w3-show w3-white"
-      style="position: absolute; left: 0; right: 0; z-index: 999; max-height: 200px; overflow-y: auto; border-radius: 0 0 4px 4px;">
-
+    <div class="np-picker-dropdown">
       @for (stop of filteredStops(); track stop.id) {
-        <button
-          type="button"
-          class="w3-bar-item w3-button w3-hover-light-grey w3-padding-small"
-          (mousedown)="selectStop(stop)">
-
-          <div class="w3-medium">
-            <b>{{ stop.name }}</b>
-          </div>
-
-          <div class="w3-small text-muted">
-            {{ stop.road }} • {{ stop.city }}
-          </div>
-
-        </button>
+        <div class="np-picker-item" (mousedown)="selectStop(stop)">
+          <strong>{{ stop.name }}</strong>
+          <span>{{ stop.road }}{{ stop.city ? ', ' + stop.city : '' }}</span>
+        </div>
       }
-
-    </div>
-  } @else if (showDropdown() && searchQuery().trim().length > 0) {
-    <div
-      class="w3-dropdown-content w3-bar-block w3-card-4 w3-show w3-white w3-padding w3-center text-muted"
-      style="position: absolute; left: 0; right: 0; z-index: 999; border-radius: 0 0 4px 4px;">
-      No stops found
     </div>
   }
-
 </div>

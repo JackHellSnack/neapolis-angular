@@ -1,0 +1,101 @@
+.np-login-wrap {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--crema);
+  padding: 40px 20px;
+}
+
+.np-login-card {
+  background: var(--carta);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-float);
+  padding: 48px 44px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.np-login-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.np-logo-mark-lg {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: conic-gradient(from 45deg, var(--maiolica), var(--sole), var(--azzurro), var(--maiolica));
+}
+
+.np-login-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--blu-golfo);
+}
+
+.np-login-card h2 {
+  font-size: 1.5rem;
+  color: var(--inchiostro);
+  margin-bottom: 8px;
+}
+
+.np-login-sub {
+  color: var(--grigio-testo);
+  font-size: 0.92rem;
+  margin-bottom: 24px;
+}
+
+.np-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.np-pwd-wrap {
+  position: relative;
+}
+
+.np-pwd-wrap input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.np-pwd-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--grigio-testo);
+  padding: 4px;
+  display: flex;
+}
+
+.np-btn-full {
+  width: 100%;
+  justify-content: center;
+  margin-top: 8px;
+  padding: 14px;
+  font-size: 1rem;
+}
+
+.np-login-back {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.88rem;
+  color: var(--grigio-testo);
+}
+
+.np-login-back a {
+  color: var(--azzurro);
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .np-login-card { padding: 32px 24px; }
+}

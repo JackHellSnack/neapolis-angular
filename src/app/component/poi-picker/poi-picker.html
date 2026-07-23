@@ -1,30 +1,19 @@
 <div class="np-picker">
-
   <input
     class="np-picker-input"
     type="text"
-    [ngModel]="searchQuery()"
-    (ngModelChange)="onInputChange($event)"
-    (focus)="showDropdown.set(searchQuery().trim().length > 0)"
-    (blur)="hideDropdownWithDelay()"
-    placeholder="Cerca un punto di interesse...">
-
+    [value]="searchQuery()"
+    (input)="onInputChange($any($event.target).value)"
+    (blur)="hide()"
+    placeholder="Cerca punto di interesse...">
   @if (showDropdown() && filteredPois().length > 0) {
     <div class="np-picker-dropdown">
       @for (poi of filteredPois(); track poi.id) {
-        <button
-          type="button"
-          class="np-picker-item"
-          (mousedown)="selectPoi(poi)">
-          <span class="np-picker-item-name">{{ poi.name }}</span>
-          <span class="np-picker-item-meta">{{ poi.category }}</span>
-        </button>
+        <div class="np-picker-item" (mousedown)="selectPoi(poi)">
+          <strong>{{ poi.name }}</strong>
+          <span>{{ poi.category }}</span>
+        </div>
       }
     </div>
-  } @else if (showDropdown() && searchQuery().trim().length > 0) {
-    <div class="np-picker-dropdown np-picker-empty">
-      Nessun punto di interesse trovato
-    </div>
   }
-
 </div>

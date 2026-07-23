@@ -1,99 +1,55 @@
-// src/app/component/line-form/line-form.ts
-import { Component, inject, output } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormArray, FormGroup, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { LineService } from '../../service/line-service';
 import { StopPicker } from '../stop-picker/stop-picker';
-import Line from '../../model/line';
 import Stop from '../../model/stop';
+import MapIdDelta from '../../model/map-id-delta';
 
 @Component({
   selector: 'app-line-form',
   standalone: true,
-  imports: [ReactiveFormsModule, StopPicker],
+  imports: [CommonModule, FormsModule, RouterLink, StopPicker],
   templateUrl: './line-form.html',
-  styleUrl: './line-form.css',
+  styleUrl: './line-form.css'
 })
 export class LineForm {
-  private fb = inject(FormBuilder);
   private lineService = inject(LineService);
+  private router = inject(Router);
 
-  created = output<Line>();
-  submitting = false;
-  errorMessage = '';
-  successMessage = '';
+  name     = signal('');
+  type     = signal('');
+  provider = signal('');
+  stopIds  = signal<MapIdDelta[]>([]);
+  newStop  = signal<Stop | null>(null);
+  newDelta = signal<number>(0);
 
-  form = this.fb.group({
-    name: ['', Validators.required],
-    type: ['', Validators.required],
-    provider: [''],
-    stopEntries: this.fb.array([this.newStopEntry()]),
-  });
+  loading = signal(false);
+  error   = signal<string | null>(null);
+  success = signal(false);
 
-  private newStopEntry(): FormGroup {
-    return this.fb.group({
-      stopId: [null as number | null, Validators.required],
-      delta: [null as number | null, Validators.required],
-    });
+  addStop() {
+    const s = this.newStop();
+    if (!s?.id) return;
+    if (this.stopIds().some(x => x.id === s.id)) return;
+    this.stopIds.update(ls => [...ls, { id: s.id!, delta: this.newDelta() }]);
+    this.newStop.set(null);
+    this.newDelta.set(this.newDelta() + 1);
   }
 
-  get stopEntries(): FormArray {
-    return this.form.get('stopEntries') as FormArray;
-  }
-
-  addStopRow() {
-    this.stopEntries.push(this.newStopEntry());
-  }
-
-  removeStopRow(index: number) {
-    if (this.stopEntries.length > 1) {
-      this.stopEntries.removeAt(index);
-    }
-  }
-
-  onStopSelected(stop: Stop | null, index: number): void {
-    this.stopEntries.at(index).patchValue({ stopId: stop ? stop.id : null });
-  }
+  removeStop(id: number) { this.stopIds.update(ls => ls.filter(x => x.id !== id)); }
 
   onSubmit() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
+    this.error.set(null);
+    if (!this.name().trim() || !this.type().trim() || !this.provider().trim()) {
+      this.error.set('Nome, tipo e gestore sono obbligatori.'); return;
     }
-
-    this.submitting = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    const stopIds = this.stopEntries.controls
-      .map(ctrl => ({
-        id: ctrl.value.stopId,
-        delta: ctrl.value.delta
-      }))
-      .filter(entry => entry.id != null);
-
-    const payload = {
-      name: this.form.value.name!,
-      type: this.form.value.type!,
-      provider: this.form.value.provider ?? '',
-      stopIds,
-    } as unknown as Line;
-
+    this.loading.set(true);
+    const payload = { name: this.name(), type: this.type(), provider: this.provider(), stopIds: this.stopIds() };
     this.lineService.save(payload).subscribe({
-      next: line => {
-        this.submitting = false;
-        this.successMessage = `Linea "${line.name}" creata con successo.`;
-        this.created.emit(line);
-        this.form.reset();
-        while (this.stopEntries.length > 1) {
-          this.stopEntries.removeAt(1);
-        }
-        this.stopEntries.at(0).reset({ stopId: null, delta: null });
-      },
-      error: err => {
-        this.submitting = false;
-        this.errorMessage = 'Errore durante la creazione della linea.';
-        console.error(err);
-      }
+      next: () => { this.loading.set(false); this.success.set(true); setTimeout(() => this.router.navigate(['/admin']), 1000); },
+      error: () => { this.error.set('Errore durante il salvataggio.'); this.loading.set(false); }
     });
   }
 }

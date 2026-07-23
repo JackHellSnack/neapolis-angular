@@ -1,46 +1,59 @@
-<!-- src/app/component/line-form/line-form.html -->
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="line-form">
-  <h2>Nuova linea</h2>
+<div class="np-page">
+  <div class="np-section-head">
+    <h2>Nuova Linea</h2>
+    <p><a routerLink="/admin">← Torna al pannello admin</a></p>
+  </div>
 
-  <label>
-    Nome
-    <input type="text" formControlName="name" />
-  </label>
+  <div class="np-card">
+    @if (success()) { <div class="np-banner np-banner-success">Linea salvata con successo!</div> }
+    @if (error())   { <div class="np-banner np-banner-error">{{ error() }}</div> }
 
-  <label>
-    Tipo
-    <input type="text" formControlName="type" placeholder="es. bus, metro" />
-  </label>
-
-  <label>
-    Provider
-    <input type="text" formControlName="provider" />
-  </label>
-
-  <fieldset formArrayName="stopEntries">
-    <legend>Stazioni della linea (stazione + distanza dall'origine)</legend>
-
-    @for (row of stopEntries.controls; track row; let i = $index) {
-      <div [formGroupName]="i" class="stop-row">
-        <app-stop-picker (stopChange)="onStopSelected($event, i)"></app-stop-picker>
-        <input type="number" step="any" formControlName="delta" placeholder="Delta" />
-        <button type="button" (click)="removeStopRow(i)" [disabled]="stopEntries.length === 1">
-          Rimuovi
-        </button>
+    <form (ngSubmit)="onSubmit()">
+      <div class="np-field">
+        <label>Nome linea *</label>
+        <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" name="name" placeholder="Es: R2 - Napoli Centro" required>
       </div>
-    }
+      <div class="np-form-row">
+        <div class="np-field">
+          <label>Tipo *</label>
+          <select [ngModel]="type()" (ngModelChange)="type.set($event)" name="type" required>
+            <option value="">Seleziona tipo</option>
+            <option value="BUS">BUS</option>
+            <option value="METRO">METRO</option>
+            <option value="TRAM">TRAM</option>
+            <option value="FERRY">FERRY</option>
+            <option value="FUNICULAR">FUNICOLARE</option>
+          </select>
+        </div>
+        <div class="np-field">
+          <label>Gestore *</label>
+          <input type="text" [ngModel]="provider()" (ngModelChange)="provider.set($event)" name="provider" placeholder="Es: ANM" required>
+        </div>
+      </div>
 
-    <button type="button" (click)="addStopRow()">+ Aggiungi stazione</button>
-  </fieldset>
+      <div class="np-subhead">Fermate in ordine di passaggio</div>
+      <div class="np-stop-add-row">
+        <div style="flex:1">
+          <app-stop-picker [(stop)]="newStop"></app-stop-picker>
+        </div>
+        <div class="np-field" style="width:100px">
+          <label>Delta</label>
+          <input type="number" [ngModel]="newDelta()" (ngModelChange)="newDelta.set($event)" name="delta">
+        </div>
+        <button type="button" class="np-btn np-btn-ghost np-btn-sm" (click)="addStop()">+ Aggiungi</button>
+      </div>
+      @if (stopIds().length) {
+        <div class="np-stop-chips">
+          @for (s of stopIds(); track s.id) {
+            <span class="np-chip">ID {{ s.id }} (δ{{ s.delta }}) <button type="button" (click)="removeStop(s.id)">×</button></span>
+          }
+        </div>
+      }
 
-  <button type="submit" [disabled]="submitting">
-    {{ submitting ? 'Salvataggio...' : 'Salva linea' }}
-  </button>
-
-  @if (successMessage) {
-    <p class="success">{{ successMessage }}</p>
-  }
-  @if (errorMessage) {
-    <p class="error">{{ errorMessage }}</p>
-  }
-</form>
+      <button type="submit" class="np-btn np-btn-primary" [disabled]="loading()">
+        @if (loading()) { <span class="np-spinner" style="width:16px;height:16px;border-width:2px"></span> }
+        Salva linea
+      </button>
+    </form>
+  </div>
+</div>

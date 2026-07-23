@@ -9,70 +9,40 @@ import PointOfInterest from '../../model/point-of-interest';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './poi-picker.html',
-  styleUrls: ['./poi-picker.css']
+  styleUrl: './poi-picker.css'
 })
 export class PoiPicker implements OnInit {
-
   private poiService = inject(PointOfInterestService);
-
-  // Two-way binding con il parent.
-  // model() genera automaticamente anche l'output "poiChange",
-  // quindi nel template del parent si può usare sia [(poi)] che (poiChange).
   poi = model<PointOfInterest | null>(null);
-
-  // Lista completa dei poi
   private allPois = signal<PointOfInterest[]>([]);
-
-  // Testo di ricerca
   searchQuery = signal('');
-
-  // Visibilità dropdown
   showDropdown = signal(false);
 
-  // Poi filtrati in base alla query
   filteredPois = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-
-    if (!query) {
-      return [];
-    }
-
-    return this.allPois().filter(poi =>
-      poi.name.toLowerCase().includes(query) ||
-      poi.category?.toLowerCase().includes(query)
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return [];
+    return this.allPois().filter(p =>
+      p.name.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q)
     );
   });
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.poiService.findAll().subscribe({
-      next: (data) => {
+      next: data => {
         this.allPois.set(data ?? []);
-
-        const initialPoi = this.poi();
-        if (initialPoi) {
-          this.searchQuery.set(initialPoi.name);
-        }
+        const init = this.poi();
+        if (init) this.searchQuery.set(init.name);
       },
-      error: err => console.error('Error loading points of interest:', err)
+      error: err => console.error('Error loading POIs:', err)
     });
   }
 
-  onInputChange(value: string): void {
+  onInputChange(value: string) {
     this.searchQuery.set(value);
     this.showDropdown.set(value.trim().length > 0);
-
-    if (!value.trim() || (this.poi() && this.poi()?.name !== value)) {
-      this.poi.set(null);
-    }
+    if (!value.trim() || (this.poi() && this.poi()?.name !== value)) this.poi.set(null);
   }
 
-  selectPoi(selected: PointOfInterest): void {
-    this.searchQuery.set(selected.name);
-    this.showDropdown.set(false);
-    this.poi.set(selected);
-  }
-
-  hideDropdownWithDelay(): void {
-    setTimeout(() => this.showDropdown.set(false), 200);
-  }
+  selectPoi(p: PointOfInterest) { this.searchQuery.set(p.name); this.showDropdown.set(false); this.poi.set(p); }
+  hide() { setTimeout(() => this.showDropdown.set(false), 200); }
 }

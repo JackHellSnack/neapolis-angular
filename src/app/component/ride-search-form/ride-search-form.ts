@@ -2,10 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import { LinePicker } from '../line-picker/line-picker';
 import { StopPicker } from '../stop-picker/stop-picker';
-
 import Line from '../../model/line';
 import Stop from '../../model/stop';
 import RouteLeg from '../../model/route-leg';
@@ -18,68 +15,56 @@ import { RouteHighlightService } from '../../service/route-highlight-service';
   standalone: true,
   imports: [CommonModule, FormsModule, StopPicker],
   templateUrl: './ride-search-form.html',
-  styleUrls: ['./ride-search-form.css']
+  styleUrl: './ride-search-form.css'
 })
 export class RideSearchForm {
-  private rideService = inject(RideService);
-  private routeHighlight = inject(RouteHighlightService);
-  private router = inject(Router);
+  private rideService     = inject(RideService);
+  private routeHighlight  = inject(RouteHighlightService);
+  private router          = inject(Router);
 
-  selectedLine = signal<Line | null>(null);
-  startStop = signal<Stop | null>(null);
-  arrivalStop = signal<Stop | null>(null);
+  selectedLine   = signal<Line | null>(null);
+  startStop      = signal<Stop | null>(null);
+  arrivalStop    = signal<Stop | null>(null);
+  time           = signal<string>(this.defaultTime());
+  searchByArrival = signal(false);
+  loading        = signal(false);
+  errorMessage   = signal<string | null>(null);
+  searchResults  = signal<RouteLeg[] | null>(null);
 
-  time = signal<string>('12:00');
-  searchByArrival = signal<boolean>(false);
-
-  loading = signal<boolean>(false);
-  errorMessage = signal<string | null>(null);
-  searchResults = signal<RouteLeg[] | null>(null);
-
-  onLineChange(newLine: Line | null): void {
-    // unchanged
+  private defaultTime(): string {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   }
 
-  onSubmit(): void {
+  onSubmit() {
     this.errorMessage.set(null);
-
-    const start = this.startStop();
-    const arrival = this.arrivalStop();
-
+    const start = this.startStop(), arrival = this.arrivalStop();
     if (!start?.id || !arrival?.id || !this.time()) {
-      this.errorMessage.set('Please select a start stop, arrival stop, and time.');
+      this.errorMessage.set('Seleziona fermata di partenza, arrivo e orario.');
       return;
     }
     if (start.id === arrival.id) {
-      this.errorMessage.set('Start stop and arrival stop cannot be the same.');
+      this.errorMessage.set('La fermata di partenza e arrivo non possono coincidere.');
       return;
     }
-
     const payload: RideSearchRequest = {
-      time: this.time(),
-      searchByArrival: this.searchByArrival(),
-      startStopId: start.id,
-      arrivalStopId: arrival.id,
+      time: this.time(), searchByArrival: this.searchByArrival(),
+      startStopId: start.id, arrivalStopId: arrival.id
     };
-
     this.loading.set(true);
-
     this.rideService.searchRideByTime(payload).subscribe({
-      next: (legs) => {
-        console.log('raw legs from backend:', legs);
+      next: legs => {
         this.loading.set(false);
         this.searchResults.set(legs);
-
         if (legs?.length) {
           this.routeHighlight.setResult(legs);
           this.router.navigate(['/stop-map']);
         } else {
-          this.errorMessage.set('No rides found for this route/time.');
+          this.errorMessage.set('Nessuna corsa trovata per questo percorso/orario.');
         }
       },
-      error: (err) => {
-        console.error('Ride search failed:', err);
-        this.errorMessage.set('Failed to search rides. Please try again.');
+      error: () => {
+        this.errorMessage.set('Errore nella ricerca. Riprova.');
         this.loading.set(false);
       }
     });

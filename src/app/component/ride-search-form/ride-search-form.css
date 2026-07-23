@@ -1,3 +1,53 @@
-/* src/app/component/ride-search-form/ride-search-form.css */
-.error { color: #c0392b; font-size: 0.85rem; }
-.success { color: #27ae60; font-size: 0.85rem; }
+.np-search-form { display: flex; flex-direction: column; gap: 16px; }
+
+.np-search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.np-field-grow { flex: 1; min-width: 180px; }
+.np-field-time { width: 130px; flex-shrink: 0; }
+
+.np-search-swap {
+  display: flex;
+  align-items: center;
+  padding-bottom: 2px;
+  color: var(--grigio-testo);
+}
+
+.np-search-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.np-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--grigio-testo);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.np-checkbox-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--azzurro); }
+
+.np-search-error {
+  color: var(--maiolica);
+  font-size: 0.88rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.np-btn-accent { margin-left: auto; }
+
+@media (max-width: 640px) {
+  .np-search-row { flex-direction: column; gap: 0; }
+  .np-search-swap { display: none; }
+  .np-field-time { width: 100%; }
+  .np-btn-accent { width: 100%; justify-content: center; }
+}

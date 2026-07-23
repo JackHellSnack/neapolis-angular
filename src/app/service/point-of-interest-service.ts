@@ -26,4 +26,8 @@ export class PointOfInterestService {
   findRouteToPoi(dto: PoiSearchRequest): Observable<RouteLeg[]> {
     return this.http.post<RouteLeg[]>(`${this.apiUrl}/route`, dto);
   }
+  
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

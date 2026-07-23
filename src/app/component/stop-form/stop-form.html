@@ -1,105 +1,67 @@
-<!-- src/app/component/stop-form/stop-form.html -->
-
-<div class="np-card">
-
-  <div class="np-card-head">
-    <h2>Nuova stazione NeaPolis</h2>
+<div class="np-page">
+  <div class="np-section-head">
+    <h2>Nuova Fermata</h2>
+    <p><a routerLink="/admin">← Torna al pannello admin</a></p>
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="np-form">
-
-    @if (successMessage) {
-      <div class="np-banner np-banner-success">
-        <p>{{ successMessage }}</p>
-      </div>
+  <div class="np-card">
+    @if (success()) {
+      <div class="np-banner np-banner-success">Fermata salvata con successo!</div>
+    }
+    @if (error()) {
+      <div class="np-banner np-banner-error">{{ error() }}</div>
     }
 
-    @if (errorMessage) {
-      <div class="np-banner np-banner-error">
-        <p>{{ errorMessage }}</p>
+    <form (ngSubmit)="onSubmit()">
+      <div class="np-field">
+        <label>Nome fermata *</label>
+        <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" name="name" placeholder="Es: Piazza Garibaldi" required>
       </div>
-    }
+      <div class="np-form-row">
+        <div class="np-field">
+          <label>Via</label>
+          <input type="text" [ngModel]="road()" (ngModelChange)="road.set($event)" name="road" placeholder="Nome strada">
+        </div>
+        <div class="np-field">
+          <label>Città</label>
+          <input type="text" [ngModel]="city()" (ngModelChange)="city.set($event)" name="city" placeholder="Es: Napoli">
+        </div>
+      </div>
+      <div class="np-form-row">
+        <div class="np-field">
+          <label>Latitudine *</label>
+          <input type="number" step="any" [ngModel]="lat()" (ngModelChange)="lat.set($event)" name="lat" placeholder="40.85...">
+        </div>
+        <div class="np-field">
+          <label>Longitudine *</label>
+          <input type="number" step="any" [ngModel]="lon()" (ngModelChange)="lon.set($event)" name="lon" placeholder="14.27...">
+        </div>
+      </div>
 
-    <div class="np-field">
-      <label>Nome stazione</label>
-      <input
-        type="text"
-        formControlName="name"
-        placeholder="Es. Piazza Garibaldi, Via Toledo...">
-
-      @if (form.get('name')?.invalid && form.get('name')?.touched) {
-        <span class="np-error-text">
-          Il nome della stazione è obbligatorio.
-        </span>
-      }
-    </div>
-
-    <div class="np-field">
-      <label>Via</label>
-      <input
-        type="text"
-        formControlName="road"
-        placeholder="Es. Via Toledo 10">
-    </div>
-
-    <div class="np-field">
-      <label>Città / Comune</label>
-      <input
-        type="text"
-        formControlName="city"
-        placeholder="Es. Napoli, Portici...">
-    </div>
-
-    <div formArrayName="lineEntries" class="np-line-entries">
-
-      @for (entry of lineEntries.controls; track $index) {
-        <div [formGroupName]="$index" class="np-line-row">
-
-          <div class="np-line-picker-slot">
-            <app-line-picker (lineChange)="onLineSelected($event, $index)"></app-line-picker>
-          </div>
-
-          <input
-            class="np-delta-input"
-            type="number"
-            formControlName="delta"
-            placeholder="Delta">
-
-          @if (lineEntries.length > 1) {
-            <button
-              type="button"
-              class="np-icon-btn"
-              (click)="removeLineEntry($index)"
-              aria-label="Rimuovi linea">
-              &minus;
-            </button>
+      <!-- Lines section -->
+      <div class="np-subhead">Linee collegate</div>
+      <div class="np-line-add-row">
+        <div style="flex:1">
+          <app-line-picker [(line)]="newLine"></app-line-picker>
+        </div>
+        <div class="np-field" style="width:100px">
+          <label>Delta</label>
+          <input type="number" [ngModel]="newDelta()" (ngModelChange)="newDelta.set($event)" name="delta">
+        </div>
+        <button type="button" class="np-btn np-btn-ghost np-btn-sm" (click)="addLine()">+ Aggiungi</button>
+      </div>
+      @if (lines().length) {
+        <div class="np-line-chips">
+          @for (l of lines(); track l.id) {
+            <span class="np-chip">ID {{ l.id }} (δ{{ l.delta }}) <button type="button" (click)="removeLine(l.id)">×</button></span>
           }
-
         </div>
       }
 
-      <button type="button" class="np-add-line" (click)="addLineEntry()">
-        + Aggiungi linea
+      <button type="submit" class="np-btn np-btn-primary" [disabled]="loading()">
+        @if (loading()) { <span class="np-spinner" style="width:16px;height:16px;border-width:2px"></span> }
+        Salva fermata
       </button>
-
-    </div>
-
-    <div class="np-actions">
-      <button
-        type="button"
-        class="np-btn np-btn-ghost"
-        (click)="resetForm()">
-        Svuota
-      </button>
-
-      <button
-        type="submit"
-        class="np-btn np-btn-primary"
-        [disabled]="form.invalid || submitting">
-        {{ submitting ? 'Salvataggio...' : 'Salva stazione' }}
-      </button>
-    </div>
-
-  </form>
-
+    </form>
+  </div>
 </div>

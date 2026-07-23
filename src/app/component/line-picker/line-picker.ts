@@ -1,78 +1,59 @@
-import { Component, OnInit, inject, signal, computed, model } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, model, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LineService } from '../../service/line-service';
 import Line from '../../model/line';
-
 
 @Component({
   selector: 'app-line-picker',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './line-picker.html',
-  styleUrls: ['./line-picker.css']
+  styleUrl: './line-picker.css'
 })
 export class LinePicker implements OnInit {
-
   private lineService = inject(LineService);
-
-  // Two-way binding with parent
   line = model<Line | null>(null);
-
-  // Complete list of lines
+  lineChange = model<Line | null>();
   private allLines = signal<Line[]>([]);
-
-  // Search text
   searchQuery = signal('');
-
-  // Dropdown visibility
   showDropdown = signal(false);
 
-  // Filtered list
   filteredLines = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-
-    if (!query) {
-      return [];
-    }
-
-    return this.allLines().filter(line =>
-      line.name.toLowerCase().includes(query) ||
-      line.provider.toLowerCase().includes(query) ||
-      line.type.toLowerCase().includes(query)
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return [];
+    return this.allLines().filter(l =>
+      l.name.toLowerCase().includes(q) ||
+      l.provider.toLowerCase().includes(q) ||
+      l.type.toLowerCase().includes(q)
     );
   });
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.lineService.findAll().subscribe({
-      next: (data) => {
+      next: data => {
         this.allLines.set(data ?? []);
-
-        const initialLine = this.line();
-        if (initialLine) {
-          this.searchQuery.set(initialLine.name);
-        }
+        const init = this.line();
+        if (init) this.searchQuery.set(init.name);
       },
       error: err => console.error('Error loading lines:', err)
     });
   }
 
-  onInputChange(value: string): void {
-    this.searchQuery.set(value);
-    this.showDropdown.set(value.trim().length > 0);
+  onInputChange(value: string) {
+  this.searchQuery.set(value);
+  this.showDropdown.set(value.trim().length > 0);
 
-    if (!value.trim() || (this.line() && this.line()?.name !== value)) {
-      this.line.set(null);
-    }
+  if (!value.trim() || (this.line() && this.line()?.name !== value)) {
+    this.line.set(null);   // automatically emits lineChange
   }
+}
 
-  selectLine(selected: Line): void {
-    this.searchQuery.set(selected.name);
-    this.showDropdown.set(false);
-    this.line.set(selected);
-  }
+selectLine(l: Line) {
+  this.searchQuery.set(l.name);
+  this.showDropdown.set(false);
+  this.line.set(l);        // automatically emits lineChange
+}
 
-  hideDropdownWithDelay(): void {
-    setTimeout(() => this.showDropdown.set(false), 200);
-  }
+  hide() { setTimeout(() => this.showDropdown.set(false), 200); }
 }

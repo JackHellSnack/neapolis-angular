@@ -1,28 +1,26 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-
-interface NavItem {
-  path: string;
-  label: string;
-}
+import { Component, inject, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../service/auth-service';
 
 @Component({
   selector: 'app-navigation-menu',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './navigation-menu.html',
-  styleUrl: './navigation-menu.css',
+  styleUrl: './navigation-menu.css'
 })
 export class NavigationMenu {
+  authService = inject(AuthService);
+  private router = inject(Router);
+  menuOpen = signal(false);
 
-  readonly items: NavItem[] = [
-    { path: '/stop-map', label: 'Mappa fermate' },
-    { path: '/map', label: 'Mappa' },
-    { path: '/stop-form', label: 'Nuova fermata' },
-    { path: '/line-form', label: 'Nuova linea' },
-    { path: '/ride-search', label: 'Cerca corsa' },
-    { path: '/login', label: 'Login' },
-    { path: '/poi-form', label: 'Nuovo Poi' },
-    { path: '/poi-search', label: 'Cerca Poi' }
-  ];
+  toggleMenu() { this.menuOpen.update(v => !v); }
+  closeMenu()  { this.menuOpen.set(false); }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/home']);
+    this.closeMenu();
+  }
 }

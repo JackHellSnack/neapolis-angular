@@ -22,4 +22,8 @@ export class StopService {
     save(stop: Partial<Stop>): Observable<Stop> {
         return this.http.post<Stop>(`${this.apiUrl}/stops`, stop);
     }
+
+    delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/stops/${id}`);
+  }
 }

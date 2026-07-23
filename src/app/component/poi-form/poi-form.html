@@ -1,39 +1,50 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="poi-form">
-  <h2>Nuovo punto di interesse</h2>
+<div class="np-page">
+  <div class="np-section-head">
+    <h2>Nuovo Punto di Interesse</h2>
+    <p><a routerLink="/admin">← Torna al pannello admin</a></p>
+  </div>
 
-  <label>
-    Nome
-    <input type="text" formControlName="name" />
-  </label>
+  <div class="np-card">
+    @if (success()) { <div class="np-banner np-banner-success">POI salvato con successo!</div> }
+    @if (error())   { <div class="np-banner np-banner-error">{{ error() }}</div> }
 
-  <label>
-    Categoria
-    <input type="text" formControlName="category" placeholder="es. museo, ristorante" />
-  </label>
+    <form (ngSubmit)="onSubmit()">
+      <div class="np-field">
+        <label>Nome *</label>
+        <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" name="name" placeholder="Es: Museo Nazionale" required>
+      </div>
+      <div class="np-field">
+        <label>Categoria</label>
+        <select [ngModel]="category()" (ngModelChange)="category.set($event)" name="category">
+          <option value="">Seleziona categoria</option>
+          <option value="MUSEO">Museo</option>
+          <option value="OSPEDALE">Ospedale</option>
+          <option value="SCUOLA">Scuola</option>
+          <option value="PARCO">Parco</option>
+          <option value="MONUMENTI">Monumento</option>
+          <option value="COMMERCIO">Commercio</option>
+          <option value="ALTRO">Altro</option>
+        </select>
+      </div>
+      <div class="np-form-row">
+        <div class="np-field">
+          <label>Latitudine *</label>
+          <input type="number" step="any" [ngModel]="lat()" (ngModelChange)="lat.set($event)" name="lat" placeholder="40.85...">
+        </div>
+        <div class="np-field">
+          <label>Longitudine *</label>
+          <input type="number" step="any" [ngModel]="lon()" (ngModelChange)="lon.set($event)" name="lon" placeholder="14.27...">
+        </div>
+      </div>
+      <div class="np-field">
+        <label>Fermata più vicina *</label>
+        <app-stop-picker [(stop)]="stop"></app-stop-picker>
+      </div>
 
-  <label>
-    Fermata associata
-    <app-stop-picker (stopChange)="onStopSelected($event)"></app-stop-picker>
-  </label>
-
-  <label>
-    Lat
-    <input type="number" step="any" formControlName="lat" />
-  </label>
-
-  <label>
-    Lon
-    <input type="number" step="any" formControlName="lon" />
-  </label>
-
-  <button type="submit" [disabled]="submitting">
-    {{ submitting ? 'Salvataggio...' : 'Salva punto di interesse' }}
-  </button>
-
-  @if (successMessage) {
-    <p class="success">{{ successMessage }}</p>
-  }
-  @if (errorMessage) {
-    <p class="error">{{ errorMessage }}</p>
-  }
-</form>
+      <button type="submit" class="np-btn np-btn-primary" [disabled]="loading()" style="margin-top:8px">
+        @if (loading()) { <span class="np-spinner" style="width:16px;height:16px;border-width:2px"></span> }
+        Salva POI
+      </button>
+    </form>
+  </div>
+</div>

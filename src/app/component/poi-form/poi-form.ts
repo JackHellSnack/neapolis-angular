@@ -1,67 +1,43 @@
-import { Component, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { PointOfInterestService } from '../../service/point-of-interest-service';
 import { StopPicker } from '../stop-picker/stop-picker';
 import Stop from '../../model/stop';
-import PointOfInterest from '../../model/point-of-interest';
 
 @Component({
   selector: 'app-poi-form',
   standalone: true,
-  imports: [ReactiveFormsModule, StopPicker],
+  imports: [CommonModule, FormsModule, RouterLink, StopPicker],
   templateUrl: './poi-form.html',
-  styleUrl: './poi-form.css',
+  styleUrl: './poi-form.css'
 })
 export class PoiForm {
-  private fb = inject(FormBuilder);
   private poiService = inject(PointOfInterestService);
+  private router = inject(Router);
 
-  selectedStop: Stop | null = null;
-  submitting = false;
-  successMessage = '';
-  errorMessage = '';
+  name     = signal('');
+  category = signal('');
+  lat      = signal<number | null>(null);
+  lon      = signal<number | null>(null);
+  stop     = signal<Stop | null>(null);
 
-  form = this.fb.group({
-    name: ['', Validators.required],
-    category: [''],
-    lat: [0, Validators.required],
-    lon: [0, Validators.required],
-  });
+  loading = signal(false);
+  error   = signal<string | null>(null);
+  success = signal(false);
 
-  onStopSelected(stop: Stop | null): void {
-    this.selectedStop = stop;
-  }
-
-  onSubmit(): void {
-    if (this.form.invalid || !this.selectedStop?.id) {
-      this.errorMessage = 'Compila il nome e seleziona una fermata.';
-      return;
+  onSubmit() {
+    this.error.set(null);
+    const stop = this.stop();
+    if (!this.name().trim() || !stop?.id) {
+      this.error.set('Nome, coordinate e fermata collegata sono obbligatori.'); return;
     }
-
-    this.submitting = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    const poi: PointOfInterest = {
-      name: this.form.value.name ?? '',
-      category: this.form.value.category ?? '',
-      lat: this.form.value.lat ?? 0,
-      lon: this.form.value.lon ?? 0,
-      stopId: this.selectedStop.id,
-    };
-
-    this.poiService.save(poi).subscribe({
-      next: saved => {
-        this.submitting = false;
-        this.successMessage = `Punto di interesse "${saved.name}" creato con successo.`;
-        this.form.reset({ name: '', category: '', lat: 0, lon: 0 });
-        this.selectedStop = null;
-      },
-      error: err => {
-        this.submitting = false;
-        this.errorMessage = 'Errore durante la creazione del punto di interesse.';
-        console.error(err);
-      }
+    this.loading.set(true);
+    const payload = { name: this.name(), category: this.category(), lat: this.lat()!, lon: this.lon()!, stopId: stop.id };
+    this.poiService.save(payload).subscribe({
+      next: () => { this.loading.set(false); this.success.set(true); setTimeout(() => this.router.navigate(['/admin']), 1000); },
+      error: () => { this.error.set('Errore durante il salvataggio.'); this.loading.set(false); }
     });
   }
 }

@@ -1,15 +1,8 @@
-/* src/app/component/line-form/line-form.css */
-.line-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 420px;
-  padding: 1rem;
-}
-.stop-row {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-.error { color: #c0392b; font-size: 0.85rem; }
-.success { color: #27ae60; font-size: 0.85rem; }
+.np-form-row { display: flex; gap: 16px; }
+.np-form-row .np-field { flex: 1; }
+.np-subhead { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--grigio-testo); margin: 24px 0 12px; }
+.np-stop-add-row { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 12px; }
+.np-stop-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.np-chip { background: var(--azzurro-light); color: var(--blu-golfo); padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.np-chip button { background: none; border: none; cursor: pointer; color: var(--blu-golfo); font-size: 0.9rem; padding: 0; }
+@media (max-width: 480px) { .np-form-row { flex-direction: column; } }

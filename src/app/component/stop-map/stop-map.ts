@@ -1,31 +1,27 @@
 import * as L from 'leaflet';
 
-// Fix default marker icon paths broken by Angular's bundler
 const iconDefault = L.icon({
-  iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
-  iconUrl: 'assets/leaflet/marker-icon.png',
-  shadowUrl: 'assets/leaflet/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41],
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
 L.Marker.prototype.options.icon = iconDefault;
 
-// Icona arancione dedicata ai punti di interesse, per distinguerli
-// visivamente dalle fermate/linee (che usano il marker blu di default).
-const poiIcon = L.icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
-  shadowUrl: 'assets/leaflet/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41],
+const userIcon = L.divIcon({
+  className: '',
+  html: `<div style="width:18px;height:18px;background:#2C8FBF;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>`,
+  iconSize: [18, 18], iconAnchor: [9, 9],
 });
 
-import { Component, OnInit, inject, effect } from '@angular/core';
+const poiIcon = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
+});
+
+import { Component, OnInit, inject, effect, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { StopService } from '../../service/stop-service';
 import { GeolocationService } from '../../service/geolocation-service';
@@ -37,261 +33,214 @@ import Stop from '../../model/stop';
 import Line from '../../model/line';
 import PointOfInterest from '../../model/point-of-interest';
 import RouteLeg from '../../model/route-leg';
+import PoiSearchRequest from '../../model/poi-search-request';
 
 @Component({
   selector: 'app-stop-map',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './stop-map.html',
   styleUrl: './stop-map.css'
 })
 export class StopMap implements OnInit {
-
-  private stopService = inject(StopService);
+  private stopService     = inject(StopService);
   private geolocationService = inject(GeolocationService);
-  private lineService = inject(LineService);
-  private poiService = inject(PointOfInterestService);
-  private routeHighlight = inject(RouteHighlightService);
+  private lineService     = inject(LineService);
+  private poiService      = inject(PointOfInterestService);
+  private routeHighlight  = inject(RouteHighlightService);
 
   private map!: L.Map;
-
   private allStopsLayer!: L.LayerGroup;
   private nearbyStopsLayer!: L.LayerGroup;
   private linesLayer!: L.LayerGroup;
   private poiLayer!: L.LayerGroup;
   private highlightLayer!: L.LayerGroup;
 
-  // Lookup used to resolve a stopId (from Line.stopIds) to its coordinates
   private stopsById = new Map<number, Stop>();
   private linesById = new Map<number, Line>();
   private dataReady = false;
 
-  private readonly HIGHLIGHT_COLOR = '#E4703A'; // brand "maiolica" orange
+  routeActive = signal(false);
+  searching   = signal(false);
+  searchError = signal<string | null>(null);
+
+  private readonly HIGHLIGHT_COLOR = '#E4703A';
 
   constructor() {
-    // Reacts if a search result arrives/changes while this component is already mounted
     effect(() => {
       const legs = this.routeHighlight.legs();
-      if (legs && this.dataReady) {
-        this.renderHighlightedRoute(legs);
+      if (this.dataReady) {
+        if (legs) {
+          this.renderHighlightedRoute(legs);
+          this.routeActive.set(true);
+        } else {
+          this.clearHighlight();
+          this.routeActive.set(false);
+        }
       }
     });
   }
 
   ngOnInit() {
-
-    this.map = L.map('map').setView([40.85, 14.27], 13); // fallback view (e.g. Naples) until geolocation resolves
-
+    this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
-    this.allStopsLayer = L.layerGroup().addTo(this.map);
+    this.allStopsLayer   = L.layerGroup().addTo(this.map);
     this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
-    this.linesLayer = L.layerGroup().addTo(this.map);
-    this.poiLayer = L.layerGroup().addTo(this.map);
-    this.highlightLayer = L.layerGroup().addTo(this.map);
+    this.linesLayer       = L.layerGroup().addTo(this.map);
+    this.poiLayer         = L.layerGroup().addTo(this.map);
+    this.highlightLayer   = L.layerGroup().addTo(this.map);
 
-    // Fetch stops, lines and points of interest together: we need every
-    // stop's coordinates resolved BEFORE we try to draw any line, otherwise
-    // stopsById lookups inside drawLine() would fail.
     forkJoin({
       stops: this.stopService.findAll(),
       lines: this.lineService.findAll(),
-      pois: this.poiService.findAll()
+      pois:  this.poiService.findAll()
     }).subscribe({
       next: ({ stops, lines, pois }) => {
         stops.forEach(stop => {
           this.stopsById.set(stop.id!, stop);
           this.addStopMarker(stop, this.allStopsLayer);
         });
-
         lines.forEach(line => {
           this.linesById.set(line.id!, line);
           this.drawLine(line);
         });
-
         pois.forEach(poi => this.addPoiMarker(poi));
-
         this.dataReady = true;
-
-        // If a search happened before the map finished loading its base data,
-        // render it now that we have everything we need.
-        const pendingLegs = this.routeHighlight.legs();
-        if (pendingLegs) {
-          this.renderHighlightedRoute(pendingLegs);
-        }
+        const pending = this.routeHighlight.legs();
+        if (pending) { this.renderHighlightedRoute(pending); this.routeActive.set(true); }
       },
       error: err => console.error(err)
     });
 
     this.geolocationService.getCurrentPosition().subscribe({
-      next: position => {
-
-        this.map.setView(
-          [position.coords.latitude, position.coords.longitude],
-          15
-        );
-
-        L.marker([position.coords.latitude, position.coords.longitude])
-          .addTo(this.map)
-          .bindPopup('You are here');
-
-        const search: AreaSearch = {
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-          area: 500
-        };
-
+      next: pos => {
+        this.map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+        L.marker([pos.coords.latitude, pos.coords.longitude], { icon: userIcon })
+          .addTo(this.map).bindPopup('Sei qui');
+        const search: AreaSearch = { lat: pos.coords.latitude, lon: pos.coords.longitude, area: 500 };
         this.stopService.findNearbyStops(search).subscribe(stops => {
           stops.forEach(stop => this.addStopMarker(stop, this.nearbyStopsLayer));
         });
-
       },
-      error: err => console.error(err)
+      error: () => {} // geolocation might be denied — silent fail
     });
   }
 
   private addStopMarker(stop: Stop, layer: L.LayerGroup) {
-    L.marker([stop.lat, stop.lon])
-      .addTo(layer)
-      .bindPopup(this.buildStopPopup(stop));
+    L.marker([stop.lat, stop.lon]).addTo(layer).bindPopup(
+      `<strong>${stop.name}</strong>${stop.road ? '<br>' + stop.road : ''}${stop.city ? '<br>' + stop.city : ''}`
+    );
   }
 
   private addPoiMarker(poi: PointOfInterest) {
-    L.marker([poi.lat, poi.lon], { icon: poiIcon })
-      .addTo(this.poiLayer)
-      .bindPopup(this.buildPoiPopup(poi));
+    const marker = L.marker([poi.lat, poi.lon], { icon: poiIcon }).addTo(this.poiLayer);
+    const category = poi.category ? `<br><small>${poi.category}</small>` : '';
+    marker.bindPopup(`<strong>${poi.name}</strong>${category}<br><button class="lf-btn" onclick="window.neapolisPoiClick(${poi.id})">📍 Vedi percorso</button>`);
+    marker.on('click', () => this.onPoiClick(poi));
   }
 
-  private buildStopPopup(stop: Stop): string {
-    const lines = [`<strong>${stop.name}</strong>`];
-
-    if (stop.road) {
-      lines.push(stop.road);
-    }
-    if (stop.city) {
-      lines.push(stop.city);
-    }
-
-    return lines.join('<br>');
+  private onPoiClick(poi: PointOfInterest) {
+    this.searchError.set(null);
+    this.searching.set(true);
+    this.geolocationService.getCurrentPosition().subscribe({
+      next: pos => {
+        const req: PoiSearchRequest = {
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          poiId: poi.id!,
+          searchByArrival: false,
+        };
+        this.poiService.findRouteToPoi(req).subscribe({
+          next: legs => {
+            this.searching.set(false);
+            if (legs?.length) {
+              this.routeHighlight.setResult(legs);
+            } else {
+              this.searchError.set('Nessun percorso trovato per questo POI.');
+            }
+          },
+          error: () => {
+            this.searching.set(false);
+            this.searchError.set('Errore nella ricerca del percorso.');
+          }
+        });
+      },
+      error: () => {
+        this.searching.set(false);
+        this.searchError.set('Attiva la geolocalizzazione per trovare il percorso.');
+      }
+    });
   }
 
-  private buildPoiPopup(poi: PointOfInterest): string {
-    const lines = [`<strong>${poi.name}</strong>`];
-
-    if (poi.category) {
-      lines.push(poi.category);
-    }
-
-    return lines.join('<br>');
+  clearRoute() {
+    this.routeHighlight.clear();
+    this.searchError.set(null);
   }
 
-  /**
-   * Draws a single polyline connecting the stops of a line, in order.
-   *
-   * Line.stopIds is a MapIdDelta[]: { id: stopId, delta: distance from origin }.
-   * Sorting by delta reconstructs the correct order of stops along the line
-   * (assumes a simple, non-branching line). Leaflet's polyline then connects
-   * each consecutive pair only — stop[i] to stop[i+1] and stop[i] to stop[i-1] —
-   * so no stop ends up connected to anything other than its immediate neighbors.
-   */
   private drawLine(line: Line) {
-    if (!line.stopIds || line.stopIds.length < 2) {
-      return; // nothing to connect
-    }
-
-    const orderedStops = [...line.stopIds]
-      .sort((a, b) => a.delta - b.delta)
-      .map(entry => this.stopsById.get(entry.id))
-      .filter((s): s is Stop => !!s); // drop any stopId we couldn't resolve
-
-    if (orderedStops.length < 2) {
-      return;
-    }
-
-    const path: L.LatLngExpression[] = orderedStops.map(s => [s.lat, s.lon]);
-
-    L.polyline(path, {
-      color: this.colorForLine(line.id!),
-      weight: 4,
-      opacity: 0.7
-    })
-      .addTo(this.linesLayer)
-      .bindPopup(line.name);
+    if (!line.stopIds || line.stopIds.length < 2) return;
+    const ordered = [...line.stopIds].sort((a, b) => a.delta - b.delta)
+      .map(e => this.stopsById.get(e.id)).filter((s): s is Stop => !!s);
+    if (ordered.length < 2) return;
+    L.polyline(ordered.map(s => [s.lat, s.lon] as L.LatLngExpression), {
+      color: this.colorForLine(line.id!), weight: 3, opacity: 0.6
+    }).addTo(this.linesLayer).bindPopup(line.name);
   }
 
-  /**
-   * Deterministic, distinct-ish color per line id, so different lines
-   * are visually distinguishable without needing a color field from the backend.
-   */
   private colorForLine(id: number): string {
-    const hue = (id * 47) % 360;
-    return `hsl(${hue}, 70%, 45%)`;
+    return `hsl(${(id * 47) % 360}, 65%, 45%)`;
   }
 
-  /**
-   * Draws the searched route: every leg's line segment (sliced between
-   * fromStopId and toStopId, following the line's actual stop order) in one
-   * highlight color, plus circle markers on every stop the route passes through.
-   */
-  private renderHighlightedRoute(legs: RouteLeg[]): void {
+  private renderHighlightedRoute(legs: RouteLeg[]) {
     this.highlightLayer.clearLayers();
+    // Hide all stops — only show route stops
+    this.map.removeLayer(this.allStopsLayer);
+    this.map.removeLayer(this.nearbyStopsLayer);
 
-    const highlightedStopIds = new Set<number>();
+    const highlightedIds = new Set<number>();
     const bounds: L.LatLngExpression[] = [];
 
     legs.forEach(leg => {
       const line = this.linesById.get(leg.lineId);
       if (!line?.stopIds?.length) return;
-
-      const orderedIds = [...line.stopIds]
-        .sort((a, b) => a.delta - b.delta)
-        .map(entry => entry.id);
-
+      const orderedIds = [...line.stopIds].sort((a, b) => a.delta - b.delta).map(e => e.id);
       const fromIdx = orderedIds.indexOf(leg.fromStopId);
-      const toIdx = orderedIds.indexOf(leg.toStopId);
+      const toIdx   = orderedIds.indexOf(leg.toStopId);
       if (fromIdx === -1 || toIdx === -1) return;
-
       const [start, end] = fromIdx <= toIdx ? [fromIdx, toIdx] : [toIdx, fromIdx];
-      const segmentIds = orderedIds.slice(start, end + 1);
-
+      const segIds = orderedIds.slice(start, end + 1);
       const path: L.LatLngExpression[] = [];
-      segmentIds.forEach(id => {
-        const stop = this.stopsById.get(id);
-        if (!stop) return;
-        highlightedStopIds.add(id);
-        path.push([stop.lat, stop.lon]);
+      segIds.forEach(id => {
+        const s = this.stopsById.get(id);
+        if (!s) return;
+        highlightedIds.add(id);
+        path.push([s.lat, s.lon]);
       });
-
       if (path.length >= 2) {
-        L.polyline(path, {
-          color: this.HIGHLIGHT_COLOR,
-          weight: 6,
-          opacity: 0.9
-        })
-          .addTo(this.highlightLayer)
-          .bindPopup(leg.lineName);
-
+        L.polyline(path, { color: this.HIGHLIGHT_COLOR, weight: 6, opacity: 0.9 })
+          .addTo(this.highlightLayer).bindPopup(`<strong>${leg.lineName}</strong><br>${leg.fromStopName} → ${leg.toStopName}`);
         bounds.push(...path);
       }
     });
 
-    highlightedStopIds.forEach(id => {
-      const stop = this.stopsById.get(id);
-      if (!stop) return;
-
-      L.circleMarker([stop.lat, stop.lon], {
-        radius: 9,
-        color: this.HIGHLIGHT_COLOR,
-        fillColor: this.HIGHLIGHT_COLOR,
-        fillOpacity: 0.9,
-        weight: 2
-      })
-        .addTo(this.highlightLayer)
-        .bindPopup(stop.name);
+    highlightedIds.forEach(id => {
+      const s = this.stopsById.get(id);
+      if (!s) return;
+      L.circleMarker([s.lat, s.lon], {
+        radius: 8, color: this.HIGHLIGHT_COLOR,
+        fillColor: '#fff', fillOpacity: 1, weight: 3
+      }).addTo(this.highlightLayer).bindPopup(s.name);
     });
 
-    if (bounds.length) {
-      this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
-    }
+    if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
+  }
+
+  private clearHighlight() {
+    this.highlightLayer.clearLayers();
+    if (!this.map.hasLayer(this.allStopsLayer))   this.map.addLayer(this.allStopsLayer);
+    if (!this.map.hasLayer(this.nearbyStopsLayer)) this.map.addLayer(this.nearbyStopsLayer);
   }
 }

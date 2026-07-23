@@ -1,33 +1,59 @@
-<header class="np-header">
-  <div class="np-nav">
-    <div class="np-logo"><span class="np-logo-mark"></span>{{ title() }}</div>
-    <nav class="np-nav-links">
-      <a href="#fermate">Fermate</a>
-      <a href="#linee">Linee</a>
-    </nav>
-  </div>
-</header>
-
-<div class="np-hero">
+<!-- HERO -->
+<section class="np-hero">
   <div class="np-hero-inner">
     <span class="np-eyebrow">Trasporto pubblico · Napoli e area metropolitana</span>
-    <h1>Dove si ferma<br>il prossimo <em>bus</em>?</h1>
-    <p>Cerca la fermata più vicina, controlla le linee che ci passano e organizza il tuo viaggio in pochi secondi — sulla mappa, in tempo reale.</p>
+    <h1>Dove vuoi<br>andare <em>oggi</em>?</h1>
+    <p>Trova la corsa giusta, cerca il punto di interesse più vicino, segui il tuo percorso in tempo reale.</p>
   </div>
-</div>
+</section>
 
+<!-- SEARCH CARD -->
 <div class="np-search-card">
-  <app-stop-form></app-stop-form>
+  <!-- Tabs -->
+  <div class="np-tabs">
+    <button
+      class="np-tab"
+      [class.np-tab-active]="activeTab() === 'ride'"
+      (click)="setTab('ride')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Cerca Corsa
+    </button>
+    <button
+      class="np-tab"
+      [class.np-tab-active]="activeTab() === 'poi'"
+      (click)="setTab('poi')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Cerca Punto di Interesse
+    </button>
+  </div>
+
+  <div class="np-search-body">
+    @if (activeTab() === 'ride') {
+      <app-ride-search-form></app-ride-search-form>
+    } @else {
+      <app-poi-search-form></app-poi-search-form>
+    }
+  </div>
 </div>
 
 <div class="tile-strip"></div>
 
-<section id="fermate" class="np-map-section">
+<!-- MAP SECTION -->
+<section class="np-map-section">
   <div class="np-section-head">
-    <div>
-      <h2>Fermate e linee sulla mappa</h2>
-      <p>Le fermate vicine a te, le linee in servizio e i loro percorsi.</p>
-    </div>
+    <h2>Fermate e linee sulla mappa</h2>
+    <p>Clicca su un punto di interesse per vedere il percorso per raggiungerlo dalla tua posizione.</p>
   </div>
   <app-stop-map></app-stop-map>
 </section>
+
+<!-- FOOTER -->
+<footer class="np-footer">
+  <div class="np-footer-inner">
+    <div class="np-footer-brand">
+      <span class="np-logo-mark-sm"></span>
+      <span>NeaPolis</span>
+    </div>
+    <p class="np-footer-copy">Trasporto pubblico Napoli e area metropolitana</p>
+  </div>
+</footer>

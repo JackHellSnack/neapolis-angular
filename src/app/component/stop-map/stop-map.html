@@ -1,1 +1,27 @@
-<div id="map" style="height: 1080px; width: 100%;"></div>
+<div class="np-map-wrap">
+  <!-- Map overlay controls -->
+  @if (routeActive()) {
+    <div class="np-map-overlay">
+      <button class="np-btn np-btn-ghost np-btn-sm" (click)="clearRoute()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Cancella percorso
+      </button>
+    </div>
+  }
+
+  @if (searching()) {
+    <div class="np-map-searching">
+      <span class="np-spinner"></span>
+      Ricerca percorso in corso...
+    </div>
+  }
+
+  @if (searchError()) {
+    <div class="np-map-error">
+      {{ searchError() }}
+      <button (click)="searchError.set(null)">×</button>
+    </div>
+  }
+
+  <div id="stop-map-container" class="np-map"></div>
+</div>

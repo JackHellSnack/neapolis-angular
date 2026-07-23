@@ -1,0 +1,134 @@
+<div class="np-page">
+  <!-- Header -->
+  <div class="np-admin-header">
+    <div>
+      <h2>Pannello Admin</h2>
+      <p style="color:var(--grigio-testo);margin-top:4px">Gestisci fermate, linee e punti di interesse</p>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="np-stats-row">
+    <div class="np-stat">
+      <div class="np-stat-value">{{ stops().length }}</div>
+      <div class="np-stat-label">Fermate</div>
+    </div>
+    <div class="np-stat">
+      <div class="np-stat-value">{{ lines().length }}</div>
+      <div class="np-stat-label">Linee</div>
+    </div>
+    <div class="np-stat">
+      <div class="np-stat-value">{{ pois().length }}</div>
+      <div class="np-stat-label">Punti di Interesse</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="np-admin-tabs">
+    <button class="np-admin-tab" [class.np-admin-tab-active]="activeTab() === 'stops'" (click)="setTab('stops')">Fermate</button>
+    <button class="np-admin-tab" [class.np-admin-tab-active]="activeTab() === 'lines'" (click)="setTab('lines')">Linee</button>
+    <button class="np-admin-tab" [class.np-admin-tab-active]="activeTab() === 'pois'" (click)="setTab('pois')">POI</button>
+  </div>
+
+  <!-- Stops table -->
+  @if (activeTab() === 'stops') {
+    <div class="np-card np-admin-card">
+      <div class="np-admin-card-head">
+        <h3>Fermate ({{ stops().length }})</h3>
+        <a routerLink="/stop-form" class="np-btn np-btn-primary np-btn-sm">+ Nuova fermata</a>
+      </div>
+      <div class="np-table-scroll">
+        <table class="np-table">
+          <thead>
+            <tr><th>Nome</th><th>Via</th><th>Città</th><th>Linee</th><th></th></tr>
+          </thead>
+          <tbody>
+            @for (stop of stops(); track stop.id) {
+              <tr>
+                <td><strong>{{ stop.name }}</strong></td>
+                <td>{{ stop.road }}</td>
+                <td>{{ stop.city }}</td>
+                <td>
+                  @if (stop.lineIds?.length) {
+                    <span class="np-badge np-badge-blue">{{ stop.lineIds!.length }}</span>
+                  }
+                </td>
+                <td class="np-td-actions">
+                  <button class="np-icon-del" (click)="deleteStop(stop.id!)">×</button>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="5" class="np-empty-td">Nessuna fermata</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Lines table -->
+  @if (activeTab() === 'lines') {
+    <div class="np-card np-admin-card">
+      <div class="np-admin-card-head">
+        <h3>Linee ({{ lines().length }})</h3>
+        <a routerLink="/line-form" class="np-btn np-btn-primary np-btn-sm">+ Nuova linea</a>
+      </div>
+      <div class="np-table-scroll">
+        <table class="np-table">
+          <thead>
+            <tr><th>Nome</th><th>Tipo</th><th>Gestore</th><th>Fermate</th><th></th></tr>
+          </thead>
+          <tbody>
+            @for (line of lines(); track line.id) {
+              <tr>
+                <td><strong>{{ line.name }}</strong></td>
+                <td><span class="np-badge np-badge-blue">{{ line.type }}</span></td>
+                <td>{{ line.provider }}</td>
+                <td>{{ line.stopIds?.length ?? 0 }}</td>
+                <td class="np-td-actions">
+                  <button class="np-icon-del" (click)="deleteLine(line.id!)">×</button>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="5" class="np-empty-td">Nessuna linea</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- POIs table -->
+  @if (activeTab() === 'pois') {
+    <div class="np-card np-admin-card">
+      <div class="np-admin-card-head">
+        <h3>Punti di Interesse ({{ pois().length }})</h3>
+        <a routerLink="/poi-form" class="np-btn np-btn-primary np-btn-sm">+ Nuovo POI</a>
+      </div>
+      <div class="np-table-scroll">
+        <table class="np-table">
+          <thead>
+            <tr><th>Nome</th><th>Categoria</th><th>Fermata collegata</th><th></th></tr>
+          </thead>
+          <tbody>
+            @for (poi of pois(); track poi.id) {
+              <tr>
+                <td><strong>{{ poi.name }}</strong></td>
+                <td><span class="np-badge np-badge-orange">{{ poi.category }}</span></td>
+                <td>{{ poi.stopId }}</td>
+                <td class="np-td-actions">
+                  <button class="np-icon-del" (click)="deletePoi(poi.id!)">×</button>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="4" class="np-empty-td">Nessun punto di interesse</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

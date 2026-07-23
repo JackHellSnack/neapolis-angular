@@ -1,79 +1,38 @@
-<div class="w3-card-4 w3-white w3-round-large w3-padding" style="max-width: 500px; margin: 0 auto;">
-  <h2 class="w3-center w3-text-theme">Search Rides</h2>
-
-  <form (ngSubmit)="onSubmit()" class="w3-container">
-    
-    <div class="w3-margin-bottom">
-      <label class="w3-text-grey"><b>Departure Stop</b></label>
-      <app-stop-picker 
-        [line]="selectedLine()" 
-        [(stop)]="startStop">
-      </app-stop-picker>
+<form (ngSubmit)="onSubmit()" class="np-search-form">
+  <div class="np-search-row">
+    <div class="np-field np-field-grow">
+      <label>Partenza</label>
+      <app-stop-picker [line]="selectedLine()" [(stop)]="startStop"></app-stop-picker>
     </div>
 
-    <div class="w3-margin-bottom">
-      <label class="w3-text-grey"><b>Arrival Stop</b></label>
-      <app-stop-picker 
-        [line]="selectedLine()" 
-        [(stop)]="arrivalStop">
-      </app-stop-picker>
-    </div>
-    
-    <div class="w3-row-padding w3-margin-bottom" style="margin-left: -16px; margin-right: -16px;">
-      <div class="w3-half">
-        <label class="w3-text-grey"><b>Time</b></label>
-        <input 
-          class="w3-input w3-border w3-round" 
-          type="time" 
-          [ngModel]="time()" 
-          (ngModelChange)="time.set($event)" 
-          name="time" 
-          required>
-      </div>
-
-      <div class="w3-half w3-padding-top">
-        <label class="w3-validate" style="cursor: pointer;">
-          <input 
-            type="checkbox" 
-            class="w3-check" 
-            [ngModel]="searchByArrival()" 
-            (ngModelChange)="searchByArrival.set($event)" 
-            name="searchByArrival">
-          Search by Arrival Time
-        </label>
-      </div>
+    <div class="np-search-swap">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
     </div>
 
-    <!-- Error Display -->
-    @if (errorMessage()) {
-      <div class="w3-panel w3-red w3-round w3-padding-small">
-        <p class="w3-small">{{ errorMessage() }}</p>
-      </div>
-    }
+    <div class="np-field np-field-grow">
+      <label>Arrivo</label>
+      <app-stop-picker [line]="selectedLine()" [(stop)]="arrivalStop"></app-stop-picker>
+    </div>
 
-    <!-- Submit Button -->
-    <button 
-      type="submit" 
-      class="w3-button w3-block w3-blue w3-round w3-margin-top" 
-      [disabled]="loading()">
-      @if (loading()) {
-        Searching...
-      } @else {
-        Search Rides
-      }
-    </button>
-  </form>
-
- @if (searchResults(); as legs) {
-  <div class="w3-margin-top w3-border-top w3-padding-top">
-    <h4>Itinerary</h4>
-    @for (leg of legs; track $index) {
-      <div class="w3-bar w3-padding">
-        <b>{{ leg.lineName }}</b>
-        — {{ leg.fromStopName }} ({{ leg.departureTime }})
-        → {{ leg.toStopName }} ({{ leg.arrivalTime }})
-      </div>
-    }
+    <div class="np-field np-field-time">
+      <label>Orario</label>
+      <input type="time" [ngModel]="time()" (ngModelChange)="time.set($event)" name="time" required>
+    </div>
   </div>
-}
-</div>
+
+  <div class="np-search-footer">
+    <label class="np-checkbox-label">
+      <input type="checkbox" [ngModel]="searchByArrival()" (ngModelChange)="searchByArrival.set($event)" name="searchByArrival">
+      Cerca per orario di arrivo
+    </label>
+
+    @if (errorMessage()) {
+      <span class="np-search-error">{{ errorMessage() }}</span>
+    }
+
+    <button type="submit" class="np-btn np-btn-accent" [disabled]="loading()">
+      @if (loading()) { <span class="np-spinner" style="width:16px;height:16px;border-width:2px"></span> }
+      Cerca corse
+    </button>
+  </div>
+</form>

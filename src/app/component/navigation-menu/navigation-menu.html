@@ -1,11 +1,62 @@
-<nav class="w3-bar w3-white w3-card" style="padding: 0 8px;">
-  @for (item of items; track item.path) {
-    <a
-      class="w3-bar-item w3-button"
-      [routerLink]="item.path"
-      routerLinkActive="w3-brianza w3-text-white"
-      [routerLinkActiveOptions]="{ exact: false }">
-      {{ item.label }}
+<nav class="np-topnav">
+  <div class="np-topnav-inner">
+    <!-- Logo -->
+    <a class="np-topnav-logo" routerLink="/home" (click)="closeMenu()">
+      <span class="np-logo-mark"></span>
+      <span class="np-logo-text">NeaPolis</span>
     </a>
+
+    <!-- Desktop links -->
+    <div class="np-topnav-links">
+      <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
+      <a routerLink="/stop-map" routerLinkActive="active">Mappa</a>
+      @if (authService.isLoggedIn()) {
+        <a routerLink="/dashboard" routerLinkActive="active">La mia area</a>
+      }
+      @if (authService.isAdmin()) {
+        <a routerLink="/admin" routerLinkActive="active" class="np-topnav-admin">Admin</a>
+      }
+    </div>
+
+    <!-- Desktop auth -->
+    <div class="np-topnav-auth">
+      @if (authService.isLoggedIn()) {
+        <span class="np-topnav-user">{{ authService.username() }}</span>
+        <button class="np-btn np-btn-ghost np-btn-sm" (click)="logout()">Esci</button>
+      } @else {
+        <a routerLink="/login" class="np-btn np-btn-primary np-btn-sm">Accedi</a>
+      }
+    </div>
+
+    <!-- Mobile hamburger -->
+    <button class="np-hamburger" (click)="toggleMenu()" [attr.aria-label]="menuOpen() ? 'Chiudi menu' : 'Apri menu'">
+      @if (menuOpen()) {
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      } @else {
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      }
+    </button>
+  </div>
+
+  <!-- Mobile menu drawer -->
+  @if (menuOpen()) {
+    <div class="np-mobile-menu">
+      <a routerLink="/home" (click)="closeMenu()">Home</a>
+      <a routerLink="/stop-map" (click)="closeMenu()">Mappa fermate</a>
+      @if (authService.isLoggedIn()) {
+        <a routerLink="/dashboard" (click)="closeMenu()">La mia area</a>
+      }
+      @if (authService.isAdmin()) {
+        <a routerLink="/admin" (click)="closeMenu()" class="admin-link">Admin</a>
+      }
+      <div class="np-mobile-auth">
+        @if (authService.isLoggedIn()) {
+          <span class="np-mobile-user">{{ authService.username() }}</span>
+          <button class="np-btn np-btn-ghost" (click)="logout()">Esci</button>
+        } @else {
+          <a routerLink="/login" class="np-btn np-btn-primary" (click)="closeMenu()">Accedi</a>
+        }
+      </div>
+    </div>
   }
 </nav>

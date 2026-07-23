@@ -1,0 +1,107 @@
+.np-dash-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.np-dash-header h2 { font-size: 2rem; color: var(--blu-golfo); }
+.np-dash-sub { color: var(--grigio-testo); margin-top: 4px; }
+.np-dash-sub strong { color: var(--inchiostro); }
+
+/* Journey card */
+.np-journey-card { margin-bottom: 28px; }
+
+.np-journey-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.np-journey-head h3 { font-size: 1.15rem; }
+
+.np-journey-info { margin-bottom: 16px; }
+
+.np-journey-leg {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: var(--crema);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.np-journey-msg {
+  color: var(--grigio-testo);
+  font-size: 0.9rem;
+  padding: 8px 0;
+}
+
+.np-journey-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Pending route */
+.np-pending-route { margin-top: 8px; }
+.np-pending-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--grigio-testo);
+  margin-bottom: 12px;
+}
+
+/* No journey empty state */
+.np-no-journey {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0 16px;
+  text-align: center;
+  color: var(--grigio-testo);
+}
+
+.np-loading-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--grigio-testo);
+  padding: 12px 0;
+  font-size: 0.92rem;
+}
+
+/* Quick links */
+.np-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.np-quick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px;
+  background: var(--carta);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  text-decoration: none;
+  color: var(--inchiostro);
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.18s;
+}
+
+.np-quick-card svg { color: var(--blu-golfo); }
+.np-quick-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-float); }
+
+@media (max-width: 500px) {
+  .np-quick-grid { grid-template-columns: 1fr; }
+}
