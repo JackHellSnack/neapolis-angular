@@ -1,6 +1,5 @@
 import * as L from 'leaflet';
 
-// Fix default marker icon paths broken by Angular's bundler
 const iconDefault = L.icon({
   iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
   iconUrl: 'assets/leaflet/marker-icon.png',
@@ -12,6 +11,13 @@ const iconDefault = L.icon({
   shadowSize: [41, 41],
 });
 L.Marker.prototype.options.icon = iconDefault;
+
+const userIcon = L.icon({
+  iconUrl: 'assets/leaflet/your-position.png',
+  iconSize: [100, 75],
+  popupAnchor: [1, -34],
+  tooltipAnchor: [16, -28],
+});
 
 import { Component, OnInit, inject, effect } from '@angular/core';
 import { forkJoin } from 'rxjs';
@@ -111,7 +117,7 @@ export class StopMap implements OnInit {
           15
         );
 
-        L.marker([position.coords.latitude, position.coords.longitude])
+        L.marker([position.coords.latitude, position.coords.longitude], {icon: userIcon})
           .addTo(this.map)
           .bindPopup('You are here');
 

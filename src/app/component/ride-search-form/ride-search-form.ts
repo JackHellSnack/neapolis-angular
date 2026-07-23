@@ -16,7 +16,7 @@ import { RouteHighlightService } from '../../service/route-highlight-service';
 @Component({
   selector: 'app-ride-search-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, LinePicker, StopPicker],
+  imports: [CommonModule, FormsModule, StopPicker],
   templateUrl: './ride-search-form.html',
   styleUrls: ['./ride-search-form.css']
 })
