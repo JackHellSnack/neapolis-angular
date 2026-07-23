@@ -24,5 +24,6 @@ export class NavigationMenu {
     { path: '/login', label: 'Login' },
     { path: '/poi-form', label: 'Nuovo Poi' },
     { path: '/style-guide', label: 'Style guide' }
+    { path: '/poi-search', label: 'Cerca Poi' }
   ];
 }

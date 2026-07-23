@@ -1,0 +1,68 @@
+<div class="w3-card-4 w3-white w3-round-large w3-padding" style="max-width: 500px; margin: 0 auto;">
+  <h2 class="w3-center w3-text-theme">Cerca punto di interesse</h2>
+
+  <form (ngSubmit)="onSubmit()" class="w3-container">
+
+    <div class="w3-margin-bottom">
+      <label class="w3-text-grey"><b>Punto di interesse</b></label>
+      <app-poi-picker (poiChange)="onPoiChange($event)"></app-poi-picker>
+    </div>
+
+    <div class="w3-row-padding w3-margin-bottom" style="margin-left: -16px; margin-right: -16px;">
+      <div class="w3-half">
+        <label class="w3-text-grey"><b>Orario</b></label>
+        <input
+          class="w3-input w3-border w3-round"
+          type="time"
+          [ngModel]="time()"
+          (ngModelChange)="time.set($event)"
+          name="time"
+          required>
+      </div>
+
+      <div class="w3-half w3-padding-top">
+        <label class="w3-validate" style="cursor: pointer;">
+          <input
+            type="checkbox"
+            class="w3-check"
+            [ngModel]="searchByArrival()"
+            (ngModelChange)="searchByArrival.set($event)"
+            name="searchByArrival">
+          Cerca per orario di arrivo
+        </label>
+      </div>
+    </div>
+
+    <!-- Error Display -->
+    @if (errorMessage()) {
+      <div class="w3-panel w3-red w3-round w3-padding-small">
+        <p class="w3-small">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- Submit Button -->
+    <button
+      type="submit"
+      class="w3-button w3-block w3-blue w3-round w3-margin-top"
+      [disabled]="loading()">
+      @if (loading()) {
+        Ricerca in corso...
+      } @else {
+        Cerca percorso
+      }
+    </button>
+  </form>
+
+  @if (searchResults(); as legs) {
+    <div class="w3-margin-top w3-border-top w3-padding-top">
+      <h4>Itinerario</h4>
+      @for (leg of legs; track $index) {
+        <div class="w3-bar w3-padding">
+          <b>{{ leg.lineName }}</b>
+          — {{ leg.fromStopName }} ({{ leg.departureTime }})
+          → {{ leg.toStopName }} ({{ leg.arrivalTime }})
+        </div>
+      }
+    </div>
+  }
+</div>

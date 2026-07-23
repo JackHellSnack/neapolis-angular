@@ -22,3 +22,9 @@ Front-end per app neapolis
 - 
 
 
+### accorgimenti
+- togliere i punti delle stop e far vedere solo quelli che servono all'utente
+- la mia posizione omino, puntini classici per le stop
+- lorenzo popola il db con linea 1 linea 2 linea 6 e vari bus LORENZO MI RACCOMANDO
+
+

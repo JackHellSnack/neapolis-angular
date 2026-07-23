@@ -13,15 +13,29 @@ const iconDefault = L.icon({
 });
 L.Marker.prototype.options.icon = iconDefault;
 
+// Icona arancione dedicata ai punti di interesse, per distinguerli
+// visivamente dalle fermate/linee (che usano il marker blu di default).
+const poiIcon = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+  shadowUrl: 'assets/leaflet/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  tooltipAnchor: [16, -28],
+  shadowSize: [41, 41],
+});
+
 import { Component, OnInit, inject, effect } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { StopService } from '../../service/stop-service';
 import { GeolocationService } from '../../service/geolocation-service';
 import { LineService } from '../../service/line-service';
+import { PointOfInterestService } from '../../service/point-of-interest-service';
 import { RouteHighlightService } from '../../service/route-highlight-service';
 import { AreaSearch } from '../../model/area-search';
 import Stop from '../../model/stop';
 import Line from '../../model/line';
+import PointOfInterest from '../../model/point-of-interest';
 import RouteLeg from '../../model/route-leg';
 
 @Component({
@@ -34,6 +48,7 @@ export class StopMap implements OnInit {
   private stopService = inject(StopService);
   private geolocationService = inject(GeolocationService);
   private lineService = inject(LineService);
+  private poiService = inject(PointOfInterestService);
   private routeHighlight = inject(RouteHighlightService);
 
   private map!: L.Map;
@@ -41,6 +56,7 @@ export class StopMap implements OnInit {
   private allStopsLayer!: L.LayerGroup;
   private nearbyStopsLayer!: L.LayerGroup;
   private linesLayer!: L.LayerGroup;
+  private poiLayer!: L.LayerGroup;
   private highlightLayer!: L.LayerGroup;
 
   // Lookup used to resolve a stopId (from Line.stopIds) to its coordinates
@@ -71,16 +87,18 @@ export class StopMap implements OnInit {
     this.allStopsLayer = L.layerGroup().addTo(this.map);
     this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
     this.linesLayer = L.layerGroup().addTo(this.map);
+    this.poiLayer = L.layerGroup().addTo(this.map);
     this.highlightLayer = L.layerGroup().addTo(this.map);
 
-    // Fetch stops and lines together: we need every stop's coordinates
-    // resolved BEFORE we try to draw any line, otherwise stopsById lookups
-    // inside drawLine() would fail.
+    // Fetch stops, lines and points of interest together: we need every
+    // stop's coordinates resolved BEFORE we try to draw any line, otherwise
+    // stopsById lookups inside drawLine() would fail.
     forkJoin({
       stops: this.stopService.findAll(),
-      lines: this.lineService.findAll()
+      lines: this.lineService.findAll(),
+      pois: this.poiService.findAll()
     }).subscribe({
-      next: ({ stops, lines }) => {
+      next: ({ stops, lines, pois }) => {
         stops.forEach(stop => {
           this.stopsById.set(stop.id!, stop);
           this.addStopMarker(stop, this.allStopsLayer);
@@ -90,6 +108,8 @@ export class StopMap implements OnInit {
           this.linesById.set(line.id!, line);
           this.drawLine(line);
         });
+
+        pois.forEach(poi => this.addPoiMarker(poi));
 
         this.dataReady = true;
 
@@ -136,6 +156,12 @@ export class StopMap implements OnInit {
       .bindPopup(this.buildStopPopup(stop));
   }
 
+  private addPoiMarker(poi: PointOfInterest) {
+    L.marker([poi.lat, poi.lon], { icon: poiIcon })
+      .addTo(this.poiLayer)
+      .bindPopup(this.buildPoiPopup(poi));
+  }
+
   private buildStopPopup(stop: Stop): string {
     const lines = [`<strong>${stop.name}</strong>`];
 
@@ -144,6 +170,16 @@ export class StopMap implements OnInit {
     }
     if (stop.city) {
       lines.push(stop.city);
+    }
+
+    return lines.join('<br>');
+  }
+
+  private buildPoiPopup(poi: PointOfInterest): string {
+    const lines = [`<strong>${poi.name}</strong>`];
+
+    if (poi.category) {
+      lines.push(poi.category);
     }
 
     return lines.join('<br>');

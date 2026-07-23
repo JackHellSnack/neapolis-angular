@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import PointOfInterest from '../model/point-of-interest';
 import { AreaSearch } from '../model/area-search';
+import RouteLeg from '../model/route-leg';
+import PoiSearchRequest from '../model/poi-search-request';
 
 @Injectable({ providedIn: 'root' })
 export class PointOfInterestService {
@@ -19,5 +21,9 @@ export class PointOfInterestService {
 
   findNearby(dto: AreaSearch): Observable<PointOfInterest[]> {
     return this.http.post<PointOfInterest[]>(`${this.apiUrl}/nearby`, dto);
+  }
+
+  findRouteToPoi(dto: PoiSearchRequest): Observable<RouteLeg[]> {
+    return this.http.post<RouteLeg[]>(`${this.apiUrl}/route`, dto);
   }
 }
