@@ -65,6 +65,7 @@ export class StopMap implements OnInit {
   searchError = signal<string | null>(null);
 
   private readonly HIGHLIGHT_COLOR = '#E4703A';
+  private readonly DEFAULT_STOP_COLOR = '#2C8FBF';
 
   constructor() {
     effect(() => {
@@ -99,14 +100,12 @@ export class StopMap implements OnInit {
       pois:  this.poiService.findAll()
     }).subscribe({
       next: ({ stops, lines, pois }) => {
+        lines.forEach(line => this.linesById.set(line.id!, line));
         stops.forEach(stop => {
           this.stopsById.set(stop.id!, stop);
           this.addStopMarker(stop, this.allStopsLayer);
         });
-        lines.forEach(line => {
-          this.linesById.set(line.id!, line);
-          this.drawLine(line);
-        });
+        lines.forEach(line => this.drawLine(line));
         pois.forEach(poi => this.addPoiMarker(poi));
         this.dataReady = true;
         const pending = this.routeHighlight.legs();
@@ -129,10 +128,27 @@ export class StopMap implements OnInit {
     });
   }
 
+  /**
+   * Regular stop markers: small, unobtrusive circle markers (same style as
+   * the highlighted-route stops) tinted with the color of the first line
+   * serving that stop, instead of the big default Leaflet pin.
+   */
   private addStopMarker(stop: Stop, layer: L.LayerGroup) {
-    L.marker([stop.lat, stop.lon]).addTo(layer).bindPopup(
+    const color = this.colorForStop(stop);
+    L.circleMarker([stop.lat, stop.lon], {
+      radius: 5,
+      color,
+      weight: 2,
+      fillColor: '#fff',
+      fillOpacity: 1,
+    }).addTo(layer).bindPopup(
       `<strong>${stop.name}</strong>${stop.road ? '<br>' + stop.road : ''}${stop.city ? '<br>' + stop.city : ''}`
     );
+  }
+
+  private colorForStop(stop: Stop): string {
+    const firstLineId = stop.lineIds?.[0]?.id;
+    return firstLineId != null ? this.colorForLine(firstLineId) : this.DEFAULT_STOP_COLOR;
   }
 
   private addPoiMarker(poi: PointOfInterest) {

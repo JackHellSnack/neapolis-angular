@@ -16,6 +16,7 @@
       }
       @if (authService.isAdmin()) {
         <a routerLink="/admin" routerLinkActive="active" class="np-topnav-admin">Admin</a>
+        <a routerLink="/register" routerLinkActive="active" class="np-topnav-admin">Nuovo utente</a>
       }
     </div>
 
@@ -25,6 +26,7 @@
         <span class="np-topnav-user">{{ authService.username() }}</span>
         <button class="np-btn np-btn-ghost np-btn-sm" (click)="logout()">Esci</button>
       } @else {
+        <a routerLink="/register" class="np-btn np-btn-ghost np-btn-sm">Registrati</a>
         <a routerLink="/login" class="np-btn np-btn-primary np-btn-sm">Accedi</a>
       }
     </div>
@@ -49,12 +51,14 @@
       }
       @if (authService.isAdmin()) {
         <a routerLink="/admin" (click)="closeMenu()" class="admin-link">Admin</a>
+        <a routerLink="/register" (click)="closeMenu()" class="admin-link">Nuovo utente</a>
       }
       <div class="np-mobile-auth">
         @if (authService.isLoggedIn()) {
           <span class="np-mobile-user">{{ authService.username() }}</span>
           <button class="np-btn np-btn-ghost" (click)="logout()">Esci</button>
         } @else {
+          <a routerLink="/register" class="np-btn np-btn-ghost" (click)="closeMenu()">Registrati</a>
           <a routerLink="/login" class="np-btn np-btn-primary" (click)="closeMenu()">Accedi</a>
         }
       </div>

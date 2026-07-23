@@ -7,6 +7,101 @@
     </div>
   </div>
 
+  <!-- Account settings card -->
+  <div class="np-card np-profile-card">
+    <div class="np-journey-head">
+      <h3>I miei dati</h3>
+      @if (!editingProfile()) {
+        <button class="np-btn np-btn-ghost np-btn-sm" (click)="startEditingProfile()">Modifica</button>
+      }
+    </div>
+
+    @if (profileSuccess()) {
+      <div class="np-banner np-banner-success">{{ profileSuccess() }}</div>
+    }
+    @if (profileError()) {
+      <div class="np-banner np-banner-error">{{ profileError() }}</div>
+    }
+
+    @if (!editingProfile()) {
+      <div class="np-profile-view">
+        <div class="np-profile-row"><span>Username</span><strong>{{ profileUsername() }}</strong></div>
+        <div class="np-profile-row"><span>Email</span><strong>{{ profileEmail() }}</strong></div>
+      </div>
+    } @else {
+      <form (ngSubmit)="saveProfile()" class="np-profile-form">
+        <div class="np-field">
+          <label for="profileUsername">Username</label>
+          <input
+            id="profileUsername"
+            type="text"
+            [ngModel]="profileUsername()"
+            (ngModelChange)="profileUsername.set($event)"
+            name="profileUsername"
+            required>
+        </div>
+
+        <div class="np-field">
+          <label for="profileEmail">Email</label>
+          <input
+            id="profileEmail"
+            type="email"
+            [ngModel]="profileEmail()"
+            (ngModelChange)="profileEmail.set($event)"
+            name="profileEmail"
+            required>
+        </div>
+
+        <div class="np-subhead">Cambia password (opzionale)</div>
+        <div class="np-field">
+          <label for="oldPassword">Password attuale</label>
+          <input
+            id="oldPassword"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Necessaria solo per impostare una nuova password"
+            [ngModel]="oldPassword()"
+            (ngModelChange)="oldPassword.set($event)"
+            name="oldPassword">
+        </div>
+        <div class="np-form-row">
+          <div class="np-field">
+            <label for="newPassword">Nuova password</label>
+            <input
+              id="newPassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Lascia vuoto per non modificarla"
+              [ngModel]="newPassword()"
+              (ngModelChange)="newPassword.set($event)"
+              name="newPassword">
+          </div>
+          <div class="np-field">
+            <label for="confirmNewPassword">Conferma password</label>
+            <input
+              id="confirmNewPassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Ripeti la nuova password"
+              [ngModel]="confirmPassword()"
+              (ngModelChange)="confirmPassword.set($event)"
+              name="confirmNewPassword">
+          </div>
+        </div>
+
+        <div class="np-profile-actions">
+          <button type="submit" class="np-btn np-btn-primary np-btn-sm" [disabled]="profileLoading()">
+            @if (profileLoading()) { <span class="np-spinner" style="width:14px;height:14px;border-width:2px"></span> }
+            Salva modifiche
+          </button>
+          <button type="button" class="np-btn np-btn-ghost np-btn-sm" (click)="cancelEditingProfile()" [disabled]="profileLoading()">
+            Annulla
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+
   <!-- Journey Status Card -->
   <div class="np-card np-journey-card">
     <div class="np-journey-head">

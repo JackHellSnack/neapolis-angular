@@ -43,8 +43,6 @@ h1, h2, h3 {
 
 a { color: inherit; }
 
-/* Striscia decorativa "maiolica", elemento firma del brand.
-   Usarla come divisore tra sezioni chiave (es. sotto l'hero). */
 .tile-strip {
   height: 12px;
   width: 100%;
@@ -63,13 +61,6 @@ button {
   cursor: pointer;
 }
 
-
-/*
- ATTENZIONE DA QUESTE RIGHE IN POI GIACOMINO STA LAVORANDO ALLA GRAFICA, LO STILE, IL DESIGN, LA BELLEZZA, IL MITO DELL'ESTETA. 
- D'ANNUNZIO PORGI LA TUA MANO SULLA MIA E GUIDAMI A SCRIVERE DELLE REGOLE DI CSS CHE TI RENDANO FIERO.
-*/
-
-/* --- Design tokens: spacing, radius, type scale --- */
 :root {
   --space-1: 4px;
   --space-2: 8px;
@@ -95,7 +86,6 @@ button {
   --error: #c0392b;
 }
 
-/* --- Buttons --- */
 .btn {
   border: none;
   border-radius: var(--radius-pill);
@@ -113,7 +103,6 @@ button {
 .btn-ghost:hover:not(:disabled) { background: var(--crema); }
 .btn:focus-visible { outline: 2px solid var(--azzurro); outline-offset: 2px; }
 
-/* --- Inputs --- */
 .field-label {
   display: block;
   font-size: var(--fs-xs);
@@ -136,7 +125,6 @@ button {
 .field-input:focus { outline: none; border-color: var(--maiolica); }
 .field-error { color: var(--error); font-size: var(--fs-xs); margin-top: var(--space-1); display: block; }
 
-/* --- Card --- */
 .card {
   background: var(--carta);
   border-radius: var(--radius-lg);
@@ -144,12 +132,10 @@ button {
   padding: 26px;
 }
 
-/* --- Banners --- */
 .banner { padding: 12px 16px; border-radius: var(--radius-sm); font-size: var(--fs-sm); }
 .banner-success { background: rgba(76, 124, 62, 0.12); color: var(--success); }
 .banner-error { background: rgba(192, 57, 43, 0.1); color: var(--error); }
 
-/* --- Badge --- */
 .badge {
   display: inline-block;
   font-size: var(--fs-xs);
@@ -160,3 +146,197 @@ button {
   color: var(--blu-golfo);
   border: 1px solid var(--riga);
 }
+/* =========================================================================
+   PATCH — append this block to the end of src/styles.css
+   These are classes/variables referenced all over the component templates
+   (np-page, np-btn, np-card, np-banner, np-badge, np-spinner, np-picker,
+   np-stat, np-table, --grigio-bordo, --azzurro-light, --maiolica-light)
+   that were never actually defined globally, which is why the app looks
+   inconsistent/half-styled from page to page.
+   ========================================================================= */
+
+:root {
+  --grigio-bordo: rgba(11, 61, 92, 0.16);
+  --azzurro-light: rgba(44, 143, 191, 0.14);
+  --maiolica-light: rgba(228, 112, 58, 0.14);
+}
+
+/* --- Page shell (used by every admin/form page) --- */
+.np-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+}
+
+.np-section-head { margin-bottom: var(--space-5); }
+.np-section-head h2 { font-size: var(--fs-xl); color: var(--blu-golfo); }
+.np-section-head p { color: var(--grigio-testo); margin-top: var(--space-2); }
+.np-section-head a { color: var(--azzurro); font-weight: 600; text-decoration: none; font-size: var(--fs-sm); }
+.np-section-head a:hover { text-decoration: underline; }
+
+/* --- Card (np- prefixed alias, used instead of .card in templates) --- */
+.np-card {
+  background: var(--carta);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float);
+  padding: 26px;
+}
+
+/* --- Buttons (np- prefixed, templates use these — not the bare .btn set) --- */
+.np-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 26px;
+  font-weight: 800;
+  font-size: var(--fs-sm);
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s, transform 0.15s;
+  text-decoration: none;
+  color: inherit;
+}
+.np-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.np-btn:focus-visible { outline: 2px solid var(--azzurro); outline-offset: 2px; }
+
+.np-btn-primary { background: var(--maiolica); color: var(--carta); }
+.np-btn-primary:hover:not(:disabled) { opacity: 0.9; }
+
+.np-btn-ghost { background: transparent; color: var(--blu-golfo); border: 1.5px solid var(--grigio-bordo); }
+.np-btn-ghost:hover:not(:disabled) { background: var(--crema); }
+
+.np-btn-accent { background: var(--azzurro); color: var(--carta); }
+.np-btn-accent:hover:not(:disabled) { opacity: 0.9; }
+
+.np-btn-sm { padding: 8px 16px; font-size: var(--fs-xs); }
+.np-btn-full { width: 100%; }
+
+/* --- Fields / inputs (np- prefixed, used across every form) --- */
+.np-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.np-field label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--azzurro);
+}
+.np-field input,
+.np-field select,
+.np-field textarea {
+  border: 1.5px solid var(--grigio-bordo);
+  border-radius: var(--radius-sm);
+  padding: 13px 14px;
+  font-size: var(--fs-base);
+  font-family: inherit;
+  color: var(--inchiostro);
+  background: var(--crema);
+  width: 100%;
+}
+.np-field input:focus,
+.np-field select:focus,
+.np-field textarea:focus { outline: none; border-color: var(--maiolica); }
+
+/* --- Banners --- */
+.np-banner {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+.np-banner-success { background: rgba(76, 124, 62, 0.12); color: var(--success); }
+.np-banner-error { background: rgba(192, 57, 43, 0.1); color: var(--error); }
+
+/* --- Badges --- */
+.np-badge {
+  display: inline-block;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--crema);
+  color: var(--blu-golfo);
+  border: 1px solid var(--grigio-bordo);
+}
+.np-badge-blue   { background: var(--azzurro-light); color: var(--blu-golfo); border-color: transparent; }
+.np-badge-orange { background: var(--maiolica-light); color: var(--maiolica); border-color: transparent; }
+.np-badge-green  { background: rgba(76, 124, 62, 0.14); color: var(--success); border-color: transparent; }
+
+/* --- Spinner --- */
+.np-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(0,0,0,0.15);
+  border-top-color: var(--maiolica);
+  border-radius: 50%;
+  animation: np-spin 0.7s linear infinite;
+}
+.np-topnav-auth .np-spinner,
+.np-btn-primary .np-spinner { border-color: rgba(255,255,255,0.35); border-top-color: #fff; }
+@keyframes np-spin { to { transform: rotate(360deg); } }
+
+/* --- Pickers (stop/line/poi-picker share these) --- */
+.np-picker { position: relative; }
+.np-picker-input {
+  width: 100%;
+  border: 1.5px solid var(--grigio-bordo);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: var(--fs-base);
+  font-family: inherit;
+  color: var(--inchiostro);
+  background: var(--crema);
+}
+.np-picker-input:focus { outline: none; border-color: var(--maiolica); }
+.np-picker-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--carta);
+  border: 1.5px solid var(--grigio-bordo);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  z-index: 20;
+}
+.np-picker-item {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+}
+.np-picker-item:hover { background: var(--crema); }
+.np-picker-item span { font-size: var(--fs-xs); color: var(--grigio-testo); }
+
+/* --- Admin stats --- */
+.np-stat {
+  background: var(--carta);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  text-align: center;
+}
+.np-stat-value { font-family: 'Fraunces', serif; font-size: var(--fs-xl); font-weight: 700; color: var(--blu-golfo); }
+.np-stat-label { font-size: var(--fs-xs); color: var(--grigio-testo); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+
+/* --- Tables --- */
+.np-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.np-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--grigio-testo);
+  border-bottom: 1.5px solid var(--riga);
+}
+.np-table td { padding: 12px; border-bottom: 1px solid var(--riga); vertical-align: middle; }
+.np-table tr:last-child td { border-bottom: none; }

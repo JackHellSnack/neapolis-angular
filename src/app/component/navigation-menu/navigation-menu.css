@@ -22,7 +22,6 @@
   align-items: center;
   gap: 10px;
   text-decoration: none;
-<<<<<<< HEAD
   color: var(--carta);
   flex-shrink: 0;
 }
@@ -159,11 +158,3 @@
   .np-hamburger { display: flex; }
   .np-topnav-inner { gap: 0; }
 }
-=======
-  padding: 0.5em;
-  margin: 0 0.5em;
-  background-color: var(--blu-golfo);
-  color: white;
-  border-radius: 20px;
-}
->>>>>>> 93cb22ec16c4f1609b1adf2b811f5633dc64930e

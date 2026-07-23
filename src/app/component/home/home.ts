@@ -8,7 +8,7 @@ import { PoiSearchForm } from '../poi-search-form/poi-search-form';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, StopMap, RideSearchForm, PoiSearchForm],
+  imports: [CommonModule,  StopMap, RideSearchForm, PoiSearchForm],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
