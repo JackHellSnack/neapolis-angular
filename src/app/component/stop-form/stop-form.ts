@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StopService } from '../../service/stop-service';
 import { LinePicker } from '../line-picker/line-picker';
+import { GeocodingService } from '../../service/geocoding-service';
 import Line from '../../model/line';
 import MapIdDelta from '../../model/map-id-delta';
 
@@ -17,6 +18,7 @@ import MapIdDelta from '../../model/map-id-delta';
 export class StopForm {
   private stopService = inject(StopService);
   private router = inject(Router);
+  private geocodingService = inject(GeocodingService);
 
   name   = signal('');
   road   = signal('');
@@ -44,14 +46,35 @@ export class StopForm {
 
   onSubmit() {
     this.error.set(null);
-    if (!this.name().trim() || this.lat() == null || this.lon() == null) {
-      this.error.set('Nome, latitudine e longitudine sono obbligatori.'); return;
+    if (!this.name().trim() || this.city() == null || this.road() == null) {
+      this.error.set('Nome, città e strada sono obbligatori.'); return;
     }
-    this.loading.set(true);
-    const payload = { name: this.name(), road: this.road(), city: this.city(), lat: this.lat()!, lon: this.lon()!, lineIds: this.lines() };
-    this.stopService.save(payload).subscribe({
-      next: () => { this.loading.set(false); this.success.set(true); setTimeout(() => this.router.navigate(['/admin']), 1000); },
-      error: () => { this.error.set('Errore durante il salvataggio.'); this.loading.set(false); }
+
+    const address =
+      `${this.road()}, ${this.city()} Italia`;
+
+    this.geocodingService.geocode(address).subscribe({
+
+      next: (res: any) => {
+
+        if (res && res.length > 0) {
+          this.lat.set(res[0].lat);
+          this.lon.set((res[0].lon));
+        }
+
+         this.loading.set(true);
+          const payload = { name: this.name(), road: this.road(), city: this.city(), lat: this.lat()!, lon: this.lon()!, lineIds: this.lines() };
+          this.stopService.save(payload).subscribe({
+            next: () => { this.loading.set(false); this.success.set(true); setTimeout(() => this.router.navigate(['/admin']), 1000); },
+            error: () => { this.error.set('Errore durante il salvataggio.'); this.loading.set(false); }
+          });
+      },
+      error: err => {
+            this.error.set('Errore durante il salvataggio.'); 
+            console.error(err);
+      }
+
     });
+   
   }
 }

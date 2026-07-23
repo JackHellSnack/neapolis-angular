@@ -28,6 +28,16 @@
       </div>
       <div class="np-form-row">
         <div class="np-field">
+          <label>Città</label>
+          <input type="text" [ngModel]="city()" (ngModelChange)="city.set($event)" name="city" placeholder="Es: Napoli">
+        </div>
+        <div class="np-field">
+          <label>Via</label>
+          <input type="text" [ngModel]="road()" (ngModelChange)="road.set($event)" name="road" placeholder="Nome strada">
+        </div>
+      </div>
+        <div class="np-form-row">
+        <div class="np-field">
           <label>Latitudine *</label>
           <input type="number" step="any" [ngModel]="lat()" (ngModelChange)="lat.set($event)" name="lat" placeholder="40.85...">
         </div>
