@@ -22,6 +22,7 @@ export class NavigationMenu {
     { path: '/line-form', label: 'Nuova linea' },
     { path: '/ride-search', label: 'Cerca corsa' },
     { path: '/login', label: 'Login' },
-    { path: '/poi-form', label: 'Nuovo Poi' }
+    { path: '/poi-form', label: 'Nuovo Poi' },
+    { path: '/poi-search', label: 'Cerca Poi' }
   ];
 }

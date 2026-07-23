@@ -7,6 +7,7 @@ import { Login } from './component/login/login';
 import { Map } from './component/map/map';
 import { RideSearchForm } from './component/ride-search-form/ride-search-form';
 import { PoiForm } from './component/poi-form/poi-form';
+import { PoiSearchForm } from './component/poi-search-form/poi-search-form';
 export const routes: Routes = [
   // --- ROTTA DI DEFAULT ---
   {
@@ -46,5 +47,9 @@ export const routes: Routes = [
   {
     path: 'poi-form',
     component: PoiForm
+  },
+  {
+    path: 'poi-search',
+    component: PoiSearchForm
   }
 ];
