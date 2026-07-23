@@ -1,0 +1,39 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="poi-form">
+  <h2>Nuovo punto di interesse</h2>
+
+  <label>
+    Nome
+    <input type="text" formControlName="name" />
+  </label>
+
+  <label>
+    Categoria
+    <input type="text" formControlName="category" placeholder="es. museo, ristorante" />
+  </label>
+
+  <label>
+    Fermata associata
+    <app-stop-picker (stopChange)="onStopSelected($event)"></app-stop-picker>
+  </label>
+
+  <label>
+    Lat
+    <input type="number" step="any" formControlName="lat" />
+  </label>
+
+  <label>
+    Lon
+    <input type="number" step="any" formControlName="lon" />
+  </label>
+
+  <button type="submit" [disabled]="submitting">
+    {{ submitting ? 'Salvataggio...' : 'Salva punto di interesse' }}
+  </button>
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+</form>
