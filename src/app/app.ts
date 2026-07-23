@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
-import { StopForm } from './component/stop-form/stop-form';
-import { StopMap } from './component/stop-map/stop-map';
+import { RouterOutlet } from '@angular/router';
+import { NavigationMenu } from './component/navigation-menu/navigation-menu';
 
 @Component({
   selector: 'app-root',
-  imports: [StopForm, StopMap],
+  imports: [RouterOutlet, NavigationMenu],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

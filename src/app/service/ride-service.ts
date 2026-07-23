@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import RideSearchRequest from '../model/ride-search-request';
-import RideSearchResponse from '../model/ride-search-response';
+import RouteLeg from '../model/route-leg';
 
 
 @Injectable({
@@ -17,15 +17,8 @@ export class RideService {
 
 
 
-  searchRideByTime(
-    rideSearch: RideSearchRequest
-  ): Observable<RideSearchResponse[]> {
-
-    return this.http.post<RideSearchResponse[]>(
-      `${this.apiUrl}/rideinfo`,
-      rideSearch
-    );
-
-  }
+  searchRideByTime(rideSearch: RideSearchRequest): Observable<RouteLeg[]> {
+  return this.http.post<RouteLeg[]>(`${this.apiUrl}/rideinfo`, rideSearch);
+}
 
 }
