@@ -3,16 +3,6 @@
 
   <form (ngSubmit)="onSubmit()" class="w3-container">
     
-    <!-- 1. Line Picker -->
-    <div class="w3-margin-bottom">
-      <label class="w3-text-grey"><b>Line</b></label>
-      <app-line-picker 
-        [line]="selectedLine()" 
-        (lineChange)="onLineChange($event)">
-      </app-line-picker>
-    </div>
-
-    <!-- 2. Start Stop Picker -->
     <div class="w3-margin-bottom">
       <label class="w3-text-grey"><b>Departure Stop</b></label>
       <app-stop-picker 
@@ -21,7 +11,6 @@
       </app-stop-picker>
     </div>
 
-    <!-- 3. Arrival Stop Picker -->
     <div class="w3-margin-bottom">
       <label class="w3-text-grey"><b>Arrival Stop</b></label>
       <app-stop-picker 
@@ -29,8 +18,7 @@
         [(stop)]="arrivalStop">
       </app-stop-picker>
     </div>
-
-    <!-- 4. Time Selection & Toggle -->
+    
     <div class="w3-row-padding w3-margin-bottom" style="margin-left: -16px; margin-right: -16px;">
       <div class="w3-half">
         <label class="w3-text-grey"><b>Time</b></label>
@@ -76,31 +64,16 @@
     </button>
   </form>
 
-  <!-- Results Section -->
-  @if (searchResults(); as results) {
-    <div class="w3-margin-top w3-border-top w3-padding-top">
-      <h4>Available Rides</h4>
-      
-      @if (results.length === 0) {
-        <p class="w3-text-grey w3-center">No rides found matching your criteria.</p>
-      } @else {
-        <div class="w3-ul w3-card-2 w3-round">
-          @for (ride of results; track $index) {
-            <li class="w3-bar w3-padding">
-              <div class="w3-row">
-                <div class="w3-half">
-                  <span class="w3-large"><b>{{ ride.startTime }}</b></span>
-                  <div class="w3-small w3-text-grey">{{ ride.startStopInfo }}</div>
-                </div>
-                <div class="w3-half w3-right-align">
-                  <span class="w3-large"><b>{{ ride.arrivalTime }}</b></span>
-                  <div class="w3-small w3-text-grey">{{ ride.arrivaStopInfo }}</div>
-                </div>
-              </div>
-            </li>
-          }
-        </div>
-      }
-    </div>
-  }
+ @if (searchResults(); as legs) {
+  <div class="w3-margin-top w3-border-top w3-padding-top">
+    <h4>Itinerary</h4>
+    @for (leg of legs; track $index) {
+      <div class="w3-bar w3-padding">
+        <b>{{ leg.lineName }}</b>
+        — {{ leg.fromStopName }} ({{ leg.departureTime }})
+        → {{ leg.toStopName }} ({{ leg.arrivalTime }})
+      </div>
+    }
+  </div>
+}
 </div>

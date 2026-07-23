@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { Home } from './component/home/home';
 import { StopMap } from './component/stop-map/stop-map';
 import { StopForm } from './component/stop-form/stop-form';
 import { LineForm } from './component/line-form/line-form';
@@ -10,8 +11,12 @@ export const routes: Routes = [
   // --- ROTTA DI DEFAULT ---
   {
     path: '',
-    redirectTo: 'stop-map',
+    redirectTo: 'home',
     pathMatch: 'full'
+  },
+  {
+    path: 'home',
+    component: Home
   },
   {
     path: 'login',
