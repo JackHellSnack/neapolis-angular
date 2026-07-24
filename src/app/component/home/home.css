@@ -117,40 +117,6 @@
   padding: 0 24px 80px;
 }
 
-/* ---- FOOTER ---- */
-.np-footer {
-  background: var(--blu-notte);
-  color: rgba(255,253,249,0.5);
-}
-
-.np-footer-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-}
-
-.np-footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: rgba(255,253,249,0.75);
-  font-family: 'Fraunces', serif;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.np-logo-mark-sm {
-  width: 20px; height: 20px;
-  border-radius: 5px;
-  background: conic-gradient(from 45deg, var(--maiolica), var(--sole), var(--azzurro), var(--maiolica));
-}
-
-.np-footer-copy { font-size: 0.82rem; }
 
 /* ---- RESPONSIVE ---- */
 @media (max-width: 640px) {

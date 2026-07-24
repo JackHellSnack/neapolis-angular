@@ -1,5 +1,6 @@
 .np-map-wrap {
   position: relative;
+  isolation: isolate; /* contiene z-index interni Leaflet */
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -9,6 +10,8 @@
   height: 520px;
   width: 100%;
 }
+
+
 
 .np-map-overlay {
   position: absolute;

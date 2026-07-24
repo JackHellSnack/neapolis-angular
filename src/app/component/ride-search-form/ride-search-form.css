@@ -7,7 +7,7 @@
   flex-wrap: wrap;
 }
 
-.np-field-grow { flex: 1; min-width: 180px; }
+.np-field-grow { flex: 1; min-width: 180px; width: 100%; }
 .np-field-time { width: 130px; flex-shrink: 0; }
 
 .np-search-swap {
