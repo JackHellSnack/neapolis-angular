@@ -1,29 +1,111 @@
 <form (ngSubmit)="onSubmit()" class="np-search-form">
+
   <div class="np-search-row">
+
     <div class="np-field np-field-grow">
+
       <label>Punto di Interesse</label>
+
       <app-poi-picker [(poi)]="selectedPoi"></app-poi-picker>
+
     </div>
 
     <div class="np-field np-field-time">
+
       <label>Orario</label>
-      <input type="time" [ngModel]="time()" (ngModelChange)="time.set($event)" name="time">
+
+      <input
+        type="time"
+        [ngModel]="time()"
+        (ngModelChange)="time.set($event)"
+        name="time">
+
     </div>
+
   </div>
 
   <div class="np-search-footer">
+
     <label class="np-checkbox-label">
-      <input type="checkbox" [ngModel]="searchByArrival()" (ngModelChange)="searchByArrival.set($event)" name="searchByArrival">
+
+      <input
+        type="checkbox"
+        [ngModel]="searchByArrival()"
+        (ngModelChange)="searchByArrival.set($event)"
+        name="searchByArrival">
+
       Cerca per orario di arrivo
+
     </label>
 
     @if (errorMessage()) {
-      <span class="np-search-error">{{ errorMessage() }}</span>
+
+      <span class="np-search-error">
+
+        {{ errorMessage() }}
+
+      </span>
+
     }
 
-    <button type="submit" class="np-btn np-btn-accent" [disabled]="loading()">
-      @if (loading()) { <span class="np-spinner" style="width:16px;height:16px;border-width:2px"></span> }
+    <button
+      type="submit"
+      class="np-btn np-btn-accent"
+      [disabled]="loading()">
+
+      @if (loading()) {
+
+        <span
+          class="np-spinner"
+          style="width:16px;height:16px;border-width:2px">
+        </span>
+
+      }
+
       Cerca percorso
+
     </button>
+
   </div>
+
+  @if (showAlternativePrompt()) {
+
+    <div class="np-alternative-box">
+
+      <p>
+
+        Percorso trovato!
+
+        <br>
+
+        Vuoi visualizzare anche percorsi alternativi?
+
+      </p>
+
+      <div class="np-search-row">
+
+        <button
+          type="button"
+          class="np-btn np-btn-accent"
+          (click)="searchAlternativeRoutes()">
+
+          Sì, mostra alternative
+
+        </button>
+
+        <button
+          type="button"
+          class="np-btn"
+          (click)="useCurrentRoute()">
+
+          No, usa questo percorso
+
+        </button>
+
+      </div>
+
+    </div>
+
+  }
+
 </form>
