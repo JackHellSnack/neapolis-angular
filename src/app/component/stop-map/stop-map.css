@@ -1,17 +1,22 @@
 .np-map-wrap {
-  position: relative;
-  isolation: isolate; /* contiene z-index interni Leaflet */
+  display: flex;
+  flex-grow: 1;
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-card);
+  background-color: cornflowerblue;
 }
 
 .np-map {
-  height: 520px;
+  height: 100%;
   width: 100%;
 }
 
-
+@media (max-width: 640px) {
+  .np-map-wrap {
+    height: 380px;
+  }
+}
 
 .np-map-overlay {
   position: absolute;
@@ -86,5 +91,7 @@
 }
 
 @media (max-width: 640px) {
-  .np-map { height: 380px; }
+  .np-map {
+    height: 380px;
+  }
 }

@@ -27,7 +27,7 @@
 }
 
 .np-hero-inner {
-  max-width: 1200px;
+  max-width: 950px;
   margin: 0 auto;
   position: relative;
   z-index: 2;
@@ -64,7 +64,7 @@
 
 /* ---- SEARCH CARD ---- */
 .np-search-card {
-  max-width: 860px;
+  max-width: 950px;
   margin: -84px auto 0;
   padding: 0 24px;
   position: relative;
@@ -112,9 +112,9 @@
 
 /* ---- MAP SECTION ---- */
 .np-map-section {
-  max-width: 1200px;
-  margin: 60px auto 0;
-  padding: 0 24px 80px;
+  max-width: 950px;
+  min-height: 400px;
+  margin: 0 auto;
 }
 
 

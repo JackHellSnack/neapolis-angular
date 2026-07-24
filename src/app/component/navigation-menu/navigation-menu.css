@@ -1,16 +1,27 @@
 .np-topnav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: var(--z-nav, 1001);
+  background: var(--blu-notte);
+
+}
+
+/* lo utilizzo per avere la behavior di un header impostato nel flow della pagina */
+.header-spacer {
+  min-height: 64px;
   background: var(--blu-notte);
   color: var(--carta);
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 2px 12px rgba(8, 44, 66, 0.2);
 }
 
 .np-topnav-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
+  margin-inline: auto;
+  padding-inline: 24px;
   height: 64px;
   display: flex;
   align-items: center;
