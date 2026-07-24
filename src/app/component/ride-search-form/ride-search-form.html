@@ -1,38 +1,133 @@
 <form (ngSubmit)="onSubmit()" class="np-search-form">
+
   <div class="np-search-row">
+
     <div class="np-field np-field-grow">
       <label>Partenza</label>
-      <app-stop-picker [line]="selectedLine()" [(stop)]="startStop"></app-stop-picker>
+      <app-stop-picker
+        [line]="selectedLine()"
+        [(stop)]="startStop">
+      </app-stop-picker>
     </div>
 
     <div class="np-search-swap">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      <svg width="20"
+           height="20"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="2">
+        <polyline points="17 1 21 5 17 9"/>
+        <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+        <polyline points="7 23 3 19 7 15"/>
+        <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+      </svg>
     </div>
 
     <div class="np-field np-field-grow">
       <label>Arrivo</label>
-      <app-stop-picker [line]="selectedLine()" [(stop)]="arrivalStop"></app-stop-picker>
+      <app-stop-picker
+        [line]="selectedLine()"
+        [(stop)]="arrivalStop">
+      </app-stop-picker>
     </div>
 
     <div class="np-field np-field-time">
       <label>Orario</label>
-      <input type="time" [ngModel]="time()" (ngModelChange)="time.set($event)" name="time" required>
+
+      <input
+        type="time"
+        [ngModel]="time()"
+        (ngModelChange)="time.set($event)"
+        name="time"
+        required>
+
     </div>
+
   </div>
 
   <div class="np-search-footer">
+
     <label class="np-checkbox-label">
-      <input type="checkbox" [ngModel]="searchByArrival()" (ngModelChange)="searchByArrival.set($event)" name="searchByArrival">
+
+      <input
+        type="checkbox"
+        [ngModel]="searchByArrival()"
+        (ngModelChange)="searchByArrival.set($event)"
+        name="searchByArrival">
+
       Cerca per orario di arrivo
+
     </label>
 
     @if (errorMessage()) {
-      <span class="np-search-error">{{ errorMessage() }}</span>
+
+      <span class="np-search-error">
+
+        {{ errorMessage() }}
+
+      </span>
+
     }
 
-    <button type="submit" class="np-btn np-btn-accent" [disabled]="loading()">
-      @if (loading()) { <span class="np-spinner" style="width:16px;height:16px;border-width:2px"></span> }
+    <button
+      type="submit"
+      class="np-btn np-btn-accent"
+      [disabled]="loading()">
+
+      @if (loading()) {
+
+        <span
+          class="np-spinner"
+          style="width:16px;height:16px;border-width:2px">
+        </span>
+
+      }
+
       Cerca corse
+
     </button>
+
   </div>
+
+  @if (showAlternativePrompt()) {
+
+    <div class="np-alternative-box">
+
+      <p>
+
+        Percorso trovato!
+
+        <br>
+
+        Vuoi cercare anche percorsi alternativi?
+
+      </p>
+
+      <div class="np-search-row">
+
+        <button
+          type="button"
+          class="np-btn np-btn-accent"
+          (click)="searchAlternativeRoutes()">
+
+          Sì, mostra alternative
+
+        </button>
+
+        <button
+          type="button"
+          class="np-btn"
+          (click)="useCurrentRoute()">
+
+          No, usa questo percorso
+
+        </button>
+
+      </div>
+
+    </div>
+
+  }
+
 </form>

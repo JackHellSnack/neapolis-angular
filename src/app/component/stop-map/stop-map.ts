@@ -64,20 +64,35 @@ export class StopMap implements OnInit {
   searching   = signal(false);
   searchError = signal<string | null>(null);
 
-  private readonly HIGHLIGHT_COLOR = '#E4703A';
+  private readonly ROUTE_COLORS = [
+  '#B00020', // best route
+  '#C62828',
+  '#D84343',
+  '#f15a5a',
+  '#f76161',
+  '#e73749'
+];
   private readonly DEFAULT_STOP_COLOR = '#2C8FBF';
 
   constructor() {
     effect(() => {
-      const legs = this.routeHighlight.legs();
-      if (this.dataReady) {
-        if (legs) {
-          this.renderHighlightedRoute(legs);
-          this.routeActive.set(true);
+      const routes = this.routeHighlight.routes();
+
+      if (!this.dataReady) {
+        return;
+      }
+
+      if (routes.length > 0) {
+        if (routes.length === 1) {
+          this.renderHighlightedRoute(routes[0]);
         } else {
-          this.clearHighlight();
-          this.routeActive.set(false);
+          this.renderHighlightedRoutes(routes);
         }
+
+        this.routeActive.set(true);
+      } else {
+        this.clearHighlight();
+        this.routeActive.set(false);
       }
     });
   }
@@ -108,8 +123,18 @@ export class StopMap implements OnInit {
         lines.forEach(line => this.drawLine(line));
         pois.forEach(poi => this.addPoiMarker(poi));
         this.dataReady = true;
-        const pending = this.routeHighlight.legs();
-        if (pending) { this.renderHighlightedRoute(pending); this.routeActive.set(true); }
+        const pending = this.routeHighlight.routes();
+
+        if (pending.length > 0) {
+
+            if (pending.length === 1) {
+                this.renderHighlightedRoute(pending[0]);
+            } else {
+                this.renderHighlightedRoutes(pending);
+            }
+
+            this.routeActive.set(true);
+        }
       },
       error: err => console.error(err)
     });
@@ -236,7 +261,7 @@ export class StopMap implements OnInit {
         path.push([s.lat, s.lon]);
       });
       if (path.length >= 2) {
-        L.polyline(path, { color: this.HIGHLIGHT_COLOR, weight: 6, opacity: 0.9 })
+        L.polyline(path, { color: this.ROUTE_COLORS[0], weight: 6, opacity: 0.9 })
           .addTo(this.highlightLayer).bindPopup(`<strong>${leg.lineName}</strong><br>${leg.fromStopName} → ${leg.toStopName}`);
         bounds.push(...path);
       }
@@ -246,12 +271,118 @@ export class StopMap implements OnInit {
       const s = this.stopsById.get(id);
       if (!s) return;
       L.circleMarker([s.lat, s.lon], {
-        radius: 8, color: this.HIGHLIGHT_COLOR,
+        radius: 8, color: this.ROUTE_COLORS[0],
         fillColor: '#fff', fillOpacity: 1, weight: 3
       }).addTo(this.highlightLayer).bindPopup(s.name);
     });
 
     if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
+  }
+
+  private renderHighlightedRoutes(routes: RouteLeg[][]) {
+
+    this.highlightLayer.clearLayers();
+
+    this.map.removeLayer(this.allStopsLayer);
+    this.map.removeLayer(this.nearbyStopsLayer);
+
+    const highlightedStops = new Set<number>();
+    const bounds: L.LatLngExpression[] = [];
+
+    routes.forEach((legs, routeIndex) => {
+
+      const color =
+        this.ROUTE_COLORS[
+          Math.min(routeIndex, this.ROUTE_COLORS.length - 1)
+        ];
+
+      const weight = routeIndex === 0 ? 7 : 5;
+
+      legs.forEach(leg => {
+
+        const line = this.linesById.get(leg.lineId);
+
+        if (!line?.stopIds?.length) {
+          return;
+        }
+
+        const orderedIds = [...line.stopIds]
+          .sort((a, b) => a.delta - b.delta)
+          .map(e => e.id);
+
+        const from = orderedIds.indexOf(leg.fromStopId);
+        const to = orderedIds.indexOf(leg.toStopId);
+
+        if (from === -1 || to === -1) {
+          return;
+        }
+
+        const start = Math.min(from, to);
+        const end = Math.max(from, to);
+
+        const path: L.LatLngExpression[] = [];
+
+        orderedIds
+          .slice(start, end + 1)
+          .forEach(id => {
+
+            const stop = this.stopsById.get(id);
+
+            if (!stop) {
+              return;
+            }
+
+            highlightedStops.add(id);
+
+            path.push([stop.lat, stop.lon]);
+          });
+
+        if (path.length >= 2) {
+
+          L.polyline(path, {
+            color,
+            weight,
+            opacity: 0.9
+          })
+          .addTo(this.highlightLayer)
+          .bindPopup(
+            `<strong>Option ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}`
+          );
+
+          bounds.push(...path);
+        }
+
+      });
+
+    });
+
+    highlightedStops.forEach(id => {
+
+      const stop = this.stopsById.get(id);
+
+      if (!stop) {
+        return;
+      }
+
+      L.circleMarker([stop.lat, stop.lon], {
+        radius: 8,
+        color: '#333',
+        fillColor: '#fff',
+        fillOpacity: 1,
+        weight: 2
+      })
+      .addTo(this.highlightLayer)
+      .bindPopup(stop.name);
+
+    });
+
+    if (bounds.length) {
+      this.map.fitBounds(
+        L.latLngBounds(bounds),
+        { padding: [40, 40] }
+      );
+    }
+
   }
 
   private clearHighlight() {
