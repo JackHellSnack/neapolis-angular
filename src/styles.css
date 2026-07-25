@@ -37,8 +37,6 @@ main {
 app-navigation-menu {
   margin-bottom: auto;
   background: var(--blu-notte);
-  box-shadow: 0 2px 12px rgba(8, 44, 66, 0.2);
-
 }
 
 app-footer {
@@ -148,7 +146,6 @@ button {
 .btn-ghost {
   background: transparent;
   color: var(--blu-golfo);
-  border: 1.5px solid var(--riga);
 }
 
 .btn-ghost:hover:not(:disabled) {
@@ -196,7 +193,6 @@ button {
 .card {
   background: var(--carta);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-float);
   padding: 26px;
 }
 
@@ -278,7 +274,6 @@ button {
 .np-card {
   background: var(--carta);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-float);
   padding: 26px;
 }
 
@@ -496,7 +491,6 @@ button {
   background: var(--carta);
   border: 1.5px solid var(--grigio-bordo);
   border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-card);
   z-index: 20;
 }
 
@@ -522,7 +516,6 @@ button {
 .np-stat {
   background: var(--carta);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
   padding: 20px;
   text-align: center;
 }

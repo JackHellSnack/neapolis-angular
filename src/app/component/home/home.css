@@ -106,7 +106,6 @@
 .np-search-body {
   background: var(--carta);
   border-radius: 0 0 var(--radius) var(--radius);
-  box-shadow: var(--shadow-float);
   padding: 32px;
 }
 

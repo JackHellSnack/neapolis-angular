@@ -34,11 +34,12 @@ import Line from '../../model/line';
 import PointOfInterest from '../../model/point-of-interest';
 import RouteLeg from '../../model/route-leg';
 import PoiSearchRequest from '../../model/poi-search-request';
+import { SquircleDirective } from '../../directive/squircle';
 
 @Component({
   selector: 'app-stop-map',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,SquircleDirective],
   templateUrl: './stop-map.html',
   styleUrl: './stop-map.css'
 })

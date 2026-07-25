@@ -2,11 +2,12 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../service/auth-service';
+import { SquircleDirective } from '../../directive/squircle';
 
 @Component({
   selector: 'app-navigation-menu',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterLink, RouterLinkActive, CommonModule,SquircleDirective],
   templateUrl: './navigation-menu.html',
   styleUrl: './navigation-menu.css'
 })
