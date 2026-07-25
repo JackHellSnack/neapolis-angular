@@ -42,10 +42,6 @@
   margin: 12px 0 12px;
 }
 
-.np-form-row { display: flex; gap: 16px; }
-.np-form-row .np-field { flex: 1; }
-@media (max-width: 480px) { .np-form-row { flex-direction: column; } }
-
 .np-profile-actions {
   display: flex;
   gap: 10px;

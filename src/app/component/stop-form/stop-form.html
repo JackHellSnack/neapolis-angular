@@ -40,7 +40,7 @@
 
       <!-- Lines section -->
       <div class="np-subhead">Linee collegate</div>
-      <div class="np-line-add-row">
+      <div class="np-picker-add-row">
         <div style="flex:1">
           <app-line-picker [(line)]="newLine"></app-line-picker>
         </div>
@@ -51,7 +51,7 @@
         <button type="button" class="np-btn np-btn-ghost np-btn-sm" (click)="addLine()">+ Aggiungi</button>
       </div>
       @if (lines().length) {
-        <div class="np-line-chips">
+        <div class="np-picker-chips">
           @for (l of lines(); track l.id) {
             <span class="np-chip">ID {{ l.id }} (δ{{ l.delta }}) <button type="button" (click)="removeLine(l.id)">×</button></span>
           }

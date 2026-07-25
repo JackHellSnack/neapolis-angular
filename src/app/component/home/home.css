@@ -65,8 +65,9 @@
 /* ---- SEARCH CARD ---- */
 .np-search-card {
   max-width: 950px;
-  margin: -84px auto 0;
-  padding: 0 24px;
+  margin: 0 auto;
+  margin-top: -8em;
+  padding: 1em;
   position: relative;
   z-index: 10;
 }

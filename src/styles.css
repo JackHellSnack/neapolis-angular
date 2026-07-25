@@ -12,14 +12,39 @@
   --inchiostro: #12232E;
   --grigio-testo: #5b6b74;
   --riga: rgba(11, 61, 92, 0.14);
+  --grigio-bordo: rgba(11, 61, 92, 0.16);
+  --azzurro-light: rgba(44, 143, 191, 0.14);
+  --maiolica-light: rgba(228, 112, 58, 0.14);
+
   --radius: 16px;
   --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-pill: 100px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --fs-xs: 0.78rem;
+  --fs-sm: 0.88rem;
+  --fs-base: 1rem;
+  --fs-md: 1.1rem;
+  --fs-lg: 1.5rem;
+  --fs-xl: 2rem;
+
+  --success: #3c6330;
+  --error: #c0392b;
+
   --shadow-card: 0 16px 30px rgba(11, 61, 92, 0.12);
   --shadow-float: 0 24px 60px rgba(8, 44, 66, 0.25);
 }
 
-html,
-body {
+html, body {
   margin: 0;
   background: var(--crema);
   color: var(--inchiostro);
@@ -34,14 +59,8 @@ main {
   align-content: center;
 }
 
-app-navigation-menu {
-  margin-bottom: auto;
-  background: var(--blu-notte);
-}
-
-app-footer {
-  margin-top: auto;
-}
+app-navigation-menu { margin-bottom: auto; background: var(--blu-notte); }
+app-footer { margin-top: auto; }
 
 app-stop-map {
   display: flex;
@@ -59,23 +78,16 @@ app-stop-map {
   gap: 32px;
 }
 
-h1,
-h2,
-h3 {
+h1, h2, h3 {
   font-family: 'Fraunces', serif;
   margin: 0;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-.mono {
-  font-family: 'IBM Plex Mono', monospace;
-  letter-spacing: 0.02em;
-}
-
-a {
-  color: inherit;
-}
+.mono { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em; }
+a { color: inherit; }
+button { font-family: inherit; cursor: pointer; }
 
 .tile-strip {
   height: 12px;
@@ -88,196 +100,26 @@ a {
   background-size: 28px 28px;
 }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-:root {
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 20px;
-  --radius-pill: 100px;
-
-  --fs-xs: 0.78rem;
-  --fs-sm: 0.88rem;
-  --fs-base: 1rem;
-  --fs-md: 1.1rem;
-  --fs-lg: 1.5rem;
-  --fs-xl: 2rem;
-
-  --success: #3c6330;
-  --error: #c0392b;
-}
-
-.btn {
-  border: none;
-  border-radius: var(--radius-pill);
-  padding: 12px 26px;
-  font-weight: 800;
-  font-size: var(--fs-sm);
-  font-family: inherit;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: var(--maiolica);
-  color: var(--carta);
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--blu-golfo);
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background: var(--crema);
-}
-
-.btn:focus-visible {
-  outline: 2px solid var(--azzurro);
-  outline-offset: 2px;
-}
-
-.field-label {
-  display: block;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--azzurro);
-  margin-bottom: var(--space-2);
-}
-
-.field-input {
-  width: 100%;
-  border: 1.5px solid var(--riga);
-  border-radius: var(--radius-sm);
-  padding: 13px 14px;
-  font-size: var(--fs-base);
-  font-family: inherit;
-  color: var(--inchiostro);
-  background: var(--crema);
-}
-
-.field-input:focus {
-  outline: none;
-  border-color: var(--maiolica);
-}
-
-.field-error {
-  color: var(--error);
-  font-size: var(--fs-xs);
-  margin-top: var(--space-1);
-  display: block;
-}
-
-.card {
-  background: var(--carta);
-  border-radius: var(--radius-lg);
-  padding: 26px;
-}
-
-.banner {
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  font-size: var(--fs-sm);
-}
-
-.banner-success {
-  background: rgba(76, 124, 62, 0.12);
-  color: var(--success);
-}
-
-.banner-error {
-  background: rgba(192, 57, 43, 0.1);
-  color: var(--error);
-}
-
-.badge {
-  display: inline-block;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--crema);
-  color: var(--blu-golfo);
-  border: 1px solid var(--riga);
-}
-
-/* =========================================================================
-   PATCH — append this block to the end of src/styles.css
-   These are classes/variables referenced all over the component templates
-   (np-page, np-btn, np-card, np-banner, np-badge, np-spinner, np-picker,
-   np-stat, np-table, --grigio-bordo, --azzurro-light, --maiolica-light)
-   that were never actually defined globally, which is why the app looks
-   inconsistent/half-styled from page to page.
-   ========================================================================= */
-
-:root {
-  --grigio-bordo: rgba(11, 61, 92, 0.16);
-  --azzurro-light: rgba(44, 143, 191, 0.14);
-  --maiolica-light: rgba(228, 112, 58, 0.14);
-}
-
-/* --- Page shell (used by every admin/form page) --- */
+/* --- Page shell (admin/form pages) --- */
 .np-page {
   max-width: 900px;
   margin: 0 auto;
   padding: var(--space-6) var(--space-4) var(--space-7);
 }
 
-.np-section-head {
-  margin-bottom: var(--space-5);
-}
+.np-section-head { margin-bottom: var(--space-5); }
+.np-section-head h2 { font-size: var(--fs-xl); color: var(--blu-golfo); }
+.np-section-head p { color: var(--grigio-testo); margin-top: var(--space-2); }
+.np-section-head a { color: var(--azzurro); font-weight: 600; text-decoration: none; font-size: var(--fs-sm); }
+.np-section-head a:hover { text-decoration: underline; }
 
-.np-section-head h2 {
-  font-size: var(--fs-xl);
-  color: var(--blu-golfo);
-}
-
-.np-section-head p {
-  color: var(--grigio-testo);
-  margin-top: var(--space-2);
-}
-
-.np-section-head a {
-  color: var(--azzurro);
-  font-weight: 600;
-  text-decoration: none;
-  font-size: var(--fs-sm);
-}
-
-.np-section-head a:hover {
-  text-decoration: underline;
-}
-
-/* --- Card (np- prefixed alias, used instead of .card in templates) --- */
 .np-card {
   background: var(--carta);
   border-radius: var(--radius-lg);
   padding: 26px;
 }
 
-/* --- Buttons (np- prefixed, templates use these — not the bare .btn set) --- */
+/* --- Buttons --- */
 .np-btn {
   display: inline-flex;
   align-items: center;
@@ -295,69 +137,29 @@ button {
   color: inherit;
 }
 
-.np-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.np-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.np-btn:focus-visible { outline: 2px solid var(--azzurro); outline-offset: 2px; }
 
-.np-btn:focus-visible {
-  outline: 2px solid var(--azzurro);
-  outline-offset: 2px;
-}
-
-.np-btn-primary {
-  background: var(--maiolica);
-  color: var(--carta);
-}
-
-.np-btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
+.np-btn-primary { background: var(--maiolica); color: var(--carta); }
+.np-btn-primary:hover:not(:disabled) { opacity: 0.9; }
 
 .np-btn-ghost {
   background: transparent;
   color: var(--blu-golfo);
   border: 1.5px solid var(--grigio-bordo);
 }
+.np-btn-ghost:hover:not(:disabled) { background: var(--crema); }
 
-.np-btn-ghost:hover:not(:disabled) {
-  background: var(--crema);
-}
+.np-btn-accent { background: var(--azzurro); color: var(--carta); }
+.np-btn-accent:hover:not(:disabled) { opacity: 0.9; }
 
-.np-btn-accent {
-  background: var(--azzurro);
-  color: var(--carta);
-}
+.np-btn-sm { padding: 8px 16px; font-size: var(--fs-xs); }
+.np-btn-full { width: 100%; }
 
-.np-btn-accent:hover:not(:disabled) {
-  opacity: 0.9;
-}
+/* --- Forms (shared across all admin/auth forms) --- */
+.np-search-form { display: flex; flex-direction: column; gap: 16px; padding: 1em; }
 
-.np-btn-sm {
-  padding: 8px 16px;
-  font-size: var(--fs-xs);
-}
-
-.np-btn-full {
-  width: 100%;
-}
-
-/* --- Fields / inputs (np- prefixed, used across every form) --- */
-
-.np-search-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 1em;
-}
-
-.np-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-  flex-grow: 1;
-}
+.np-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; flex-grow: 1; }
 
 .np-field label {
   font-size: var(--fs-xs);
@@ -388,6 +190,36 @@ button {
   border-color: var(--maiolica);
 }
 
+.np-form-row { display: flex; gap: 16px; }
+.np-form-row .np-field { flex: 1; }
+@media (max-width: 480px) { .np-form-row { flex-direction: column; } }
+
+.np-subhead {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--grigio-testo);
+  margin: 24px 0 12px;
+}
+
+/* stop-form / line-form: add-row + chip list (was np-stop-*/np-line-* duplicated identically) */
+.np-picker-add-row { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 12px; }
+.np-picker-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+
+.np-chip {
+  background: var(--azzurro-light);
+  color: var(--blu-golfo);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.np-chip button { background: none; border: none; cursor: pointer; color: var(--blu-golfo); font-size: 0.9rem; padding: 0; }
+
 /* --- Banners --- */
 .np-banner {
   padding: 12px 16px;
@@ -396,16 +228,8 @@ button {
   margin-bottom: 16px;
   font-weight: 600;
 }
-
-.np-banner-success {
-  background: rgba(76, 124, 62, 0.12);
-  color: var(--success);
-}
-
-.np-banner-error {
-  background: rgba(192, 57, 43, 0.1);
-  color: var(--error);
-}
+.np-banner-success { background: rgba(76, 124, 62, 0.12); color: var(--success); }
+.np-banner-error { background: rgba(192, 57, 43, 0.1); color: var(--error); }
 
 /* --- Badges --- */
 .np-badge {
@@ -418,24 +242,9 @@ button {
   color: var(--blu-golfo);
   border: 1px solid var(--grigio-bordo);
 }
-
-.np-badge-blue {
-  background: var(--azzurro-light);
-  color: var(--blu-golfo);
-  border-color: transparent;
-}
-
-.np-badge-orange {
-  background: var(--maiolica-light);
-  color: var(--maiolica);
-  border-color: transparent;
-}
-
-.np-badge-green {
-  background: rgba(76, 124, 62, 0.14);
-  color: var(--success);
-  border-color: transparent;
-}
+.np-badge-blue { background: var(--azzurro-light); color: var(--blu-golfo); border-color: transparent; }
+.np-badge-orange { background: var(--maiolica-light); color: var(--maiolica); border-color: transparent; }
+.np-badge-green { background: rgba(76, 124, 62, 0.14); color: var(--success); border-color: transparent; }
 
 /* --- Spinner --- */
 .np-spinner {
@@ -447,23 +256,15 @@ button {
   border-radius: 50%;
   animation: np-spin 0.7s linear infinite;
 }
-
 .np-topnav-auth .np-spinner,
 .np-btn-primary .np-spinner {
   border-color: rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
 }
+@keyframes np-spin { to { transform: rotate(360deg); } }
 
-@keyframes np-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* --- Pickers (stop/line/poi-picker share these) --- */
-.np-picker {
-  position: relative;
-}
+/* --- Pickers (stop/line/poi-picker) --- */
+.np-picker { position: relative; }
 
 .np-picker-input {
   border: 1.5px solid var(--grigio-bordo);
@@ -475,11 +276,7 @@ button {
   box-sizing: border-box;
   width: 100%;
 }
-
-.np-picker-input:focus {
-  outline: none;
-  border-color: var(--maiolica);
-}
+.np-picker-input:focus { outline: none; border-color: var(--maiolica); }
 
 .np-picker-dropdown {
   position: absolute;
@@ -494,54 +291,17 @@ button {
   z-index: 20;
 }
 
-.np-picker-item {
-  padding: 10px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  cursor: pointer;
-  font-size: var(--fs-sm);
-}
-
-.np-picker-item:hover {
-  background: var(--crema);
-}
-
-.np-picker-item span {
-  font-size: var(--fs-xs);
-  color: var(--grigio-testo);
-}
+.np-picker-item { padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; font-size: var(--fs-sm); }
+.np-picker-item:hover { background: var(--crema); }
+.np-picker-item span { font-size: var(--fs-xs); color: var(--grigio-testo); }
 
 /* --- Admin stats --- */
-.np-stat {
-  background: var(--carta);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  text-align: center;
-}
-
-.np-stat-value {
-  font-family: 'Fraunces', serif;
-  font-size: var(--fs-xl);
-  font-weight: 700;
-  color: var(--blu-golfo);
-}
-
-.np-stat-label {
-  font-size: var(--fs-xs);
-  color: var(--grigio-testo);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: 4px;
-}
+.np-stat { background: var(--carta); border-radius: var(--radius-md); padding: 20px; text-align: center; }
+.np-stat-value { font-family: 'Fraunces', serif; font-size: var(--fs-xl); font-weight: 700; color: var(--blu-golfo); }
+.np-stat-label { font-size: var(--fs-xs); color: var(--grigio-testo); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
 
 /* --- Tables --- */
-.np-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--fs-sm);
-}
-
+.np-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 .np-table th {
   text-align: left;
   padding: 10px 12px;
@@ -551,13 +311,57 @@ button {
   color: var(--grigio-testo);
   border-bottom: 1.5px solid var(--riga);
 }
+.np-table td { padding: 12px; border-bottom: 1px solid var(--riga); vertical-align: middle; }
+.np-table tr:last-child td { border-bottom: none; }
 
-.np-table td {
-  padding: 12px;
-  border-bottom: 1px solid var(--riga);
-  vertical-align: middle;
+/* --- Login/Register card (was duplicated identically in login.css + register.css) --- */
+.np-login-wrap {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--crema);
+  padding: 40px 20px;
 }
 
-.np-table tr:last-child td {
-  border-bottom: none;
+.np-login-card {
+  background: var(--carta);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-float);
+  padding: 48px 44px;
+  width: 100%;
+  max-width: 440px;
 }
+
+.np-login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+
+.np-logo-mark-lg {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: conic-gradient(from 45deg, var(--maiolica), var(--sole), var(--azzurro), var(--maiolica));
+}
+
+.np-login-title { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 700; color: var(--blu-golfo); }
+.np-login-card h2 { font-size: 1.5rem; color: var(--inchiostro); margin-bottom: 8px; }
+.np-login-sub { color: var(--grigio-testo); font-size: 0.92rem; margin-bottom: 24px; }
+.np-login-form { display: flex; flex-direction: column; gap: 4px; }
+
+.np-pwd-wrap { position: relative; }
+.np-pwd-wrap input { width: 100%; padding-right: 44px; }
+.np-pwd-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--grigio-testo);
+  padding: 4px;
+  display: flex;
+}
+
+.np-login-back { text-align: center; margin-top: 20px; font-size: 0.88rem; color: var(--grigio-testo); }
+.np-login-back a { color: var(--azzurro); font-weight: 600; }
+
+@media (max-width: 480px) { .np-login-card { padding: 32px 24px; } }
