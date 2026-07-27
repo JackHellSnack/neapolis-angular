@@ -1,5 +1,18 @@
 <div class="np-map-wrap">
-  <!-- Map overlay controls -->
+
+  @if (routes().length > 1) {
+    <div class="np-map-options">
+      @for (r of routes(); track $index) {
+        <button
+          class="np-route-option"
+          [class.np-route-option-active]="$index === selectedIndex()"
+          (click)="selectRoute($index)">
+          Opzione {{ $index + 1 }}
+        </button>
+      }
+    </div>
+  }
+
   @if (routeActive()) {
     <div class="np-map-overlay">
       <button class="np-btn np-btn-ghost np-btn-sm" (click)="clearRoute()">

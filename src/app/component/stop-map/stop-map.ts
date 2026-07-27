@@ -74,9 +74,17 @@ export class StopMap implements OnInit {
 ];
   private readonly DEFAULT_STOP_COLOR = '#2C8FBF';
 
+routes = this.routeHighlight.routes;
+  selectedIndex = this.routeHighlight.selectedIndex;
+
+  selectRoute(index: number) {
+    this.routeHighlight.selectRoute(index);
+  }
+
   constructor() {
     effect(() => {
       const routes = this.routeHighlight.routes();
+      const selectedIndex = this.routeHighlight.selectedIndex();
 
       if (!this.dataReady) {
         return;
@@ -86,7 +94,7 @@ export class StopMap implements OnInit {
         if (routes.length === 1) {
           this.renderHighlightedRoute(routes[0]);
         } else {
-          this.renderHighlightedRoutes(routes);
+          this.renderHighlightedRoutes(routes, selectedIndex);
         }
 
         this.routeActive.set(true);
@@ -98,6 +106,8 @@ export class StopMap implements OnInit {
   }
 
   ngOnInit() {
+    (window as any).neapolisSelectRoute = (index: number) => this.selectRoute(index);
+
     this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -108,6 +118,8 @@ export class StopMap implements OnInit {
     this.linesLayer       = L.layerGroup().addTo(this.map);
     this.poiLayer         = L.layerGroup().addTo(this.map);
     this.highlightLayer   = L.layerGroup().addTo(this.map);
+
+
 
     forkJoin({
       stops: this.stopService.findAll(),
@@ -125,14 +137,12 @@ export class StopMap implements OnInit {
         this.dataReady = true;
         const pending = this.routeHighlight.routes();
 
-        if (pending.length > 0) {
-
+       if (pending.length > 0) {
             if (pending.length === 1) {
                 this.renderHighlightedRoute(pending[0]);
             } else {
-                this.renderHighlightedRoutes(pending);
+                this.renderHighlightedRoutes(pending, this.routeHighlight.selectedIndex());
             }
-
             this.routeActive.set(true);
         }
       },
@@ -279,7 +289,7 @@ export class StopMap implements OnInit {
     if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
   }
 
-  private renderHighlightedRoutes(routes: RouteLeg[][]) {
+ private renderHighlightedRoutes(routes: RouteLeg[][], selectedIndex: number = 0) {
 
     this.highlightLayer.clearLayers();
 
@@ -291,20 +301,15 @@ export class StopMap implements OnInit {
 
     routes.forEach((legs, routeIndex) => {
 
-      const color =
-        this.ROUTE_COLORS[
-          Math.min(routeIndex, this.ROUTE_COLORS.length - 1)
-        ];
-
-      const weight = routeIndex === 0 ? 7 : 5;
+      const isSelected = routeIndex === selectedIndex;
+      const color = isSelected ? this.ROUTE_COLORS[0] : '#9aa5ab';
+      const weight = isSelected ? 7 : 4;
+      const opacity = isSelected ? 0.95 : 0.55;
 
       legs.forEach(leg => {
 
         const line = this.linesById.get(leg.lineId);
-
-        if (!line?.stopIds?.length) {
-          return;
-        }
+        if (!line?.stopIds?.length) return;
 
         const orderedIds = [...line.stopIds]
           .sort((a, b) => a.delta - b.delta)
@@ -312,77 +317,45 @@ export class StopMap implements OnInit {
 
         const from = orderedIds.indexOf(leg.fromStopId);
         const to = orderedIds.indexOf(leg.toStopId);
-
-        if (from === -1 || to === -1) {
-          return;
-        }
+        if (from === -1 || to === -1) return;
 
         const start = Math.min(from, to);
         const end = Math.max(from, to);
-
         const path: L.LatLngExpression[] = [];
 
-        orderedIds
-          .slice(start, end + 1)
-          .forEach(id => {
-
-            const stop = this.stopsById.get(id);
-
-            if (!stop) {
-              return;
-            }
-
-            highlightedStops.add(id);
-
-            path.push([stop.lat, stop.lon]);
-          });
+        orderedIds.slice(start, end + 1).forEach(id => {
+          const stop = this.stopsById.get(id);
+          if (!stop) return;
+          if (isSelected) highlightedStops.add(id);
+          path.push([stop.lat, stop.lon]);
+        });
 
         if (path.length >= 2) {
 
-          L.polyline(path, {
-            color,
-            weight,
-            opacity: 0.9
-          })
-          .addTo(this.highlightLayer)
-          .bindPopup(
-            `<strong>Option ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}`
-          );
+          const polyline = L.polyline(path, { color, weight, opacity })
+            .addTo(this.highlightLayer)
+            .bindPopup(
+              `<strong>Opzione ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}` +
+              (isSelected ? '' : `<br><button class="lf-btn" onclick="window.neapolisSelectRoute(${routeIndex})">✓ Usa questa</button>`)
+            );
 
-          bounds.push(...path);
+          // Click diretto sulla linea per selezionarla
+          polyline.on('click', () => this.selectRoute(routeIndex));
+
+          if (isSelected) bounds.push(...path);
         }
-
       });
-
     });
 
     highlightedStops.forEach(id => {
-
       const stop = this.stopsById.get(id);
-
-      if (!stop) {
-        return;
-      }
-
+      if (!stop) return;
       L.circleMarker([stop.lat, stop.lon], {
-        radius: 8,
-        color: '#333',
-        fillColor: '#fff',
-        fillOpacity: 1,
-        weight: 2
-      })
-      .addTo(this.highlightLayer)
-      .bindPopup(stop.name);
-
+        radius: 8, color: '#333', fillColor: '#fff', fillOpacity: 1, weight: 2
+      }).addTo(this.highlightLayer).bindPopup(stop.name);
     });
 
-    if (bounds.length) {
-      this.map.fitBounds(
-        L.latLngBounds(bounds),
-        { padding: [40, 40] }
-      );
-    }
-
+    if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
   }
 
   private clearHighlight() {
