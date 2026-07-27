@@ -51,6 +51,7 @@ export class Register {
     const username = this.username().trim();
     const email = this.email().trim();
     const password = this.password();
+    const interestedCategories = this.interestedCategories();
 
     if (!username || !email || !password) {
       this.error.set('Compila tutti i campi obbligatori.');
@@ -69,7 +70,7 @@ export class Register {
       return;
     }
 
-    const payload = { username, email, password };
+    const payload = { username, email, password, interestedCategories};
     this.loading.set(true);
 
     if (this.authService.isAdmin() && this.createAsAdmin()) {
