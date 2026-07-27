@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+  import { Routes } from '@angular/router';
 import { Home } from './component/home/home';
 import { StopMap } from './component/stop-map/stop-map';
 import { StopForm } from './component/stop-form/stop-form';

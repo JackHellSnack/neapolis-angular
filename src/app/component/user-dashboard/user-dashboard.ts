@@ -10,11 +10,12 @@ import { RouteHighlightService } from '../../service/route-highlight-service';
 import RouteLeg from '../../model/route-leg';
 import { UserService } from '../../service/user-service';
 import { PasswordUpdateRequest } from '../../model/password-update-request';
+import { SquircleDirective } from '../../directive/squircle';
 
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink,SquircleDirective],
   templateUrl: './user-dashboard.html',
   styleUrl: './user-dashboard.css'
 })

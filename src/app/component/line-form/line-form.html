@@ -32,7 +32,7 @@
       </div>
 
       <div class="np-subhead">Fermate in ordine di passaggio</div>
-      <div class="np-stop-add-row">
+      <div class="np-picker-add-row">
         <div style="flex:1">
           <app-stop-picker [(stop)]="newStop"></app-stop-picker>
         </div>
@@ -43,7 +43,7 @@
         <button type="button" class="np-btn np-btn-ghost np-btn-sm" (click)="addStop()">+ Aggiungi</button>
       </div>
       @if (stopIds().length) {
-        <div class="np-stop-chips">
+        <div class="np-picker-chips">
           @for (s of stopIds(); track s.id) {
             <span class="np-chip">ID {{ s.id }} (δ{{ s.delta }}) <button type="button" (click)="removeStop(s.id)">×</button></span>
           }

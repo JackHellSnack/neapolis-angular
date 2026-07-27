@@ -4,11 +4,12 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../service/auth-service';
 import { UserService } from '../../service/user-service';
+import { SquircleDirective } from '../../directive/squircle';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink,SquircleDirective],
   templateUrl: './register.html',
   styleUrl: './register.css'
 })

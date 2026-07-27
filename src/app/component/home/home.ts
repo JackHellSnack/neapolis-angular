@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { StopMap } from '../stop-map/stop-map';
 import { RideSearchForm } from '../ride-search-form/ride-search-form';
 import { PoiSearchForm } from '../poi-search-form/poi-search-form';
+import { SquircleDirective } from '../../directive/squircle';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule,  StopMap, RideSearchForm, PoiSearchForm],
+  imports: [CommonModule,  StopMap, RideSearchForm, PoiSearchForm,SquircleDirective],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })

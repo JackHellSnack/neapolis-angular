@@ -27,7 +27,7 @@
 }
 
 .np-hero-inner {
-  max-width: 1200px;
+  max-width: 950px;
   margin: 0 auto;
   position: relative;
   z-index: 2;
@@ -64,9 +64,10 @@
 
 /* ---- SEARCH CARD ---- */
 .np-search-card {
-  max-width: 860px;
-  margin: -84px auto 0;
-  padding: 0 24px;
+  max-width: 950px;
+  margin: 0 auto;
+  margin-top: -8em;
+  padding: 1em;
   position: relative;
   z-index: 10;
 }
@@ -106,15 +107,14 @@
 .np-search-body {
   background: var(--carta);
   border-radius: 0 0 var(--radius) var(--radius);
-  box-shadow: var(--shadow-float);
   padding: 32px;
 }
 
 /* ---- MAP SECTION ---- */
 .np-map-section {
-  max-width: 1200px;
-  margin: 60px auto 0;
-  padding: 0 24px 80px;
+  max-width: 950px;
+  min-height: 400px;
+  margin: 0 auto;
 }
 
 

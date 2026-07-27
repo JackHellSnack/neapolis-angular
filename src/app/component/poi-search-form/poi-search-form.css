@@ -1,5 +1,4 @@
 /* Shares styles with ride-search-form */
-.np-search-form { display: flex; flex-direction: column; gap: 16px; }
 .np-search-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 .np-field-grow { flex: 1; min-width: 220px; }
 .np-field-time { width: 130px; flex-shrink: 0; }
