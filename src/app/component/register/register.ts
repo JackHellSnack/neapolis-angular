@@ -21,6 +21,8 @@ export class Register {
   username = signal('');
   email    = signal('');
   password = signal('');
+  interestedCategories = signal<string[]>([]);
+  newCategory = signal('');
   confirmPassword = signal('');
 
   // Only meaningful/visible when the person filling this form is already an admin.
@@ -30,6 +32,18 @@ export class Register {
   error   = signal<string | null>(null);
   success = signal(false);
   showPwd = signal(false);
+
+  addInterest() {
+    const category = this.newCategory();
+    if (!category) return;
+    if (this.interestedCategories().includes(category)) return;
+    this.interestedCategories.update(categories => [...categories, category]);
+    this.newCategory.set('');
+  }
+
+  removeInterest(interest:string){
+     this.interestedCategories.update(x => x.filter(category => category !== interest)); 
+  }
 
   onSubmit() {
     this.error.set(null);

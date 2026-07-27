@@ -20,13 +20,14 @@ const poiIcon = L.icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
 
-import { Component, OnInit, inject, effect, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { StopService } from '../../service/stop-service';
 import { GeolocationService } from '../../service/geolocation-service';
 import { LineService } from '../../service/line-service';
 import { PointOfInterestService } from '../../service/point-of-interest-service';
+import { AuthService } from '../../service/auth-service';
 import { RouteHighlightService } from '../../service/route-highlight-service';
 import { AreaSearch } from '../../model/area-search';
 import Stop from '../../model/stop';
@@ -43,11 +44,12 @@ import { SquircleDirective } from '../../directive/squircle';
   templateUrl: './stop-map.html',
   styleUrl: './stop-map.css'
 })
-export class StopMap implements OnInit {
+export class StopMap implements OnInit, OnDestroy {
   private stopService     = inject(StopService);
   private geolocationService = inject(GeolocationService);
   private lineService     = inject(LineService);
   private poiService      = inject(PointOfInterestService);
+  private authService     = inject(AuthService);
   private routeHighlight  = inject(RouteHighlightService);
 
   private map!: L.Map;
@@ -99,6 +101,11 @@ export class StopMap implements OnInit {
   }
 
   ngOnInit() {
+    // Expose a global hook so the Leaflet popup button (plain HTML/onclick,
+    // outside Angular's template & change detection) can trigger the route
+    // search when the user taps "Vedi percorso" on a POI popup.
+    (window as any).neapolisPoiClick = (poiId: number) => this.onPoiButtonClick(poiId);
+
     this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -113,7 +120,9 @@ export class StopMap implements OnInit {
     forkJoin({
       stops: this.stopService.findAll(),
       lines: this.lineService.findAll(),
-      pois:  this.poiService.findAll()
+      pois:  this.authService.isLoggedIn()
+        ? this.poiService.findByUserInterests()
+        : this.poiService.findAll()
     }).subscribe({
       next: ({ stops, lines, pois }) => {
         lines.forEach(line => this.linesById.set(line.id!, line));
@@ -181,21 +190,35 @@ export class StopMap implements OnInit {
     const marker = L.marker([poi.lat, poi.lon], { icon: poiIcon }).addTo(this.poiLayer);
     const category = poi.category ? `<br><small>${poi.category}</small>` : '';
     marker.bindPopup(`<strong>${poi.name}</strong>${category}<br><button class="lf-btn" onclick="window.neapolisPoiClick(${poi.id})">📍 Vedi percorso</button>`);
-    marker.on('click', () => this.onPoiClick(poi));
+    // Note: no marker.on('click', ...) here — clicking the marker just opens
+    // the popup (default Leaflet behavior). The route search is triggered
+    // only by the "Vedi percorso" button via onPoiButtonClick, below.
   }
 
-  private onPoiClick(poi: PointOfInterest) {
+  /**
+   * Triggered from the Leaflet popup's "Vedi percorso" button
+   * (see window.neapolisPoiClick wiring in ngOnInit).
+   * Looks up the route to this POI directly by its id, without needing
+   * the user's current position.
+   */
+  /**
+   * Triggered from the Leaflet popup's "Vedi percorso" button
+   * (see window.neapolisPoiClick wiring in ngOnInit).
+   * lat/lon are required by PoiSearchRequest, so we grab the user's
+   * current position first, then look up the route to this POI.
+   */
+  private onPoiButtonClick(poiId: number) {
     this.searchError.set(null);
     this.searching.set(true);
     this.geolocationService.getCurrentPosition().subscribe({
       next: pos => {
-        const req: PoiSearchRequest = {
+        const dto: PoiSearchRequest = {
           lat: pos.coords.latitude,
           lon: pos.coords.longitude,
-          poiId: poi.id!,
+          poiId,
           searchByArrival: false,
         };
-        this.poiService.findRouteToPoi(req).subscribe({
+        this.poiService.findRouteToPoiByPoiId(dto).subscribe({
           next: legs => {
             this.searching.set(false);
             if (legs?.length) {
@@ -390,5 +413,15 @@ export class StopMap implements OnInit {
     this.highlightLayer.clearLayers();
     if (!this.map.hasLayer(this.allStopsLayer))   this.map.addLayer(this.allStopsLayer);
     if (!this.map.hasLayer(this.nearbyStopsLayer)) this.map.addLayer(this.nearbyStopsLayer);
+  }
+
+  ngOnDestroy() {
+    // Avoid leaking a reference to a destroyed component instance on the
+    // global object (relevant if this component is ever created/destroyed
+    // more than once, e.g. via routing).
+    if ((window as any).neapolisPoiClick) {
+      delete (window as any).neapolisPoiClick;
+    }
+    this.map?.remove();
   }
 }

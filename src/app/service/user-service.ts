@@ -16,7 +16,7 @@ export class UserService {
 
   /** Updates username / email / (optionally) password for the logged-in user. */
   updateMe(data: UpdateUserRequest): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}`, data);
+    return this.http.put<User>(`${this.apiUrl+"/updateme"}`, data);
   }
 
   /**
