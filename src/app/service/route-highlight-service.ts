@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import RouteLeg from '../model/route-leg';
 
 @Injectable({
@@ -6,28 +6,34 @@ import RouteLeg from '../model/route-leg';
 })
 export class RouteHighlightService {
 
-  readonly legs = signal<RouteLeg[] | null>(null);
-
   readonly routes = signal<RouteLeg[][]>([]);
+  readonly selectedIndex = signal<number>(0);
+
+  /** La route attualmente "attiva" (quella selezionata dall'utente). */
+  readonly legs = computed<RouteLeg[] | null>(() => {
+    const routes = this.routes();
+    const idx = this.selectedIndex();
+    return routes[idx] ?? null;
+  });
 
   setResult(legs: RouteLeg[]): void {
-    this.legs.set(legs);
     this.routes.set([legs]);
+    this.selectedIndex.set(0);
   }
 
   setResults(routes: RouteLeg[][]): void {
     this.routes.set(routes);
+    this.selectedIndex.set(0);
+  }
 
-    if (routes.length > 0) {
-      this.legs.set(routes[0]);
-    } else {
-      this.legs.set(null);
+  selectRoute(index: number): void {
+    if (index >= 0 && index < this.routes().length) {
+      this.selectedIndex.set(index);
     }
   }
 
   clear(): void {
-    this.legs.set(null);
     this.routes.set([]);
+    this.selectedIndex.set(0);
   }
-
 }
