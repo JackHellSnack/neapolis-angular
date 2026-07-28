@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { LoginRequest } from '../model/LoginRequest';
+import { LoginRequest } from '../model/login-request';
 import { LoginResponse } from '../model/login-response';
 import { RegisterRequest } from '../model/register-request';
 import User from '../model/user';

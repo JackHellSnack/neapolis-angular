@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -10,6 +10,7 @@ import { RouteHighlightService } from '../../service/route-highlight-service';
 import RouteLeg from '../../model/route-leg';
 import { UserService } from '../../service/user-service';
 import { UserUpdateForm } from '../user-update-form/user-update-form';
+import JourneyStatus from '../../model/journey-status';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -25,8 +26,8 @@ export class UserDashboard implements OnInit, OnDestroy {
   routeHighlight   = inject(RouteHighlightService);
   private userService = inject(UserService);
 
-  journeyStatus    = signal<any | null>(null);
-  journeyLegs      = signal<RouteLeg[] | null>(null);
+  journeyStatus = signal<JourneyStatus | null>(null);
+  journeyLegs      = computed(() => this.routeHighlight.legs());
   loading          = signal(true);
   pinging          = signal(false);
   ending           = signal(false);
@@ -47,19 +48,16 @@ export class UserDashboard implements OnInit, OnDestroy {
   private pingInterval: any;
 
   ngOnInit() {
-    const cached = this.routeHighlight.legs();
-    if (cached) this.journeyLegs.set(cached);
-
     this.journeyService.getStatus().subscribe({
       next: status => {
-        if (status && status.active !== false) {
+        if (status && !status.finished) {
           this.journeyStatus.set(status);
           this.startPingLoop();
         }
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
-    });
+      });
   }
 
   ngOnDestroy() {
@@ -77,14 +75,13 @@ export class UserDashboard implements OnInit, OnDestroy {
     });
   }
 
-  endJourney() {
+    endJourney() {
     this.ending.set(true);
     this.journeyService.end().subscribe({
       next: () => {
         this.ending.set(false);
         this.journeyStatus.set(null);
-        this.routeHighlight.clear();
-        this.journeyLegs.set(null);
+        this.routeHighlight.clear();   // this alone clears journeyLegs() too, since it's derived
         if (this.pingInterval) { clearInterval(this.pingInterval); this.pingInterval = null; }
       },
       error: () => this.ending.set(false)
@@ -116,6 +113,7 @@ export class UserDashboard implements OnInit, OnDestroy {
   }
 
   isJourneyActive(): boolean {
-    return !!this.journeyStatus() && this.journeyStatus().active !== false;
+    const status = this.journeyStatus();
+    return !!status && !status.finished;
   }
 }
