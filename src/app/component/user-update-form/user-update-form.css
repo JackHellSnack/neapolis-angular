@@ -95,41 +95,6 @@
   margin-bottom: 12px;
 }
 
-.np-leg {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px;
-  background: var(--crema);
-  border-left: 4px solid var(--blu-golfo);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-}
-
-.np-leg-line {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 40px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--blu-golfo);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-
-.np-leg-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 0.9rem;
-}
-
-.np-leg-body strong { color: var(--inchiostro); }
-.np-leg-body span { color: var(--grigio-testo); font-size: 0.82rem; }
-
 /* No journey empty state */
 .np-no-journey {
   display: flex;

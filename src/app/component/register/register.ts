@@ -21,6 +21,8 @@ export class Register {
   username = signal('');
   email    = signal('');
   password = signal('');
+  interestedCategories = signal<string[]>([]);
+  newCategory = signal('');
   confirmPassword = signal('');
 
   // Only meaningful/visible when the person filling this form is already an admin.
@@ -31,12 +33,25 @@ export class Register {
   success = signal(false);
   showPwd = signal(false);
 
+  addInterest() {
+    const category = this.newCategory();
+    if (!category) return;
+    if (this.interestedCategories().includes(category)) return;
+    this.interestedCategories.update(categories => [...categories, category]);
+    this.newCategory.set('');
+  }
+
+  removeInterest(interest:string){
+     this.interestedCategories.update(x => x.filter(category => category !== interest)); 
+  }
+
   onSubmit() {
     this.error.set(null);
 
     const username = this.username().trim();
     const email = this.email().trim();
     const password = this.password();
+    const interestedCategories = this.interestedCategories();
 
     if (!username || !email || !password) {
       this.error.set('Compila tutti i campi obbligatori.');
@@ -55,7 +70,7 @@ export class Register {
       return;
     }
 
-    const payload = { username, email, password };
+    const payload = { username, email, password, interestedCategories};
     this.loading.set(true);
 
     if (this.authService.isAdmin() && this.createAsAdmin()) {

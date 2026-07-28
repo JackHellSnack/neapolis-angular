@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed, model } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PointOfInterestService } from '../../service/point-of-interest-service';
+import { AuthService } from '../../service/auth-service';
 import PointOfInterest from '../../model/point-of-interest';
 import { BasePickerComponent } from '../../directive/base-picker';
 
@@ -14,6 +15,7 @@ import { BasePickerComponent } from '../../directive/base-picker';
 })
 export class PoiPicker extends BasePickerComponent<PointOfInterest> implements OnInit {
   private poiService = inject(PointOfInterestService);
+  private authService = inject(AuthService);
   poi = model<PointOfInterest | null>(null);
   private allPois = signal<PointOfInterest[]>([]);
   searchQuery = signal('');
@@ -29,7 +31,10 @@ export class PoiPicker extends BasePickerComponent<PointOfInterest> implements O
   protected filteredItems() { return this.filteredPois(); }
 
   ngOnInit() {
-    this.poiService.findAll().subscribe({
+    const pois$ = this.authService.isLoggedIn()
+      ? this.poiService.findByUserInterests()
+      : this.poiService.findAll();
+    pois$.subscribe({
       next: data => {
         this.allPois.set(data ?? []);
         const init = this.poi();

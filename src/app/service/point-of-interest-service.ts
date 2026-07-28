@@ -15,6 +15,10 @@ export class PointOfInterestService {
     return this.http.get<PointOfInterest[]>(this.apiUrl);
   }
 
+  findByUserInterests(): Observable<PointOfInterest[]> {
+    return this.http.get<PointOfInterest[]>(`${this.apiUrl}/byuserinterests`);
+  }
+
   save(poi: PointOfInterest): Observable<PointOfInterest> {
     return this.http.post<PointOfInterest>(this.apiUrl, poi);
   }
@@ -33,5 +37,9 @@ export class PointOfInterestService {
   
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  findRouteToPoiByPoiId(dto: PoiSearchRequest): Observable<RouteLeg[]> {
+    return this.http.post<RouteLeg[]>(`${this.apiUrl}/routebyid`,dto);
   }
 }

@@ -20,13 +20,14 @@ const poiIcon = L.icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
 
-import { Component, OnInit, inject, effect, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { StopService } from '../../service/stop-service';
 import { GeolocationService } from '../../service/geolocation-service';
 import { LineService } from '../../service/line-service';
 import { PointOfInterestService } from '../../service/point-of-interest-service';
+import { AuthService } from '../../service/auth-service';
 import { RouteHighlightService } from '../../service/route-highlight-service';
 import { AreaSearch } from '../../model/area-search';
 import Stop from '../../model/stop';
@@ -43,12 +44,13 @@ import { SquircleDirective } from '../../directive/squircle';
   templateUrl: './stop-map.html',
   styleUrl: './stop-map.css'
 })
-export class StopMap implements OnInit {
-  private stopService = inject(StopService);
+export class StopMap implements OnInit, OnDestroy {
+  private stopService     = inject(StopService);
   private geolocationService = inject(GeolocationService);
-  private lineService = inject(LineService);
-  private poiService = inject(PointOfInterestService);
-  private routeHighlight = inject(RouteHighlightService);
+  private lineService     = inject(LineService);
+  private poiService      = inject(PointOfInterestService);
+  private authService     = inject(AuthService);
+  private routeHighlight  = inject(RouteHighlightService);
 
   private map!: L.Map;
   private allStopsLayer!: L.LayerGroup;
@@ -75,9 +77,17 @@ export class StopMap implements OnInit {
   ];
   private readonly DEFAULT_STOP_COLOR = '#2C8FBF';
 
+routes = this.routeHighlight.routes;
+  selectedIndex = this.routeHighlight.selectedIndex;
+
+  selectRoute(index: number) {
+    this.routeHighlight.selectRoute(index);
+  }
+
   constructor() {
     effect(() => {
       const routes = this.routeHighlight.routes();
+      const selectedIndex = this.routeHighlight.selectedIndex();
 
       if (!this.dataReady) {
         return;
@@ -87,7 +97,7 @@ export class StopMap implements OnInit {
         if (routes.length === 1) {
           this.renderHighlightedRoute(routes[0]);
         } else {
-          this.renderHighlightedRoutes(routes);
+          this.renderHighlightedRoutes(routes, selectedIndex);
         }
 
         this.routeActive.set(true);
@@ -99,6 +109,13 @@ export class StopMap implements OnInit {
   }
 
   ngOnInit() {
+
+    // Expose a global hook so the Leaflet popup button (plain HTML/onclick,
+    // outside Angular's template & change detection) can trigger the route
+    // search when the user taps "Vedi percorso" on a POI popup.
+    (window as any).neapolisPoiClick = (poiId: number) => this.onPoiButtonClick(poiId);
+
+
     this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
     this.map.zoomControl.setPosition('topright');
     L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
@@ -108,14 +125,18 @@ export class StopMap implements OnInit {
 
     this.allStopsLayer = L.layerGroup().addTo(this.map);
     this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
-    this.linesLayer = L.layerGroup().addTo(this.map);
-    this.poiLayer = L.layerGroup().addTo(this.map);
-    this.highlightLayer = L.layerGroup().addTo(this.map);
+    this.linesLayer       = L.layerGroup().addTo(this.map);
+    this.poiLayer         = L.layerGroup().addTo(this.map);
+    this.highlightLayer   = L.layerGroup().addTo(this.map);
+
+
 
     forkJoin({
       stops: this.stopService.findAll(),
       lines: this.lineService.findAll(),
-      pois: this.poiService.findAll()
+      pois:  this.authService.isLoggedIn()
+        ? this.poiService.findByUserInterests()
+        : this.poiService.findAll()
     }).subscribe({
       next: ({ stops, lines, pois }) => {
         lines.forEach(line => this.linesById.set(line.id!, line));
@@ -128,15 +149,13 @@ export class StopMap implements OnInit {
         this.dataReady = true;
         const pending = this.routeHighlight.routes();
 
-        if (pending.length > 0) {
-
-          if (pending.length === 1) {
-            this.renderHighlightedRoute(pending[0]);
-          } else {
-            this.renderHighlightedRoutes(pending);
-          }
-
-          this.routeActive.set(true);
+       if (pending.length > 0) {
+            if (pending.length === 1) {
+                this.renderHighlightedRoute(pending[0]);
+            } else {
+                this.renderHighlightedRoutes(pending, this.routeHighlight.selectedIndex());
+            }
+            this.routeActive.set(true);
         }
       },
       error: err => console.error(err)
@@ -183,21 +202,35 @@ export class StopMap implements OnInit {
     const marker = L.marker([poi.lat, poi.lon], { icon: poiIcon }).addTo(this.poiLayer);
     const category = poi.category ? `<br><small>${poi.category}</small>` : '';
     marker.bindPopup(`<strong>${poi.name}</strong>${category}<br><button class="lf-btn" onclick="window.neapolisPoiClick(${poi.id})">📍 Vedi percorso</button>`);
-    marker.on('click', () => this.onPoiClick(poi));
+    // Note: no marker.on('click', ...) here — clicking the marker just opens
+    // the popup (default Leaflet behavior). The route search is triggered
+    // only by the "Vedi percorso" button via onPoiButtonClick, below.
   }
 
-  private onPoiClick(poi: PointOfInterest) {
+  /**
+   * Triggered from the Leaflet popup's "Vedi percorso" button
+   * (see window.neapolisPoiClick wiring in ngOnInit).
+   * Looks up the route to this POI directly by its id, without needing
+   * the user's current position.
+   */
+  /**
+   * Triggered from the Leaflet popup's "Vedi percorso" button
+   * (see window.neapolisPoiClick wiring in ngOnInit).
+   * lat/lon are required by PoiSearchRequest, so we grab the user's
+   * current position first, then look up the route to this POI.
+   */
+  private onPoiButtonClick(poiId: number) {
     this.searchError.set(null);
     this.searching.set(true);
     this.geolocationService.getCurrentPosition().subscribe({
       next: pos => {
-        const req: PoiSearchRequest = {
+        const dto: PoiSearchRequest = {
           lat: pos.coords.latitude,
           lon: pos.coords.longitude,
-          poiId: poi.id!,
+          poiId,
           searchByArrival: false,
         };
-        this.poiService.findRouteToPoi(req).subscribe({
+        this.poiService.findRouteToPoiByPoiId(dto).subscribe({
           next: legs => {
             this.searching.set(false);
             if (legs?.length) {
@@ -282,7 +315,7 @@ export class StopMap implements OnInit {
     if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
   }
 
-  private renderHighlightedRoutes(routes: RouteLeg[][]) {
+ private renderHighlightedRoutes(routes: RouteLeg[][], selectedIndex: number = 0) {
 
     this.highlightLayer.clearLayers();
 
@@ -294,20 +327,15 @@ export class StopMap implements OnInit {
 
     routes.forEach((legs, routeIndex) => {
 
-      const color =
-        this.ROUTE_COLORS[
-        Math.min(routeIndex, this.ROUTE_COLORS.length - 1)
-        ];
-
-      const weight = routeIndex === 0 ? 7 : 5;
+      const isSelected = routeIndex === selectedIndex;
+      const color = isSelected ? this.ROUTE_COLORS[0] : '#9aa5ab';
+      const weight = isSelected ? 7 : 4;
+      const opacity = isSelected ? 0.95 : 0.55;
 
       legs.forEach(leg => {
 
         const line = this.linesById.get(leg.lineId);
-
-        if (!line?.stopIds?.length) {
-          return;
-        }
+        if (!line?.stopIds?.length) return;
 
         const orderedIds = [...line.stopIds]
           .sort((a, b) => a.delta - b.delta)
@@ -315,82 +343,60 @@ export class StopMap implements OnInit {
 
         const from = orderedIds.indexOf(leg.fromStopId);
         const to = orderedIds.indexOf(leg.toStopId);
-
-        if (from === -1 || to === -1) {
-          return;
-        }
+        if (from === -1 || to === -1) return;
 
         const start = Math.min(from, to);
         const end = Math.max(from, to);
-
         const path: L.LatLngExpression[] = [];
 
-        orderedIds
-          .slice(start, end + 1)
-          .forEach(id => {
-
-            const stop = this.stopsById.get(id);
-
-            if (!stop) {
-              return;
-            }
-
-            highlightedStops.add(id);
-
-            path.push([stop.lat, stop.lon]);
-          });
+        orderedIds.slice(start, end + 1).forEach(id => {
+          const stop = this.stopsById.get(id);
+          if (!stop) return;
+          if (isSelected) highlightedStops.add(id);
+          path.push([stop.lat, stop.lon]);
+        });
 
         if (path.length >= 2) {
 
-          L.polyline(path, {
-            color,
-            weight,
-            opacity: 0.9
-          })
+          const polyline = L.polyline(path, { color, weight, opacity })
             .addTo(this.highlightLayer)
             .bindPopup(
-              `<strong>Option ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}`
+              `<strong>Opzione ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}` +
+              (isSelected ? '' : `<br><button class="lf-btn" onclick="window.neapolisSelectRoute(${routeIndex})">✓ Usa questa</button>`)
             );
 
-          bounds.push(...path);
+          // Click diretto sulla linea per selezionarla
+          polyline.on('click', () => this.selectRoute(routeIndex));
+
+          if (isSelected) bounds.push(...path);
         }
-
       });
-
     });
 
     highlightedStops.forEach(id => {
-
       const stop = this.stopsById.get(id);
-
-      if (!stop) {
-        return;
-      }
-
+      if (!stop) return;
       L.circleMarker([stop.lat, stop.lon], {
-        radius: 8,
-        color: '#333',
-        fillColor: '#fff',
-        fillOpacity: 1,
-        weight: 2
-      })
-        .addTo(this.highlightLayer)
-        .bindPopup(stop.name);
-
+        radius: 8, color: '#333', fillColor: '#fff', fillOpacity: 1, weight: 2
+      }).addTo(this.highlightLayer).bindPopup(stop.name);
     });
 
-    if (bounds.length) {
-      this.map.fitBounds(
-        L.latLngBounds(bounds),
-        { padding: [40, 40] }
-      );
-    }
-
+    if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
   }
 
   private clearHighlight() {
     this.highlightLayer.clearLayers();
     if (!this.map.hasLayer(this.allStopsLayer)) this.map.addLayer(this.allStopsLayer);
     if (!this.map.hasLayer(this.nearbyStopsLayer)) this.map.addLayer(this.nearbyStopsLayer);
+  }
+
+  ngOnDestroy() {
+    // Avoid leaking a reference to a destroyed component instance on the
+    // global object (relevant if this component is ever created/destroyed
+    // more than once, e.g. via routing).
+    if ((window as any).neapolisPoiClick) {
+      delete (window as any).neapolisPoiClick;
+    }
+    this.map?.remove();
   }
 }

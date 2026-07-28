@@ -4,4 +4,5 @@ export default interface User{
   email: string;
   password?: string;
   role: string;
+  interestedCategories: string[];
 }

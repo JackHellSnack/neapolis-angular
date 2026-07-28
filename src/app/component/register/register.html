@@ -47,6 +47,26 @@
           name="email"
           required>
       </div>
+      <div>
+        <div class="np-field">
+          <label>Categoria</label>
+          <select [ngModel]="newCategory()" (ngModelChange)="newCategory.set($event); addInterest()" name="category">
+            <option value="">Seleziona categoria</option>
+            <option value="MUSEUM">Museo</option>
+            <option value="PARK">Parco</option>
+            <option value="MONUMENT">Monumento</option>
+            <option value="COMMERCE">Commercio</option>
+            <option value="OTHER">Altro</option>
+          </select>
+        </div>
+      </div>
+      @if (interestedCategories().length) {
+        <div class="np-picker-chips">
+          @for (category of interestedCategories(); track category) {
+            <span class="np-chip">{{category}} <button type="button" (click)="removeInterest(category)">×</button></span>
+          }
+        </div>
+      }
 
       <div class="np-field">
         <label for="password">Password</label>
