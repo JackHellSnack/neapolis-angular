@@ -12,6 +12,7 @@ import PoiSearchRequest from '../../model/poi-search-request';
 import { PointOfInterestService } from '../../service/point-of-interest-service';
 import { GeolocationService } from '../../service/geolocation-service';
 import { RouteHighlightService } from '../../service/route-highlight-service';
+import { DEFAULT_POSITION } from '../../model/default-location';
 
 @Component({
   selector: 'app-poi-search-form',
@@ -52,90 +53,54 @@ export class PoiSearchForm {
   }
 
   onSubmit() {
+  this.errorMessage.set(null);
+  this.showAlternativePrompt.set(false);
 
-    this.errorMessage.set(null);
-
-    this.showAlternativePrompt.set(false);
-
-    const poi = this.selectedPoi();
-
-    if (!poi?.id) {
-      this.errorMessage.set('Seleziona un punto di interesse.');
-      return;
-    }
-
-    this.loading.set(true);
-
-    this.geolocationService.getCurrentPosition().subscribe({
-
-      next: pos => {
-
-        const payload: PoiSearchRequest = {
-
-          lat: pos.coords.latitude,
-
-          lon: pos.coords.longitude,
-
-          poiId: poi.id!,
-
-          time: this.time(),
-
-          searchByArrival: this.searchByArrival()
-
-        };
-
-        this.lastSearch.set(payload);
-
-        this.poiService.findRouteToPoi(payload).subscribe({
-
-          next: legs => {
-
-            this.loading.set(false);
-
-            if (!legs.length) {
-
-              this.errorMessage.set(
-                'Nessun percorso trovato per questo punto di interesse.'
-              );
-
-              return;
-
-            }
-
-            this.searchResults.set(legs);
-
-            this.routeHighlight.setResult(legs);
-
-            this.showAlternativePrompt.set(true);
-
-          },
-
-          error: () => {
-
-            this.loading.set(false);
-
-            this.errorMessage.set('Errore nella ricerca. Riprova.');
-
-          }
-
-        });
-
-      },
-
-      error: () => {
-
-        this.loading.set(false);
-
-        this.errorMessage.set(
-          'Attiva la geolocalizzazione per trovare il percorso.'
-        );
-
-      }
-
-    });
-
+  const poi = this.selectedPoi();
+  if (!poi?.id) {
+    this.errorMessage.set('Seleziona un punto di interesse.');
+    return;
   }
 
+  this.loading.set(true);
+
+  this.geolocationService.getCurrentPosition().subscribe({
+    next: pos => this.doSearch(poi.id!, pos.coords.latitude, pos.coords.longitude),
+    error: () => {
+      // No geolocation permission: default to Napoli Centrale rather than blocking.
+      this.doSearch(poi.id!, DEFAULT_POSITION.lat, DEFAULT_POSITION.lon);
+    }
+  });
+}
+
+private doSearch(poiId: number, lat: number, lon: number) {
+  const payload: PoiSearchRequest = {
+    lat,
+    lon,
+    poiId,
+    time: this.time(),
+    searchByArrival: this.searchByArrival()
+  };
+
+  this.lastSearch.set(payload);
+
+  this.poiService.findRouteToPoi(payload).subscribe({
+    next: legs => {
+      this.loading.set(false);
+      if (!legs.length) {
+        this.errorMessage.set('Nessun percorso trovato per questo punto di interesse.');
+        return;
+      }
+      this.searchResults.set(legs);
+      this.routeHighlight.setResult(legs);
+      this.showAlternativePrompt.set(true);
+    },
+    error: () => {
+      this.loading.set(false);
+      this.errorMessage.set('Errore nella ricerca. Riprova.');
+    }
+  });
+}
   useCurrentRoute() {
 
     this.showAlternativePrompt.set(false);
