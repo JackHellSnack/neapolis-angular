@@ -37,6 +37,7 @@ import RouteLeg from '../../model/route-leg';
 import PoiSearchRequest from '../../model/poi-search-request';
 import { SquircleDirective } from '../../directive/squircle';
 import { Router } from '@angular/router';
+import { JourneyService } from '../../service/journey-service';
 
 @Component({
   selector: 'app-stop-map',
@@ -52,7 +53,9 @@ export class StopMap implements OnInit, OnDestroy {
   private poiService      = inject(PointOfInterestService);
   private authService     = inject(AuthService);
   private routeHighlight  = inject(RouteHighlightService);
+  private journeyService  = inject(JourneyService);
   private router = inject(Router);
+  private stopTimesById = new Map<number, { arrival?: string; departure?: string }>();
 
   private map!: L.Map;
   private allStopsLayer!: L.LayerGroup;
@@ -66,6 +69,8 @@ export class StopMap implements OnInit, OnDestroy {
     return routes[idx] ?? null;
   });
 
+  startingJourney = signal(false);
+  startJourneyError = signal<string | null>(null);
   private stopsById = new Map<number, Stop>();
   private linesById = new Map<number, Line>();
   private dataReady = false;
@@ -91,6 +96,22 @@ export class StopMap implements OnInit, OnDestroy {
     this.routeHighlight.selectRoute(index);
   }
 
+   startJourneyFromMap() {
+    const legs = this.routeHighlight.legs();
+    if (!legs?.length) return;
+    this.startingJourney.set(true);
+    this.startJourneyError.set(null);
+    this.journeyService.start(legs).subscribe({
+      next: () => {
+        this.startingJourney.set(false);
+        this.router.navigate(['/dashboard']);
+      },
+      error: () => {
+        this.startingJourney.set(false);
+        this.startJourneyError.set('Errore nell\'avvio del viaggio.');
+      }
+    });
+  }
 
   constructor() {
     effect(() => {
@@ -274,117 +295,137 @@ export class StopMap implements OnInit, OnDestroy {
   }
 
   private renderHighlightedRoute(legs: RouteLeg[]) {
-    this.highlightLayer.clearLayers();
-    // Hide all stops — only show route stops
-    this.map.removeLayer(this.allStopsLayer);
-    this.map.removeLayer(this.nearbyStopsLayer);
+  this.highlightLayer.clearLayers();
+  this.stopTimesById.clear();
+  // Hide all stops — only show route stops
+  this.map.removeLayer(this.allStopsLayer);
+  this.map.removeLayer(this.nearbyStopsLayer);
 
-    const highlightedIds = new Set<number>();
-    const bounds: L.LatLngExpression[] = [];
+  const highlightedIds = new Set<number>();
+  const bounds: L.LatLngExpression[] = [];
 
-    legs.forEach(leg => {
-      const line = this.linesById.get(leg.lineId);
-      if (!line?.stopIds?.length) return;
-      const orderedIds = [...line.stopIds].sort((a, b) => a.delta - b.delta).map(e => e.id);
-      const fromIdx = orderedIds.indexOf(leg.fromStopId);
-      const toIdx = orderedIds.indexOf(leg.toStopId);
-      if (fromIdx === -1 || toIdx === -1) return;
-      const [start, end] = fromIdx <= toIdx ? [fromIdx, toIdx] : [toIdx, fromIdx];
-      const segIds = orderedIds.slice(start, end + 1);
-      const path: L.LatLngExpression[] = [];
-      segIds.forEach(id => {
-        const s = this.stopsById.get(id);
-        if (!s) return;
-        highlightedIds.add(id);
-        path.push([s.lat, s.lon]);
-      });
-      if (path.length >= 2) {
-        L.polyline(path, { color: this.ROUTE_COLORS[0], weight: 6, opacity: 0.9 })
-          .addTo(this.highlightLayer).bindPopup(`<strong>${leg.lineName}</strong><br>${leg.fromStopName} → ${leg.toStopName}`);
-        bounds.push(...path);
-      }
-    });
+  legs.forEach(leg => {
+    // Record the times we actually know: departure at the origin stop,
+    // arrival at the destination stop of this leg.
+    const dep = this.stopTimesById.get(leg.fromStopId) ?? {};
+    dep.departure = leg.departureTime;
+    this.stopTimesById.set(leg.fromStopId, dep);
 
-    highlightedIds.forEach(id => {
+    const arr = this.stopTimesById.get(leg.toStopId) ?? {};
+    arr.arrival = leg.arrivalTime;
+    this.stopTimesById.set(leg.toStopId, arr);
+
+    const line = this.linesById.get(leg.lineId);
+    if (!line?.stopIds?.length) return;
+    const orderedIds = [...line.stopIds].sort((a, b) => a.delta - b.delta).map(e => e.id);
+    const fromIdx = orderedIds.indexOf(leg.fromStopId);
+    const toIdx = orderedIds.indexOf(leg.toStopId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const [start, end] = fromIdx <= toIdx ? [fromIdx, toIdx] : [toIdx, fromIdx];
+    const segIds = orderedIds.slice(start, end + 1);
+    const path: L.LatLngExpression[] = [];
+    segIds.forEach(id => {
       const s = this.stopsById.get(id);
       if (!s) return;
-      L.circleMarker([s.lat, s.lon], {
-        radius: 8, color: this.ROUTE_COLORS[0],
-        fillColor: '#fff', fillOpacity: 1, weight: 3
-      }).addTo(this.highlightLayer).bindPopup(s.name);
+      highlightedIds.add(id);
+      path.push([s.lat, s.lon]);
     });
+    if (path.length >= 2) {
+      L.polyline(path, { color: this.ROUTE_COLORS[0], weight: 6, opacity: 0.9 })
+        .addTo(this.highlightLayer).bindPopup(`<strong>${leg.lineName}</strong><br>${leg.fromStopName} → ${leg.toStopName}`);
+      bounds.push(...path);
+    }
+  });
 
-    if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
-  }
+  highlightedIds.forEach(id => {
+    const s = this.stopsById.get(id);
+    if (!s) return;
+    L.circleMarker([s.lat, s.lon], {
+      radius: 8, color: this.ROUTE_COLORS[0],
+      fillColor: '#fff', fillOpacity: 1, weight: 3
+    }).addTo(this.highlightLayer).bindPopup(this.stopPopupContent(s));
+  });
+
+  if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
+}
+
+private stopPopupContent(stop: Stop): string {
+  const times = this.stopTimesById.get(stop.id!);
+  let timesHtml = '';
+  if (times?.arrival) timesHtml += `<br>Arrivo: <strong>${times.arrival}</strong>`;
+  if (times?.departure) timesHtml += `<br>Partenza: <strong>${times.departure}</strong>`;
+  return `<strong>${stop.name}</strong>${timesHtml}`;
+}
 
  private renderHighlightedRoutes(routes: RouteLeg[][], selectedIndex: number = 0) {
+  this.highlightLayer.clearLayers();
+  this.stopTimesById.clear();
 
-    this.highlightLayer.clearLayers();
+  this.map.removeLayer(this.allStopsLayer);
+  this.map.removeLayer(this.nearbyStopsLayer);
 
-    this.map.removeLayer(this.allStopsLayer);
-    this.map.removeLayer(this.nearbyStopsLayer);
+  const highlightedStops = new Set<number>();
+  const bounds: L.LatLngExpression[] = [];
 
-    const highlightedStops = new Set<number>();
-    const bounds: L.LatLngExpression[] = [];
+  routes.forEach((legs, routeIndex) => {
+    const isSelected = routeIndex === selectedIndex;
+    const color = isSelected ? this.ROUTE_COLORS[0] : '#9aa5ab';
+    const weight = isSelected ? 7 : 4;
+    const opacity = isSelected ? 0.95 : 0.55;
 
-    routes.forEach((legs, routeIndex) => {
+    legs.forEach(leg => {
+      if (isSelected) {
+        const dep = this.stopTimesById.get(leg.fromStopId) ?? {};
+        dep.departure = leg.departureTime;
+        this.stopTimesById.set(leg.fromStopId, dep);
 
-      const isSelected = routeIndex === selectedIndex;
-      const color = isSelected ? this.ROUTE_COLORS[0] : '#9aa5ab';
-      const weight = isSelected ? 7 : 4;
-      const opacity = isSelected ? 0.95 : 0.55;
+        const arr = this.stopTimesById.get(leg.toStopId) ?? {};
+        arr.arrival = leg.arrivalTime;
+        this.stopTimesById.set(leg.toStopId, arr);
+      }
 
-      legs.forEach(leg => {
+      const line = this.linesById.get(leg.lineId);
+      if (!line?.stopIds?.length) return;
 
-        const line = this.linesById.get(leg.lineId);
-        if (!line?.stopIds?.length) return;
+      const orderedIds = [...line.stopIds].sort((a, b) => a.delta - b.delta).map(e => e.id);
+      const from = orderedIds.indexOf(leg.fromStopId);
+      const to = orderedIds.indexOf(leg.toStopId);
+      if (from === -1 || to === -1) return;
 
-        const orderedIds = [...line.stopIds]
-          .sort((a, b) => a.delta - b.delta)
-          .map(e => e.id);
+      const start = Math.min(from, to);
+      const end = Math.max(from, to);
+      const path: L.LatLngExpression[] = [];
 
-        const from = orderedIds.indexOf(leg.fromStopId);
-        const to = orderedIds.indexOf(leg.toStopId);
-        if (from === -1 || to === -1) return;
-
-        const start = Math.min(from, to);
-        const end = Math.max(from, to);
-        const path: L.LatLngExpression[] = [];
-
-        orderedIds.slice(start, end + 1).forEach(id => {
-          const stop = this.stopsById.get(id);
-          if (!stop) return;
-          if (isSelected) highlightedStops.add(id);
-          path.push([stop.lat, stop.lon]);
-        });
-
-        if (path.length >= 2) {
-
-          const polyline = L.polyline(path, { color, weight, opacity })
-            .addTo(this.highlightLayer)
-            .bindPopup(
-              `<strong>Opzione ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}` +
-              (isSelected ? '' : `<br><button class="lf-btn" onclick="window.neapolisSelectRoute(${routeIndex})">✓ Usa questa</button>`)
-            );
-
-          // Click diretto sulla linea per selezionarla
-          polyline.on('click', () => this.selectRoute(routeIndex));
-
-          if (isSelected) bounds.push(...path);
-        }
+      orderedIds.slice(start, end + 1).forEach(id => {
+        const stop = this.stopsById.get(id);
+        if (!stop) return;
+        if (isSelected) highlightedStops.add(id);
+        path.push([stop.lat, stop.lon]);
       });
-    });
 
-    highlightedStops.forEach(id => {
-      const stop = this.stopsById.get(id);
-      if (!stop) return;
-      L.circleMarker([stop.lat, stop.lon], {
-        radius: 8, color: '#333', fillColor: '#fff', fillOpacity: 1, weight: 2
-      }).addTo(this.highlightLayer).bindPopup(stop.name);
+      if (path.length >= 2) {
+        const polyline = L.polyline(path, { color, weight, opacity })
+          .addTo(this.highlightLayer)
+          .bindPopup(
+            `<strong>Opzione ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}` +
+            (isSelected ? '' : `<br><button class="lf-btn" onclick="window.neapolisSelectRoute(${routeIndex})">✓ Usa questa</button>`)
+          );
+        polyline.on('click', () => this.selectRoute(routeIndex));
+        if (isSelected) bounds.push(...path);
+      }
     });
+  });
 
-    if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
-  }
+  highlightedStops.forEach(id => {
+    const stop = this.stopsById.get(id);
+    if (!stop) return;
+    L.circleMarker([stop.lat, stop.lon], {
+      radius: 8, color: '#333', fillColor: '#fff', fillOpacity: 1, weight: 2
+    }).addTo(this.highlightLayer).bindPopup(this.stopPopupContent(stop));
+  });
+
+  if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
+}
 
   private clearHighlight() {
     this.highlightLayer.clearLayers();
