@@ -11,12 +11,14 @@
 
   @if (routeActive()) {
   <div class="np-map-overlay">
-    <button class="np-btn np-btn-primary np-btn-sm" (click)="startJourneyFromMap()" [disabled]="startingJourney()">
-      @if (startingJourney()) {
-        <span class="np-spinner" style="width:14px;height:14px;border-width:2px"></span>
-      }
-      🚌 Inizia viaggio
-    </button>
+    @if(authService.isLoggedIn()){
+      <button class="np-btn np-btn-primary np-btn-sm" (click)="startJourneyFromMap()" [disabled]="startingJourney()">
+        @if (startingJourney()) {
+          <span class="np-spinner" style="width:14px;height:14px;border-width:2px"></span>
+        }
+        🚌 Inizia viaggio
+      </button>
+    }
     <button class="np-btn np-btn-ghost np-btn-sm" (click)="clearRoute()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       Cancella percorso
