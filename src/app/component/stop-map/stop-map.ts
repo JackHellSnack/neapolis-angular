@@ -39,6 +39,7 @@ import { SquircleDirective } from '../../directive/squircle';
 import { Router } from '@angular/router';
 import { JourneyService } from '../../service/journey-service';
 import JourneyStatus from '../../model/journey-status';
+import { DEFAULT_POSITION } from '../../model/default-location';
 
 @Component({
   selector: 'app-stop-map',
@@ -58,6 +59,7 @@ export class StopMap implements OnInit, OnDestroy {
   private router = inject(Router);
   private stopTimesById = new Map<number, { arrival?: string; departure?: string }>();
 
+  
 
   private readonly ROUTE_COLORS = [
     '#B00020', // best route
@@ -211,7 +213,17 @@ export class StopMap implements OnInit, OnDestroy {
           stops.forEach(stop => this.addStopMarker(stop, this.nearbyStopsLayer));
         });
       },
-      error: () => { }
+      error: () => {
+        // Geolocation denied/unavailable: fall back to Napoli Centrale.
+        const { lat, lon } = DEFAULT_POSITION;
+        this.map.setView([lat, lon], 15);
+        L.marker([lat, lon], { icon: userIcon })
+          .addTo(this.map).bindPopup('Posizione predefinita: Napoli Centrale');
+        const search: AreaSearch = { lat, lon, area: 500 };
+        this.stopService.findNearbyStops(search).subscribe(stops => {
+          stops.forEach(stop => this.addStopMarker(stop, this.nearbyStopsLayer));
+        });
+      }
     });
   }
 
@@ -256,32 +268,29 @@ export class StopMap implements OnInit, OnDestroy {
   private onPoiButtonClick(poiId: number) {
     this.searchError.set(null);
     this.searching.set(true);
-    this.geolocationService.getCurrentPosition().subscribe({
-      next: pos => {
-        const dto: PoiSearchRequest = {
-          lat: pos.coords.latitude,
-          lon: pos.coords.longitude,
-          poiId,
-          searchByArrival: false,
-        };
-        this.poiService.findRouteToPoiByPoiId(dto).subscribe({
-          next: legs => {
-            this.searching.set(false);
-            if (legs?.length) {
-              this.routeHighlight.setResult(legs);
-            } else {
-              this.searchError.set('Nessun percorso trovato per questo POI.');
-            }
-          },
-          error: () => {
-            this.searching.set(false);
-            this.searchError.set('Errore nella ricerca del percorso.');
-          }
-        });
+     this.geolocationService.getCurrentPosition().subscribe({
+      next: pos => this.searchRouteToPoi(poiId, pos.coords.latitude, pos.coords.longitude),
+      error: () => {
+        // Fall back silently to Napoli Centrale instead of blocking the search.
+        this.searchRouteToPoi(poiId, DEFAULT_POSITION.lat, DEFAULT_POSITION.lon);
+      }
+    });
+  }
+
+  private searchRouteToPoi(poiId: number, lat: number, lon: number) {
+    const dto: PoiSearchRequest = { lat, lon, poiId, searchByArrival: false };
+    this.poiService.findRouteToPoiByPoiId(dto).subscribe({
+      next: legs => {
+        this.searching.set(false);
+        if (legs?.length) {
+          this.routeHighlight.setResult(legs);
+        } else {
+          this.searchError.set('Nessun percorso trovato per questo POI.');
+        }
       },
       error: () => {
         this.searching.set(false);
-        this.searchError.set('Attiva la geolocalizzazione per trovare il percorso.');
+        this.searchError.set('Errore nella ricerca del percorso.');
       }
     });
   }
