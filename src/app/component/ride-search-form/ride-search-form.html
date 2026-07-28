@@ -1,4 +1,3 @@
-
 <form (ngSubmit)="onSubmit()" class="np-search-form">
 
   <div class="np-search-row">
@@ -11,7 +10,11 @@
       </app-stop-picker>
     </div>
 
-    <div class="np-search-swap">
+    <button
+      type="button"
+      class="np-search-swap"
+      (click)="swapStops()"
+      aria-label="Scambia partenza e arrivo">
       <svg width="20"
            height="20"
            viewBox="0 0 24 24"
@@ -23,7 +26,7 @@
         <polyline points="7 23 3 19 7 15"/>
         <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
       </svg>
-    </div>
+    </button>
 
     <div class="np-field np-field-grow">
       <label>Arrivo</label>

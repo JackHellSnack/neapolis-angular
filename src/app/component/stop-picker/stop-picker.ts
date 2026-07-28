@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, model, input } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, model, input, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StopService } from '../../service/stop-service';
@@ -19,6 +19,20 @@ export class StopPicker extends BasePickerComponent<Stop> implements OnInit {
   stop = model<Stop | null>(null);
   private allStops = signal<Stop[]>([]);
   searchQuery = signal('');
+  private lastSyncedName = '';
+
+  private syncSearchQueryEffect = effect(() => {
+    const s = this.stop();
+    const expectedText = s ? s.name : '';
+    untracked(() => {
+      // Only auto-update the text if it currently reflects the previous
+      // stop (i.e. the user isn't mid-typing something else).
+      if (this.searchQuery() === this.lastSyncedName && expectedText !== this.searchQuery()) {
+        this.searchQuery.set(expectedText);
+      }
+      this.lastSyncedName = expectedText;
+    });
+  });
 
   private availableStops = computed(() => {
     const stops = this.allStops();

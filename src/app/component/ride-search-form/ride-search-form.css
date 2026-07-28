@@ -1,0 +1,19 @@
+/* .np-search-swap base look (flex + icon color) comes from the global styles.css.
+   Just reset native <button> chrome so it still reads as a plain icon. */
+.np-search-swap {
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s;
+}
+
+.np-search-swap:hover {
+  background: var(--crema);
+  color: var(--maiolica);
+}
+
+.np-search-swap:focus-visible {
+  outline: 2px solid var(--azzurro);
+  outline-offset: 2px;
+}

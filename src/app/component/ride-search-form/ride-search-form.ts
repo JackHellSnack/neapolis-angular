@@ -138,6 +138,18 @@ export class RideSearchForm {
 
   }
 
+  swapStops() {
+
+    const start = this.startStop();
+
+    const arrival = this.arrivalStop();
+
+    this.startStop.set(arrival);
+
+    this.arrivalStop.set(start);
+
+  }
+
   useCurrentRoute() {
 
     this.showAlternativePrompt.set(false);
