@@ -154,7 +154,7 @@ export class RideSearchForm {
 
     this.showAlternativePrompt.set(false);
 
-    this.router.navigate(['/stop-map']);
+    this.router.navigate(['/home-map']);
 
   }
 
@@ -188,7 +188,7 @@ export class RideSearchForm {
 
         this.routeHighlight.setResults(routes);
 
-        this.router.navigate(['/stop-map']);
+        this.router.navigate(['/home-map']);
 
       },
 

@@ -116,3 +116,47 @@
   padding: 0;
   opacity: 0.8;
 }
+
+.np-map-options {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--carta);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  padding: 10px;
+  min-width: 160px;
+}
+
+.np-route-option {
+  border: 1.5px solid var(--grigio-bordo);
+  background: transparent;
+  border-radius: var(--radius-xs);
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--grigio-testo);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.np-route-option:hover {
+  background: var(--crema);
+  color: var(--inchiostro);
+}
+
+.np-route-option-active {
+  background: var(--maiolica-light);
+  border-color: var(--maiolica);
+  color: var(--maiolica);
+}
+
+.np-route-confirm {
+  margin-top: 4px;
+}

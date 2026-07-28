@@ -20,7 +20,7 @@ const poiIcon = L.icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
 
-import { Component, OnInit, OnDestroy, inject, effect, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, effect, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { StopService } from '../../service/stop-service';
@@ -36,6 +36,7 @@ import PointOfInterest from '../../model/point-of-interest';
 import RouteLeg from '../../model/route-leg';
 import PoiSearchRequest from '../../model/poi-search-request';
 import { SquircleDirective } from '../../directive/squircle';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-stop-map',
@@ -51,6 +52,7 @@ export class StopMap implements OnInit, OnDestroy {
   private poiService      = inject(PointOfInterestService);
   private authService     = inject(AuthService);
   private routeHighlight  = inject(RouteHighlightService);
+  private router = inject(Router);
 
   private map!: L.Map;
   private allStopsLayer!: L.LayerGroup;
@@ -58,6 +60,11 @@ export class StopMap implements OnInit, OnDestroy {
   private linesLayer!: L.LayerGroup;
   private poiLayer!: L.LayerGroup;
   private highlightLayer!: L.LayerGroup;
+  readonly legs = computed<RouteLeg[] | null>(() => {
+    const routes = this.routes();
+    const idx = this.selectedIndex();
+    return routes[idx] ?? null;
+  });
 
   private stopsById = new Map<number, Stop>();
   private linesById = new Map<number, Line>();
@@ -77,12 +84,13 @@ export class StopMap implements OnInit, OnDestroy {
   ];
   private readonly DEFAULT_STOP_COLOR = '#2C8FBF';
 
-routes = this.routeHighlight.routes;
+  routes = this.routeHighlight.routes;
   selectedIndex = this.routeHighlight.selectedIndex;
 
   selectRoute(index: number) {
     this.routeHighlight.selectRoute(index);
   }
+
 
   constructor() {
     effect(() => {
@@ -207,12 +215,6 @@ routes = this.routeHighlight.routes;
     // only by the "Vedi percorso" button via onPoiButtonClick, below.
   }
 
-  /**
-   * Triggered from the Leaflet popup's "Vedi percorso" button
-   * (see window.neapolisPoiClick wiring in ngOnInit).
-   * Looks up the route to this POI directly by its id, without needing
-   * the user's current position.
-   */
   /**
    * Triggered from the Leaflet popup's "Vedi percorso" button
    * (see window.neapolisPoiClick wiring in ngOnInit).
@@ -399,4 +401,7 @@ routes = this.routeHighlight.routes;
     }
     this.map?.remove();
   }
+
+  
+
 }

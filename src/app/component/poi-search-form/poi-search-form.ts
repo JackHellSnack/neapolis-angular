@@ -140,7 +140,7 @@ export class PoiSearchForm {
 
     this.showAlternativePrompt.set(false);
 
-    this.router.navigate(['/stop-map']);
+    this.router.navigate(['/home-map']);
 
   }
 
@@ -164,7 +164,7 @@ export class PoiSearchForm {
 
         this.routeHighlight.setResults(routes);
 
-        this.router.navigate(['/stop-map']);
+        this.router.navigate(['/home-map']);
 
       },
 

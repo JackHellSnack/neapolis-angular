@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -26,7 +26,7 @@ export class UserDashboard implements OnInit, OnDestroy {
   private userService = inject(UserService);
 
   journeyStatus    = signal<any | null>(null);
-  journeyLegs      = signal<RouteLeg[] | null>(null);
+  journeyLegs      = computed(() => this.routeHighlight.legs());
   loading          = signal(true);
   pinging          = signal(false);
   ending           = signal(false);
@@ -47,8 +47,6 @@ export class UserDashboard implements OnInit, OnDestroy {
   private pingInterval: any;
 
   ngOnInit() {
-    const cached = this.routeHighlight.legs();
-    if (cached) this.journeyLegs.set(cached);
 
     this.journeyService.getStatus().subscribe({
       next: status => {
@@ -77,14 +75,13 @@ export class UserDashboard implements OnInit, OnDestroy {
     });
   }
 
-  endJourney() {
+    endJourney() {
     this.ending.set(true);
     this.journeyService.end().subscribe({
       next: () => {
         this.ending.set(false);
         this.journeyStatus.set(null);
-        this.routeHighlight.clear();
-        this.journeyLegs.set(null);
+        this.routeHighlight.clear();   // this alone clears journeyLegs() too, since it's derived
         if (this.pingInterval) { clearInterval(this.pingInterval); this.pingInterval = null; }
       },
       error: () => this.ending.set(false)

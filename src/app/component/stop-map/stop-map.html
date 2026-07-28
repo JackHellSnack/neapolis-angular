@@ -9,6 +9,21 @@
     </div>
   }
 
+  <!-- Route options picker: only shows when there are multiple alternatives -->
+  @if (routes().length > 1) {
+    <div class="np-map-options">
+      @for (route of routes(); track $index) {
+        <button
+          type="button"
+          class="np-route-option"
+          [class.np-route-option-active]="selectedIndex() === $index"
+          (click)="selectRoute($index)">
+          Opzione {{ $index + 1 }}
+        </button>
+      }
+    </div>
+  }
+
   @if (searching()) {
     <div class="np-map-searching">
       <span class="np-spinner"></span>
@@ -23,5 +38,5 @@
     </div>
   }
 
-  <div  id="stop-map-container" class="np-map"></div>
+  <div id="stop-map-container" class="np-map"></div>
 </div>
