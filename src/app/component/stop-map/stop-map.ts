@@ -151,49 +151,6 @@ export class StopMap implements OnInit, OnDestroy {
   this.poiLayer         = L.layerGroup().addTo(this.map);
   this.highlightLayer   = L.layerGroup().addTo(this.map);
 
-    this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
-    this.map.zoomControl.setPosition('bottomleft');
-    L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
-     // attribution: '© OpenStreetMap contributors'
-    }).addTo(this.map);
-
-
-    this.allStopsLayer = L.layerGroup().addTo(this.map);
-    this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
-    this.linesLayer       = L.layerGroup().addTo(this.map);
-    this.poiLayer         = L.layerGroup().addTo(this.map);
-    this.highlightLayer   = L.layerGroup().addTo(this.map);
-
-
-
-    forkJoin({
-      stops: this.stopService.findAll(),
-      lines: this.lineService.findAll(),
-      pois:  this.authService.isLoggedIn()
-        ? this.poiService.findByUserInterests()
-        : this.poiService.findAll()
-    }).subscribe({
-      next: ({ stops, lines, pois }) => {
-        lines.forEach(line => this.linesById.set(line.id!, line));
-        stops.forEach(stop => {
-          this.stopsById.set(stop.id!, stop);
-          this.addStopMarker(stop, this.allStopsLayer);
-        });
-        lines.forEach(line => this.drawLine(line));
-        pois.forEach(poi => this.addPoiMarker(poi));
-        this.dataReady = true;
-        const pending = this.routeHighlight.routes();
-
-       if (pending.length > 0) {
-            if (pending.length === 1) {
-                this.renderHighlightedRoute(pending[0]);
-            } else {
-                this.renderHighlightedRoutes(pending, this.routeHighlight.selectedIndex());
-            }
-            this.routeActive.set(true);
-        }
-      },
-      error: err => console.error(err)
   forkJoin({
     stops: this.stopService.findAll(),
     lines: this.lineService.findAll(),
@@ -222,8 +179,15 @@ export class StopMap implements OnInit, OnDestroy {
     if (this.authService.isLoggedIn()) {
       this.journeyService.getStatus().subscribe({
         next: (status: JourneyStatus) => {
-          if (status && !status.finished && status.legs?.length) {
-            this.routeHighlight.setResult(status.legs);
+          if (status && !status.finished) {
+            const legs = status.legs?.length
+              ? status.legs
+              : status.currentLeg
+                ? [status.currentLeg]
+                : null;
+            if (legs) {
+              this.routeHighlight.setResult(legs);
+            }
           }
           this.dataReady.set(true);
         },
