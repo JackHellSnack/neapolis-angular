@@ -6,7 +6,7 @@
     grid-row-gap: 0px;
 
     justify-items: center;
-    
+
     position: absolute;
     padding: 0.5em 1.5em;
     top: 0;
@@ -47,12 +47,11 @@
 
 
 .floating-menu {
-    min-width: 400px;
     max-width: 450px;
     height: fit-content;
     background-color: transparent;
     justify-self: start;
-    white-space: nowrap;
+
 }
 
 .grid-top-left {
@@ -133,6 +132,9 @@
         color 5s ease,
         width 5s ease,
     ;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .np-tab-active {
@@ -167,12 +169,43 @@
     overflow: hidden;
 }
 
+.mobile-top-row {
+    display: flex;
+    background-color: var(--blu-notte);
+    border-radius: 18px;
+    align-items: center;
+
+
+}
+
 .np-mobile-menu {
     display: none;
 }
 
+.np-topnav-logo-mobile {
+
+    display: flex;
+    align-items: center;
+
+    justify-self: center;
+
+    gap: 10px;
+    text-decoration: none;
+    color: var(--carta);
+    padding: 5px 0;
+    height: fit-content;
+    margin-top: auto;
+
+
+}
+
 .np-hamburger {
     display: none;
+    max-height: min-content;
+    border: none;
+    background-color: transparent;
+    color: rgba(255, 253, 249, 0.6);
+    line-height: 1;
 }
 
 
@@ -190,7 +223,7 @@
         display: block;
     }
 
-    .floating-menu-mobile{
+    .floating-menu-mobile {
         display: flex;
     }
 }
