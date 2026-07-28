@@ -1,19 +1,21 @@
 <div class="np-picker">
   <input
+    #triggerInput
     class="np-picker-input"
     type="text"
     [value]="searchQuery()"
     (input)="onInputChange($any($event.target).value)"
     (blur)="hide()"
     placeholder="Cerca fermata...">
-  @if (showDropdown() && filteredStops().length > 0) {
-    <div class="np-picker-dropdown">
-      @for (stop of filteredStops(); track stop.id) {
-        <div class="np-picker-item" (mousedown)="selectStop(stop)">
-          <strong>{{ stop.name }}</strong>
-          <span>{{ stop.road }}{{ stop.city ? ', ' + stop.city : '' }}</span>
-        </div>
-      }
-    </div>
-  }
 </div>
+
+<ng-template #dropdownTemplate>
+  <div class="np-picker-dropdown">
+    @for (stop of filteredStops(); track stop.id) {
+      <div class="np-picker-item" (mousedown)="selectStop(stop)">
+        <strong>{{ stop.name }}</strong>
+        <span>{{ stop.road }} · {{ stop.city }}</span>
+      </div>
+    }
+  </div>
+</ng-template>

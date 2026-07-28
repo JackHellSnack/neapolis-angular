@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PointOfInterestService } from '../../service/point-of-interest-service';
 import { AuthService } from '../../service/auth-service';
 import PointOfInterest from '../../model/point-of-interest';
+import { BasePickerComponent } from '../../directive/base-picker';
 
 @Component({
   selector: 'app-poi-picker',
@@ -12,13 +13,12 @@ import PointOfInterest from '../../model/point-of-interest';
   templateUrl: './poi-picker.html',
   styleUrl: './poi-picker.css'
 })
-export class PoiPicker implements OnInit {
+export class PoiPicker extends BasePickerComponent<PointOfInterest> implements OnInit {
   private poiService = inject(PointOfInterestService);
   private authService = inject(AuthService);
   poi = model<PointOfInterest | null>(null);
   private allPois = signal<PointOfInterest[]>([]);
   searchQuery = signal('');
-  showDropdown = signal(false);
 
   filteredPois = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -27,6 +27,8 @@ export class PoiPicker implements OnInit {
       p.name.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q)
     );
   });
+
+  protected filteredItems() { return this.filteredPois(); }
 
   ngOnInit() {
     const pois$ = this.authService.isLoggedIn()
@@ -48,6 +50,9 @@ export class PoiPicker implements OnInit {
     if (!value.trim() || (this.poi() && this.poi()?.name !== value)) this.poi.set(null);
   }
 
-  selectPoi(p: PointOfInterest) { this.searchQuery.set(p.name); this.showDropdown.set(false); this.poi.set(p); }
-  hide() { setTimeout(() => this.showDropdown.set(false), 200); }
+  selectPoi(p: PointOfInterest) {
+    this.searchQuery.set(p.name);
+    this.showDropdown.set(false);
+    this.poi.set(p);
+  }
 }

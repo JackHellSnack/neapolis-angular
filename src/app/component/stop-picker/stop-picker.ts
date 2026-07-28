@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { StopService } from '../../service/stop-service';
 import Stop from '../../model/stop';
 import Line from '../../model/line';
+import { BasePickerComponent } from '../../directive/base-picker';
 
 @Component({
   selector: 'app-stop-picker',
@@ -12,13 +13,12 @@ import Line from '../../model/line';
   templateUrl: './stop-picker.html',
   styleUrl: './stop-picker.css'
 })
-export class StopPicker implements OnInit {
+export class StopPicker extends BasePickerComponent<Stop> implements OnInit {
   private stopService = inject(StopService);
   line = input<Line | null>(null);
   stop = model<Stop | null>(null);
   private allStops = signal<Stop[]>([]);
   searchQuery = signal('');
-  showDropdown = signal(false);
 
   private availableStops = computed(() => {
     const stops = this.allStops();
@@ -38,6 +38,8 @@ export class StopPicker implements OnInit {
     );
   });
 
+  protected filteredItems() { return this.filteredStops(); }
+
   ngOnInit() {
     this.stopService.findAll().subscribe({
       next: data => {
@@ -55,6 +57,9 @@ export class StopPicker implements OnInit {
     if (!value.trim() || (this.stop() && this.stop()?.name !== value)) this.stop.set(null);
   }
 
-  selectStop(s: Stop) { this.searchQuery.set(s.name); this.showDropdown.set(false); this.stop.set(s); }
-  hide() { setTimeout(() => this.showDropdown.set(false), 200); }
+  selectStop(s: Stop) {
+    this.searchQuery.set(s.name);
+    this.showDropdown.set(false);
+    this.stop.set(s);
+  }
 }
