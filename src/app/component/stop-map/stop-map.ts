@@ -38,6 +38,7 @@ import PoiSearchRequest from '../../model/poi-search-request';
 import { SquircleDirective } from '../../directive/squircle';
 import { Router } from '@angular/router';
 import { JourneyService } from '../../service/journey-service';
+import JourneyStatus from '../../model/journey-status';
 
 @Component({
   selector: 'app-stop-map',
@@ -57,6 +58,17 @@ export class StopMap implements OnInit, OnDestroy {
   private router = inject(Router);
   private stopTimesById = new Map<number, { arrival?: string; departure?: string }>();
 
+
+  private readonly ROUTE_COLORS = [
+    '#B00020', // best route
+    '#C62828',
+    '#D84343',
+    '#f15a5a',
+    '#f76161',
+    '#e73749'
+  ];
+  private readonly DEFAULT_STOP_COLOR = '#2C8FBF';
+
   private map!: L.Map;
   private allStopsLayer!: L.LayerGroup;
   private nearbyStopsLayer!: L.LayerGroup;
@@ -71,23 +83,14 @@ export class StopMap implements OnInit, OnDestroy {
 
   startingJourney = signal(false);
   startJourneyError = signal<string | null>(null);
+ 
   private stopsById = new Map<number, Stop>();
   private linesById = new Map<number, Line>();
-  private dataReady = false;
+  private dataReady = signal(false); // was: private dataReady = false;
 
   routeActive = signal(false);
   searching = signal(false);
   searchError = signal<string | null>(null);
-
-  private readonly ROUTE_COLORS = [
-    '#B00020', // best route
-    '#C62828',
-    '#D84343',
-    '#f15a5a',
-    '#f76161',
-    '#e73749'
-  ];
-  private readonly DEFAULT_STOP_COLOR = '#2C8FBF';
 
   routes = this.routeHighlight.routes;
   selectedIndex = this.routeHighlight.selectedIndex;
@@ -96,7 +99,28 @@ export class StopMap implements OnInit, OnDestroy {
     this.routeHighlight.selectRoute(index);
   }
 
-   startJourneyFromMap() {
+  constructor() {
+    effect(() => {
+      const routes = this.routeHighlight.routes();
+      const selectedIndex = this.routeHighlight.selectedIndex();
+      const ready = this.dataReady(); // now tracked reactively
+
+      if (!ready) return;
+
+      if (routes.length > 0) {
+        if (routes.length === 1) {
+          this.renderHighlightedRoute(routes[0]);
+        } else {
+          this.renderHighlightedRoutes(routes, selectedIndex);
+        }
+        this.routeActive.set(true);
+      } else {
+        this.clearHighlight();
+        this.routeActive.set(false);
+      }
+    });
+  }
+  startJourneyFromMap() {
     const legs = this.routeHighlight.legs();
     if (!legs?.length) return;
     this.startingJourney.set(true);
@@ -113,82 +137,62 @@ export class StopMap implements OnInit, OnDestroy {
     });
   }
 
-  constructor() {
-    effect(() => {
-      const routes = this.routeHighlight.routes();
-      const selectedIndex = this.routeHighlight.selectedIndex();
-
-      if (!this.dataReady) {
-        return;
-      }
-
-      if (routes.length > 0) {
-        if (routes.length === 1) {
-          this.renderHighlightedRoute(routes[0]);
-        } else {
-          this.renderHighlightedRoutes(routes, selectedIndex);
-        }
-
-        this.routeActive.set(true);
-      } else {
-        this.clearHighlight();
-        this.routeActive.set(false);
-      }
-    });
-  }
-
   ngOnInit() {
+  (window as any).neapolisPoiClick = (poiId: number) => this.onPoiButtonClick(poiId);
+  (window as any).neapolisSelectRoute = (routeIndex: number) => this.selectRoute(routeIndex);
 
-    // Expose a global hook so the Leaflet popup button (plain HTML/onclick,
-    // outside Angular's template & change detection) can trigger the route
-    // search when the user taps "Vedi percorso" on a POI popup.
-    (window as any).neapolisPoiClick = (poiId: number) => this.onPoiButtonClick(poiId);
+  this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
+  this.map.zoomControl.setPosition('topright');
+  L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {}).addTo(this.map);
 
+  this.allStopsLayer = L.layerGroup().addTo(this.map);
+  this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
+  this.linesLayer       = L.layerGroup().addTo(this.map);
+  this.poiLayer         = L.layerGroup().addTo(this.map);
+  this.highlightLayer   = L.layerGroup().addTo(this.map);
 
-    this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
-    this.map.zoomControl.setPosition('topright');
-    L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
-     // attribution: '© OpenStreetMap contributors'
-    }).addTo(this.map);
-
-
-    this.allStopsLayer = L.layerGroup().addTo(this.map);
-    this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
-    this.linesLayer       = L.layerGroup().addTo(this.map);
-    this.poiLayer         = L.layerGroup().addTo(this.map);
-    this.highlightLayer   = L.layerGroup().addTo(this.map);
-
-
-
-    forkJoin({
-      stops: this.stopService.findAll(),
-      lines: this.lineService.findAll(),
-      pois:  this.authService.isLoggedIn()
-        ? this.poiService.findByUserInterests()
-        : this.poiService.findAll()
-    }).subscribe({
-      next: ({ stops, lines, pois }) => {
-        lines.forEach(line => this.linesById.set(line.id!, line));
-        stops.forEach(stop => {
-          this.stopsById.set(stop.id!, stop);
-          this.addStopMarker(stop, this.allStopsLayer);
-        });
-        lines.forEach(line => this.drawLine(line));
-        pois.forEach(poi => this.addPoiMarker(poi));
-        this.dataReady = true;
-        const pending = this.routeHighlight.routes();
-
-       if (pending.length > 0) {
-            if (pending.length === 1) {
-                this.renderHighlightedRoute(pending[0]);
-            } else {
-                this.renderHighlightedRoutes(pending, this.routeHighlight.selectedIndex());
-            }
-            this.routeActive.set(true);
-        }
-      },
-      error: err => console.error(err)
+  forkJoin({
+    stops: this.stopService.findAll(),
+    lines: this.lineService.findAll(),
+    pois:  this.authService.isLoggedIn()
+      ? this.poiService.findByUserInterests()
+      : this.poiService.findAll()
+  }).subscribe({
+    next: ({ stops, lines, pois }) => {
+    lines.forEach(line => this.linesById.set(line.id!, line));
+    stops.forEach(stop => {
+      this.stopsById.set(stop.id!, stop);
+      this.addStopMarker(stop, this.allStopsLayer);
     });
+    lines.forEach(line => this.drawLine(line));
+    pois.forEach(poi => this.addPoiMarker(poi));
+
+    // If a route is already active in-memory (e.g. user just came from a
+    // search), keep that — don't overwrite it with the backend journey.
+    if (this.routeHighlight.routes().length > 0) {
+      this.dataReady.set(true);
+      return;
+    }
+
+    // Otherwise, check if the user has an active journey on the backend
+    // and hydrate the highlighted route from it (survives page reloads).
+    if (this.authService.isLoggedIn()) {
+      this.journeyService.getStatus().subscribe({
+        next: (status: JourneyStatus) => {
+          if (status && !status.finished && status.legs?.length) {
+            this.routeHighlight.setResult(status.legs);
+          }
+          this.dataReady.set(true);
+        },
+        error: () => this.dataReady.set(true) // no active journey — fine
+      });
+    } 
+    else {
+      this.dataReady.set(true);
+    }
+  },
+    error: err => console.error(err)
+      });
 
     this.geolocationService.getCurrentPosition().subscribe({
       next: pos => {
@@ -200,7 +204,7 @@ export class StopMap implements OnInit, OnDestroy {
           stops.forEach(stop => this.addStopMarker(stop, this.nearbyStopsLayer));
         });
       },
-      error: () => { } // geolocation might be denied — silent fail
+      error: () => { }
     });
   }
 
@@ -439,6 +443,9 @@ private stopPopupContent(stop: Stop): string {
     // more than once, e.g. via routing).
     if ((window as any).neapolisPoiClick) {
       delete (window as any).neapolisPoiClick;
+    }
+    if ((window as any).neapolisSelectRoute) {
+      delete (window as any).neapolisSelectRoute;
     }
     this.map?.remove();
   }
