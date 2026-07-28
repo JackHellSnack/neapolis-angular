@@ -1,19 +1,21 @@
 <div class="np-picker">
   <input
+    #triggerInput
     class="np-picker-input"
     type="text"
     [value]="searchQuery()"
     (input)="onInputChange($any($event.target).value)"
     (blur)="hide()"
     placeholder="Cerca punto di interesse...">
-  @if (showDropdown() && filteredPois().length > 0) {
-    <div class="np-picker-dropdown">
-      @for (poi of filteredPois(); track poi.id) {
-        <div class="np-picker-item" (mousedown)="selectPoi(poi)">
-          <strong>{{ poi.name }}</strong>
-          <span>{{ poi.category }}</span>
-        </div>
-      }
-    </div>
-  }
 </div>
+
+<ng-template #dropdownTemplate>
+  <div class="np-picker-dropdown">
+    @for (poi of filteredPois(); track poi.id) {
+      <div class="np-picker-item" (mousedown)="selectPoi(poi)">
+        <strong>{{ poi.name }}</strong>
+        <span>{{ poi.category }}</span>
+      </div>
+    }
+  </div>
+</ng-template>

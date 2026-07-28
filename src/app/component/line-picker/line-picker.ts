@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, signal, computed, model, output } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, model } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LineService } from '../../service/line-service';
 import Line from '../../model/line';
+import { BasePickerComponent } from '../../directive/base-picker';
 
 @Component({
   selector: 'app-line-picker',
@@ -11,13 +12,12 @@ import Line from '../../model/line';
   templateUrl: './line-picker.html',
   styleUrl: './line-picker.css'
 })
-export class LinePicker implements OnInit {
+export class LinePicker extends BasePickerComponent<Line> implements OnInit {
   private lineService = inject(LineService);
   line = model<Line | null>(null);
   lineChange = model<Line | null>();
   private allLines = signal<Line[]>([]);
   searchQuery = signal('');
-  showDropdown = signal(false);
 
   filteredLines = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -28,6 +28,8 @@ export class LinePicker implements OnInit {
       l.type.toLowerCase().includes(q)
     );
   });
+
+  protected filteredItems() { return this.filteredLines(); }
 
   ngOnInit() {
     this.lineService.findAll().subscribe({
@@ -41,19 +43,16 @@ export class LinePicker implements OnInit {
   }
 
   onInputChange(value: string) {
-  this.searchQuery.set(value);
-  this.showDropdown.set(value.trim().length > 0);
-
-  if (!value.trim() || (this.line() && this.line()?.name !== value)) {
-    this.line.set(null);   // automatically emits lineChange
+    this.searchQuery.set(value);
+    this.showDropdown.set(value.trim().length > 0);
+    if (!value.trim() || (this.line() && this.line()?.name !== value)) {
+      this.line.set(null);
+    }
   }
-}
 
-selectLine(l: Line) {
-  this.searchQuery.set(l.name);
-  this.showDropdown.set(false);
-  this.line.set(l);        // automatically emits lineChange
-}
-
-  hide() { setTimeout(() => this.showDropdown.set(false), 200); }
+  selectLine(l: Line) {
+    this.searchQuery.set(l.name);
+    this.showDropdown.set(false);
+    this.line.set(l);
+  }
 }

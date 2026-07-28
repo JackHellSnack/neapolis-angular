@@ -14,9 +14,9 @@ import { getSvgPath } from 'figma-squircle';
   standalone: true,
 })
 export class SquircleDirective implements OnInit, OnChanges, OnDestroy {
-  @Input() cornerRadius = 18;
+  @Input() cornerRadius = 24;
   @Input() cornerSmoothing = 0.6;
-  @Input() preserveSmoothing = false;
+  @Input() preserveSmoothing = true;
 
   private resizeObserver?: ResizeObserver;
   private wrapper?: HTMLElement;

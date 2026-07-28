@@ -72,43 +72,6 @@
   z-index: 10;
 }
 
-.np-tabs {
-  display: flex;
-  background: var(--blu-notte);
-  border-radius: var(--radius) var(--radius) 0 0;
-  overflow: hidden;
-}
-
-.np-tab {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 16px 20px;
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: rgba(255,253,249,0.6);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-bottom: 3px solid transparent;
-}
-
-.np-tab:hover { color: rgba(255,253,249,0.9); background: rgba(255,255,255,0.06); }
-
-.np-tab-active {
-  color: var(--carta) !important;
-  border-bottom-color: var(--maiolica) !important;
-  background: rgba(255,255,255,0.07) !important;
-}
-
-.np-search-body {
-  background: var(--carta);
-  border-radius: 0 0 var(--radius) var(--radius);
-  padding: 32px;
-}
 
 /* ---- MAP SECTION ---- */
 .np-map-section {

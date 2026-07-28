@@ -1,19 +1,21 @@
 <div class="np-picker">
   <input
+    #triggerInput
     class="np-picker-input"
     type="text"
     [value]="searchQuery()"
     (input)="onInputChange($any($event.target).value)"
     (blur)="hide()"
     placeholder="Cerca linea...">
-  @if (showDropdown() && filteredLines().length > 0) {
-    <div class="np-picker-dropdown">
-      @for (line of filteredLines(); track line.id) {
-        <div class="np-picker-item" (mousedown)="selectLine(line)">
-          <strong>{{ line.name }}</strong>
-          <span>{{ line.type }} · {{ line.provider }}</span>
-        </div>
-      }
-    </div>
-  }
 </div>
+
+<ng-template #dropdownTemplate>
+  <div class="np-picker-dropdown">
+    @for (line of filteredLines(); track line.id) {
+      <div class="np-picker-item" (mousedown)="selectLine(line)">
+        <strong>{{ line.name }}</strong>
+        <span>{{ line.type }} · {{ line.provider }}</span>
+      </div>
+    }
+  </div>
+</ng-template>

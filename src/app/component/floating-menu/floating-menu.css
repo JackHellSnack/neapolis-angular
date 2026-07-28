@@ -1,0 +1,74 @@
+.floating-menu-container {
+    position: fixed;
+    padding: 1em;
+    top: 0;
+    left: 0;
+    width: 450px;
+    height: 100dvh;
+    z-index: 1001;
+    float: left;
+}
+
+.floating-menu {
+    min-width: 450px;
+    height: fit-content;
+    background-color: transparent;
+}
+
+.np-tabs {
+    display: flex;
+}
+
+.np-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0.6em 0.6em;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: flex 5s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 5s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 5s ease,
+                background-color 5s ease,
+                color 5s ease,
+                width 5s ease,
+                ;
+}
+
+.np-tab-active {
+    flex: 1;
+    color: var(--carta) !important;
+    background: var(--blu-notte) !important;
+    border-radius: 16px 16px 0 0 ;
+    color: var(--carta) !important;
+    border-bottom-color: var(--maiolica) !important;
+}
+
+.np-tabs:has(.np-tab-active) {
+    gap: 0;
+}
+
+.np-tabs:has(.np-tab-active) .np-tab:not(.np-tab-active) {
+    flex: 0;
+    padding: 0;
+}
+
+.np-search-body-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.np-search-body-wrapper.np-open {
+    grid-template-rows: 1fr;
+}
+
+.np-search-body-inner {
+    overflow: hidden;
+}

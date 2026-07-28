@@ -39,16 +39,16 @@ import { SquircleDirective } from '../../directive/squircle';
 @Component({
   selector: 'app-stop-map',
   standalone: true,
-  imports: [CommonModule,SquircleDirective],
+  imports: [CommonModule, SquircleDirective],
   templateUrl: './stop-map.html',
   styleUrl: './stop-map.css'
 })
 export class StopMap implements OnInit {
-  private stopService     = inject(StopService);
+  private stopService = inject(StopService);
   private geolocationService = inject(GeolocationService);
-  private lineService     = inject(LineService);
-  private poiService      = inject(PointOfInterestService);
-  private routeHighlight  = inject(RouteHighlightService);
+  private lineService = inject(LineService);
+  private poiService = inject(PointOfInterestService);
+  private routeHighlight = inject(RouteHighlightService);
 
   private map!: L.Map;
   private allStopsLayer!: L.LayerGroup;
@@ -62,17 +62,17 @@ export class StopMap implements OnInit {
   private dataReady = false;
 
   routeActive = signal(false);
-  searching   = signal(false);
+  searching = signal(false);
   searchError = signal<string | null>(null);
 
   private readonly ROUTE_COLORS = [
-  '#B00020', // best route
-  '#C62828',
-  '#D84343',
-  '#f15a5a',
-  '#f76161',
-  '#e73749'
-];
+    '#B00020', // best route
+    '#C62828',
+    '#D84343',
+    '#f15a5a',
+    '#f76161',
+    '#e73749'
+  ];
   private readonly DEFAULT_STOP_COLOR = '#2C8FBF';
 
   constructor() {
@@ -100,20 +100,22 @@ export class StopMap implements OnInit {
 
   ngOnInit() {
     this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+    this.map.zoomControl.setPosition('topright');
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
+     // attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
-    this.allStopsLayer   = L.layerGroup().addTo(this.map);
+
+    this.allStopsLayer = L.layerGroup().addTo(this.map);
     this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
-    this.linesLayer       = L.layerGroup().addTo(this.map);
-    this.poiLayer         = L.layerGroup().addTo(this.map);
-    this.highlightLayer   = L.layerGroup().addTo(this.map);
+    this.linesLayer = L.layerGroup().addTo(this.map);
+    this.poiLayer = L.layerGroup().addTo(this.map);
+    this.highlightLayer = L.layerGroup().addTo(this.map);
 
     forkJoin({
       stops: this.stopService.findAll(),
       lines: this.lineService.findAll(),
-      pois:  this.poiService.findAll()
+      pois: this.poiService.findAll()
     }).subscribe({
       next: ({ stops, lines, pois }) => {
         lines.forEach(line => this.linesById.set(line.id!, line));
@@ -128,13 +130,13 @@ export class StopMap implements OnInit {
 
         if (pending.length > 0) {
 
-            if (pending.length === 1) {
-                this.renderHighlightedRoute(pending[0]);
-            } else {
-                this.renderHighlightedRoutes(pending);
-            }
+          if (pending.length === 1) {
+            this.renderHighlightedRoute(pending[0]);
+          } else {
+            this.renderHighlightedRoutes(pending);
+          }
 
-            this.routeActive.set(true);
+          this.routeActive.set(true);
         }
       },
       error: err => console.error(err)
@@ -150,7 +152,7 @@ export class StopMap implements OnInit {
           stops.forEach(stop => this.addStopMarker(stop, this.nearbyStopsLayer));
         });
       },
-      error: () => {} // geolocation might be denied — silent fail
+      error: () => { } // geolocation might be denied — silent fail
     });
   }
 
@@ -250,7 +252,7 @@ export class StopMap implements OnInit {
       if (!line?.stopIds?.length) return;
       const orderedIds = [...line.stopIds].sort((a, b) => a.delta - b.delta).map(e => e.id);
       const fromIdx = orderedIds.indexOf(leg.fromStopId);
-      const toIdx   = orderedIds.indexOf(leg.toStopId);
+      const toIdx = orderedIds.indexOf(leg.toStopId);
       if (fromIdx === -1 || toIdx === -1) return;
       const [start, end] = fromIdx <= toIdx ? [fromIdx, toIdx] : [toIdx, fromIdx];
       const segIds = orderedIds.slice(start, end + 1);
@@ -294,7 +296,7 @@ export class StopMap implements OnInit {
 
       const color =
         this.ROUTE_COLORS[
-          Math.min(routeIndex, this.ROUTE_COLORS.length - 1)
+        Math.min(routeIndex, this.ROUTE_COLORS.length - 1)
         ];
 
       const weight = routeIndex === 0 ? 7 : 5;
@@ -345,10 +347,10 @@ export class StopMap implements OnInit {
             weight,
             opacity: 0.9
           })
-          .addTo(this.highlightLayer)
-          .bindPopup(
-            `<strong>Option ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}`
-          );
+            .addTo(this.highlightLayer)
+            .bindPopup(
+              `<strong>Option ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}`
+            );
 
           bounds.push(...path);
         }
@@ -372,8 +374,8 @@ export class StopMap implements OnInit {
         fillOpacity: 1,
         weight: 2
       })
-      .addTo(this.highlightLayer)
-      .bindPopup(stop.name);
+        .addTo(this.highlightLayer)
+        .bindPopup(stop.name);
 
     });
 
@@ -388,7 +390,7 @@ export class StopMap implements OnInit {
 
   private clearHighlight() {
     this.highlightLayer.clearLayers();
-    if (!this.map.hasLayer(this.allStopsLayer))   this.map.addLayer(this.allStopsLayer);
+    if (!this.map.hasLayer(this.allStopsLayer)) this.map.addLayer(this.allStopsLayer);
     if (!this.map.hasLayer(this.nearbyStopsLayer)) this.map.addLayer(this.nearbyStopsLayer);
   }
 }

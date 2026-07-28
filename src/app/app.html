@@ -1,5 +1,15 @@
 <main>
-<app-navigation-menu></app-navigation-menu>
-<router-outlet></router-outlet>
-<app-footer></app-footer>
+    @if (!hideChrome()) {
+    <app-navigation-menu></app-navigation-menu>
+    }
+
+    @if (hideChrome()){
+    <app-floating-menu></app-floating-menu>
+    }
+    
+    <router-outlet></router-outlet>
+
+    @if (!hideChrome()) {
+    <app-footer></app-footer>
+    }
 </main>

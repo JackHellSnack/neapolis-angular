@@ -1,6 +1,5 @@
   import { Routes } from '@angular/router';
 import { Home } from './component/home/home';
-import { StopMap } from './component/stop-map/stop-map';
 import { StopForm } from './component/stop-form/stop-form';
 import { LineForm } from './component/line-form/line-form';
 import { Login } from './component/login/login';
@@ -12,12 +11,13 @@ import { AdminDashboard } from './component/admin-dashboard/admin-dashboard';
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
 import { Register } from './component/register/register';
+import { HomeMap } from './component/home-map/home-map';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: Home },
+  { path: 'home', component: Home,},
   { path: 'login', component: Login },
-  { path: 'stop-map', component: StopMap },
+  { path: 'home-map', component: HomeMap, data: {hideChrome: true}},
   { path: 'ride-search', component: RideSearchForm },
   { path: 'poi-search', component: PoiSearchForm },
   { path: 'dashboard', component: UserDashboard, canActivate: [authGuard] },
@@ -25,5 +25,6 @@ export const routes: Routes = [
   { path: 'stop-form', component: StopForm, canActivate: [authGuard, adminGuard] },
   { path: 'line-form', component: LineForm, canActivate: [authGuard, adminGuard] },
   { path: 'poi-form', component: PoiForm, canActivate: [authGuard, adminGuard] },
-  { path: 'register', component: Register}
+  { path: 'register', component: Register},
+
 ];

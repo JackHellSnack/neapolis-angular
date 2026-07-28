@@ -1,7 +1,6 @@
 .np-map-wrap {
   display: flex;
   flex-grow: 1;
-  border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-card);
   background-color: cornflowerblue;
@@ -10,12 +9,6 @@
 .np-map {
   height: 100%;
   width: 100%;
-}
-
-@media (max-width: 640px) {
-  .np-map-wrap {
-    height: 380px;
-  }
 }
 
 .np-map-overlay {
@@ -88,10 +81,4 @@
   cursor: pointer;
   padding: 0;
   opacity: 0.8;
-}
-
-@media (max-width: 640px) {
-  .np-map {
-    height: 380px;
-  }
 }

@@ -14,11 +14,7 @@
 
       <label>Orario</label>
 
-      <input
-        type="time"
-        [ngModel]="time()"
-        (ngModelChange)="time.set($event)"
-        name="time">
+      <input type="time" [ngModel]="time()" (ngModelChange)="time.set($event)" name="time">
 
     </div>
 
@@ -28,10 +24,7 @@
 
     <label class="np-checkbox-label">
 
-      <input
-        type="checkbox"
-        [ngModel]="searchByArrival()"
-        (ngModelChange)="searchByArrival.set($event)"
+      <input type="checkbox" [ngModel]="searchByArrival()" (ngModelChange)="searchByArrival.set($event)"
         name="searchByArrival">
 
       Cerca per orario di arrivo
@@ -40,25 +33,20 @@
 
     @if (errorMessage()) {
 
-      <span class="np-search-error">
+    <span class="np-search-error">
 
-        {{ errorMessage() }}
+      {{ errorMessage() }}
 
-      </span>
+    </span>
 
     }
 
-    <button
-      type="submit"
-      class="np-btn np-btn-accent"
-      [disabled]="loading()">
+    <button type="submit" class="np-btn np-btn-accent" [disabled]="loading()">
 
       @if (loading()) {
 
-        <span
-          class="np-spinner"
-          style="width:16px;height:16px;border-width:2px">
-        </span>
+      <span class="np-spinner" style="width:16px;height:16px;border-width:2px">
+      </span>
 
       }
 
@@ -70,41 +58,35 @@
 
   @if (showAlternativePrompt()) {
 
-    <div class="np-alternative-box">
+  <div class="np-alternative-box">
 
-      <p>
+    <p>
 
-        Percorso trovato!
+      Percorso trovato!
 
-        <br>
+      <br>
 
-        Vuoi visualizzare anche percorsi alternativi?
+      Vuoi visualizzare anche percorsi alternativi?
 
-      </p>
+    </p>
 
-      <div class="np-search-row">
+    <div class="np-search-row">
 
-        <button
-          type="button"
-          class="np-btn np-btn-accent"
-          (click)="searchAlternativeRoutes()">
+      <button type="button" class="np-btn np-btn-accent" (click)="searchAlternativeRoutes()">
 
-          Sì, mostra alternative
+        Sì, mostra alternative
 
-        </button>
+      </button>
 
-        <button
-          type="button"
-          class="np-btn"
-          (click)="useCurrentRoute()">
+      <button type="button" class="np-btn" (click)="useCurrentRoute()">
 
-          No, usa questo percorso
+        No, usa questo percorso
 
-        </button>
-
-      </div>
+      </button>
 
     </div>
+
+  </div>
 
   }
 

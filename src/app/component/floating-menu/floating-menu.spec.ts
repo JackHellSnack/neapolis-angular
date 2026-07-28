@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { StyleGuide } from './style-guide';
+import { FloatingMenu } from './floating-menu';
 
-describe('StyleGuide', () => {
-  let component: StyleGuide;
-  let fixture: ComponentFixture<StyleGuide>;
+describe('FloatingMenu', () => {
+  let component: FloatingMenu;
+  let fixture: ComponentFixture<FloatingMenu>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StyleGuide],
+      imports: [FloatingMenu],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(StyleGuide);
+    fixture = TestBed.createComponent(FloatingMenu);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
