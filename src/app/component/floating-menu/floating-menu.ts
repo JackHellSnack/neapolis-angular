@@ -1,9 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, HostListener } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../service/auth-service';
 import { SquircleDirective } from '../../directive/squircle';
-import { ClickOutside} from '../../directive/click-outside';
+import { ClickOutside } from '../../directive/click-outside';
 import { RideSearchForm } from "../ride-search-form/ride-search-form";
 import { PoiSearchForm } from "../poi-search-form/poi-search-form";
 
@@ -25,7 +25,7 @@ export class FloatingMenu {
   menuOpen = signal(false);
 
   toggleMenu() { this.menuOpen.update(v => !v); }
-  closeMenu()  { this.menuOpen.set(false); }
+  closeMenu() { this.menuOpen.set(false); }
 
   logout() {
     this.authService.logout();
@@ -41,4 +41,11 @@ export class FloatingMenu {
       this.isOpen.set(true);
     }
   }
+
+  isMobile = signal(window.innerWidth <= 1100);
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile.set(window.innerWidth <= 1100);
+  }
+
 }

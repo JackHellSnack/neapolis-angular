@@ -71,10 +71,15 @@
   font-size: 0.85rem;
 }
 
-.np-map-searching {
+.np-map-notification{
   position: absolute;
   bottom: 40px;
   right: 0;
+  transform: translateX(-9%);
+  z-index: 1002;
+}
+
+.np-map-searching {
   transform: translateX(-9%);
   z-index: 1002;
   background: var(--maiolica);
@@ -91,9 +96,6 @@
 }
 
 .np-map-error {
-  position: absolute;
-  bottom: 40px;
-  right: 0;
   transform: translateX(-9%);
   z-index: 1002;
   background: var(--maiolica);

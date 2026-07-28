@@ -24,7 +24,7 @@
   </div>
   }
   @if (startJourneyError()) {
-    <div class="np-map-error">
+    <div class="np-map-error np-map-notification">
       {{ startJourneyError() }}
       <button (click)="startJourneyError.set(null)">×</button>
     </div>
@@ -32,11 +32,11 @@
 
   <!-- Route options picker: only shows when there are multiple alternatives -->
   @if (routes().length > 1) {
-    <div class="np-map-options">
+    <div class="np-map-options np-map-notification">
       @for (route of routes(); track $index) {
         <button
           type="button"
-          class="np-route-option"
+          class="np-route-option "
           [class.np-route-option-active]="selectedIndex() === $index"
           (click)="selectRoute($index)">
           Opzione {{ $index + 1 }}
@@ -46,14 +46,14 @@
   }
 
   @if (searching()) {
-    <div class="np-map-searching">
+    <div class="np-map-searching np-map-notification">
       <span class="np-spinner"></span>
       Ricerca percorso in corso...
     </div>
   }
 
   @if (searchError()) {
-    <div class="np-map-error">
+    <div class="np-map-error np-map-notification">
       {{ searchError() }}
       <button (click)="searchError.set(null)">×</button>
     </div>

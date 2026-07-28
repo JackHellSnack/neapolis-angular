@@ -1,7 +1,6 @@
+@if (!isMobile()) {
 <nav class="floating-menu-container">
     <div squircle class="floating-menu" (clickOutside)="isOpen.set(false)">
-
-
         <div class="np-search-card">
             <div class="np-tabs">
                 <button class="np-tab" [class.np-tab-active]="activeTab() === 'ride' && isOpen()"
@@ -36,33 +35,124 @@
         </div>
     </div>
 
+    <div class="grid-bottom-left">
+        <a class="np-topnav-logo" routerLink="#" (click)="closeMenu()">
+            <span squircle class="np-logo-mark"></span>
+            <span class="np-logo-text">NeaPolis</span>
+        </a>
+    </div>
+
+    <div class="grid-top-right">
+        <div class="np-topnav-links">
+            @if (authService.isLoggedIn()) {
+            <a squircle routerLink="/dashboard" routerLinkActive="active">Ciao, {{ authService.username() }}</a>
+            <button squircle class="np-btn np-btn-primary np-btn-sm" (click)="logout()">Esci</button>
+
+            }
+            @if (authService.isAdmin()) {
+            <a squircle routerLink="/admin" routerLinkActive="active" class="np-topnav-admin">Admin</a>
+            <a squircle routerLink="/register" routerLinkActive="active" class="np-topnav-admin">Nuovo utente</a>
+            }
+        </div>
+
+        <div class="np-topnav-auth">
+            @if (authService.isLoggedIn()) {
+            } @else {
+            <a squircle routerLink="/register" class="np-btn np-btn-primary np-btn-sm">Registrati</a>
+            <a squircle routerLink="/login" class="np-btn np-btn-primary np-btn-sm">Accedi</a>
+            }
+        </div>
+
+    </div>
+</nav>
+} @else {
+<nav class="floating-menu-mobile">
+    <div class="mobile-top-row">
+        <div squircle class="floating-menu" (clickOutside)="isOpen.set(false)">
+            <div class="np-search-card">
+                <div class="np-tabs">
+                    <button class="np-tab" [class.np-tab-active]="activeTab() === 'ride' && isOpen()"
+                        (click)="setTab('ride')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        Cerca Corsa
+                    </button>
+                    <button class="np-tab" [class.np-tab-active]="activeTab() === 'poi' && isOpen()"
+                        (click)="setTab('poi')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        Cerca Punto di Interesse
+                    </button>
+                </div>
+
+                <div class="np-search-body-wrapper" [class.np-open]="isOpen()">
+                    <div class="np-search-body-inner">
+                        <div class="np-search-body">
+                            @if (activeTab() === 'ride') {
+                            <app-ride-search-form></app-ride-search-form>
+                            } @else {
+                            <app-poi-search-form></app-poi-search-form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile hamburger -->
+        <button squircle class="np-hamburger" (click)="toggleMenu()"
+            [attr.aria-label]="menuOpen() ? 'Chiudi menu' : 'Apri menu'">
+            @if (menuOpen()) {
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            } @else {
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="3" y1="7" x2="21" y2="7" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="17" x2="21" y2="17" />
+            </svg>
+            }
+        </button>
+
+        <!-- Mobile menu drawer -->
+        @if (menuOpen()) {
+
+        <div class="np-mobile-menu">
+            <a squircle routerLink="/home" (click)="closeMenu()">Home</a>
+            <a squircle routerLink="/stop-map" (click)="closeMenu()">Mappa fermate</a>
+            @if (authService.isLoggedIn()) {
+            <a squircle routerLink="/dashboard" (click)="closeMenu()">La mia area</a>
+            }
+            @if (authService.isAdmin()) {
+            <a squircle routerLink="/admin" (click)="closeMenu()" class="admin-link">Admin</a>
+            <a squircle routerLink="/register" (click)="closeMenu()" class="admin-link">Nuovo utente</a>
+            }
+            <div class="np-mobile-auth">
+                @if (authService.isLoggedIn()) {
+                <span squircle class="np-mobile-user">{{ authService.username() }}</span>
+                <button squircle class="np-btn np-btn-ghost" (click)="logout()">Esci</button>
+                } @else {
+                <a squircle routerLink="/register" class="np-btn np-btn-ghost" (click)="closeMenu()">Registrati</a>
+                <a squircle routerLink="/login" class="np-btn np-btn-primary" (click)="closeMenu()">Accedi</a>
+                }
+            </div>
+        </div>
+        }
+    </div>
+
 
     <a class="np-topnav-logo" routerLink="#" (click)="closeMenu()">
         <span squircle class="np-logo-mark"></span>
         <span class="np-logo-text">NeaPolis</span>
     </a>
-    <div class="grid-top-right">
-    <!-- Desktop links -->
-    <div class="np-topnav-links">
-      @if (authService.isLoggedIn()) {
-        <a squircle routerLink="/dashboard" routerLinkActive="active">Ciao, {{ authService.username() }}</a>
-                <button squircle class="np-btn np-btn-primary np-btn-sm" (click)="logout()">Esci</button>
-
-      }
-      @if (authService.isAdmin()) {
-        <a squircle routerLink="/admin" routerLinkActive="active" class="np-topnav-admin">Admin</a>
-        <a squircle routerLink="/register" routerLinkActive="active" class="np-topnav-admin">Nuovo utente</a>
-      }
-    </div>
-
-    <!-- Desktop auth -->
-    <div class="np-topnav-auth">
-      @if (authService.isLoggedIn()) {
-      } @else {
-        <a squircle routerLink="/register" class="np-btn np-btn-primary np-btn-sm">Registrati</a>
-        <a squircle routerLink="/login" class="np-btn np-btn-primary np-btn-sm">Accedi</a>
-      }
-    </div>
-    </div>
 
 </nav>
+}
