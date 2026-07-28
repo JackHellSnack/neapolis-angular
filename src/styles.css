@@ -783,9 +783,7 @@ button {
 .leaflet-control-zoom {
 
   border-radius: var(--radius) !important;
-  overflow: hidden;
   border: none !important;
-
 }
 
 .leaflet-control-zoom-in {
