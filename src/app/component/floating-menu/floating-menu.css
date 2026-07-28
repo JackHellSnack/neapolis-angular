@@ -1,18 +1,84 @@
 .floating-menu-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr;
+    grid-template-rows: 0.5fr repeat(3, 1fr) 0.5fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+
+    justify-items: center;
+
+
     position: fixed;
-    padding: 1em;
+    padding: 1em 3em;
     top: 0;
     left: 0;
-    width: 450px;
+    width: 100dvw;
     height: 100dvh;
     z-index: 1001;
-    float: left;
+
+    pointer-events: none;
+}
+
+.floating-menu-container>* {
+    pointer-events: all;
 }
 
 .floating-menu {
     min-width: 450px;
+    max-width: 450px;
     height: fit-content;
     background-color: transparent;
+    justify-self: start;
+}
+
+.grid-top-left {
+    grid-area: 1 / 1 / 2 / 2;
+    justify-self: start;
+}
+
+.grid-top-center {
+    grid-area: 1 / 2 / 2 / 3;
+    justify-self: center;
+}
+
+.grid-top-right {
+    grid-area: 1 / 3 / 2 / 4;
+    justify-self: end
+}
+
+.grid-bottom-center {
+    grid-area: 5 / 2 / 6 / 3;
+    justify-self: end;
+}
+
+.np-topnav-logo {
+    display: flex;
+    align-items: center;
+
+    justify-self: center;
+
+    gap: 10px;
+    text-decoration: none;
+    color: var(--carta);
+    padding: 5px 0;
+    height: fit-content;
+}
+
+.np-logo-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: conic-gradient(from 45deg, var(--maiolica), var(--sole), var(--azzurro), var(--maiolica));
+}
+
+.np-logo-text {
+    font-family: 'Fraunces', serif;
+    color: black;
+    font-size: 1rem;
+    font-weight: 700;
+    text-shadow: 0.1em 0 var(--carta), 0 0.1em var(--carta), -0.1em 0 var(--carta), 0 -0.1em var(--carta), -0.1em -0.1em var(--carta), -0.1em 0.1em var(--carta), 0.1em -0.1em var(--carta), 0.1em 0.1em var(--carta);
+    pointer-events: none;
+
 }
 
 .np-tabs {
@@ -28,24 +94,23 @@
     min-width: 0;
     overflow: hidden;
     white-space: nowrap;
-    padding: 0.6em 0.6em;
-    font-size: 0.9rem;
+    padding: 8px 16px;
     font-weight: 700;
     cursor: pointer;
     transition: flex 5s cubic-bezier(0.4, 0, 0.2, 1),
-                padding 5s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 5s ease,
-                background-color 5s ease,
-                color 5s ease,
-                width 5s ease,
-                ;
+        padding 5s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 5s ease,
+        background-color 5s ease,
+        color 5s ease,
+        width 5s ease,
+    ;
 }
 
 .np-tab-active {
     flex: 1;
     color: var(--carta) !important;
     background: var(--blu-notte) !important;
-    border-radius: 16px 16px 0 0 ;
+    border-radius: 16px 16px 0 0;
     color: var(--carta) !important;
     border-bottom-color: var(--maiolica) !important;
 }

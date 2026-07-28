@@ -96,7 +96,7 @@ export class Register {
     this.userService.createUser(payload).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home-map']);
       },
       error: (err) => {
         this.loading.set(false);

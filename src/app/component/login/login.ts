@@ -34,7 +34,7 @@ export class Login {
       next: () => {
         this.loading.set(false);
         
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home-map']);
       },
       error: () => {
         this.loading.set(false);

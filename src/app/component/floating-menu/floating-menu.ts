@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../service/auth-service';
 import { SquircleDirective } from '../../directive/squircle';
@@ -10,7 +10,7 @@ import { PoiSearchForm } from "../poi-search-form/poi-search-form";
 @Component({
   selector: 'app-floating-menu',
   standalone: true,
-  imports: [CommonModule, SquircleDirective, ClickOutside, RideSearchForm, PoiSearchForm],
+  imports: [CommonModule, SquircleDirective, ClickOutside, RideSearchForm, PoiSearchForm, RouterLink, RouterLinkActive],
   templateUrl: './floating-menu.html',
   styleUrl: './floating-menu.css'
 })

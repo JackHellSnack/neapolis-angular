@@ -7,7 +7,7 @@
   --azzurro: #2C8FBF;
   --maiolica: #EB5B00;
   --sole: #FFB200;
-  --crema: #fbf7e3;  
+  --crema: #fbf7e3;
   --carta: #FFFDF1;
   --inchiostro: #12232E;
   --grigio-testo: #5b6b74;
@@ -17,7 +17,7 @@
   --maiolica-light: rgba(228, 112, 58, 0.14);
 
   --radius: 24px;
-  --radius-sm: 24px;  
+  --radius-sm: 24px;
   --radius-md: 24px;
   --radius-lg: 24px;
   --radius-pill: 24px;
@@ -236,7 +236,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 16px;
- /* padding: 1em; */
+  /* padding: 1em; */
 }
 
 .np-search-row {
@@ -368,8 +368,19 @@ button {
 }
 
 
-.np-picker-add-row { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 12px; }
-.np-picker-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.np-picker-add-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.np-picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
 
 .np-chip {
   background: var(--azzurro-light);
@@ -591,9 +602,17 @@ button {
 .np-logo-mark-lg {
   width: 36px;
   height: 36px;
-  border-radius: 9px;
+  border-radius: 18px;
   background: conic-gradient(from 45deg, var(--maiolica), var(--sole), var(--azzurro), var(--maiolica));
 }
+
+.np-logo-mark-sm {
+  width: 20px;
+  height: 20px;
+  border-radius: 18px;
+  background: conic-gradient(from 45deg, var(--maiolica), var(--sole), var(--azzurro), var(--maiolica));
+}
+
 
 .np-login-title {
   font-family: 'Fraunces', serif;
@@ -654,13 +673,76 @@ button {
   font-weight: 600;
 }
 
+/* --- Topnav buttons: stile unico per link e bottoni --- */
+.np-topnav-links a,
+.np-topnav-auth .np-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.18s;
+  border: 1.5px solid transparent;
+}
+
+/* stato di default: link topnav = ghost */
+.np-topnav-links{
+  display: flex;
+  gap: 6px;
+}
+
+.np-topnav-links a {
+  color: var(--carta);
+  background: var(--blu-golfo);
+
+}
+
+.np-topnav-links a:hover,
+.np-topnav-links a.active {
+  color: var(--carta);
+  background: rgb(242, 93, 0);
+}
+
+.np-topnav-links a.np-topnav-admin {
+  color: var(--carta);
+}
+
+.np-topnav-links a.np-topnav-admin:hover {
+  background: rgba(255, 179, 0, 0.488);
+}
+
+/* bottoni auth: stessa pillola, ma con varianti già esistenti */
+.np-topnav-auth .np-btn-ghost {
+  color: rgba(255, 253, 249, 0.8);
+  border-color: rgba(255, 253, 249, 0.25);
+  background: transparent;
+}
+
+.np-topnav-auth .np-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--carta);
+}
+
+.np-topnav-auth .np-btn-primary {
+  background: var(--maiolica);
+  border-color: var(--maiolica);
+  color: var(--carta);
+}
+
+.np-topnav-auth .np-btn-primary:hover {
+  background: #c85c2a;
+  border-color: #c85c2a;
+}
+
 .np-tabs {
   display: flex;
   background: var(--blu-notte);
-  border-radius: var(--radius) var(--radius) 0 0;
+ /* border-radius: var(--radius) var(--radius) 0 0; */
   overflow: hidden;
 }
-
 
 .np-tab {
   flex: 1;
@@ -669,7 +751,7 @@ button {
   justify-content: center;
   gap: 8px;
   padding: 0.5em 1em;
-  font-size: 0.92rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: rgba(255, 253, 249, 0.6);
   background: transparent;
@@ -696,11 +778,14 @@ button {
   padding: 1em;
 }
 
+/* Leaflet override */
+
 .leaflet-control-zoom {
 
   border-radius: var(--radius) !important;
   overflow: hidden;
   border: none !important;
+
 }
 
 .leaflet-control-zoom-in {
@@ -717,6 +802,108 @@ button {
   margin-bottom: 1em !important;
   border-radius: var(--radius) !important;
 }
+
+/* --- Leaflet popup custom --- */
+.leaflet-popup-content-wrapper {
+  background: var(--carta);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-float);
+  padding: 10px;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px;
+  font-family: 'Manrope', sans-serif;
+  color: var(--inchiostro);
+  line-height: 1.4;
+}
+
+.leaflet-popup-content strong {
+  font-family: 'Fraunces', serif;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--blu-golfo);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.leaflet-popup-content small {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--grigio-testo);
+}
+
+.leaflet-popup-tip {
+  background: var(--carta);
+  box-shadow: none;
+}
+
+.leaflet-popup-close-button {
+  color: var(--grigio-testo) !important;
+  font-size: 1.1rem !important;
+  padding: 8px !important;
+  width: 35px !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: var(--maiolica) !important;
+}
+
+/* bottone "Vedi percorso" dentro il popup */
+.lf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: var(--fs-xs);
+  background: var(--maiolica);
+  color: var(--carta);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.lf-btn:hover {
+  opacity: 0.9;
+}
+
+.np-topnav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--carta);
+  flex-shrink: 0;
+}
+
+.np-logo-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: conic-gradient(from 45deg, var(--maiolica), var(--sole), var(--azzurro), var(--maiolica));
+}
+
+.np-logo-text {
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.np-topnav-auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  height: fit-content;
+  justify-self: end;
+}
+
 
 @media (max-width: 480px) {
   .np-login-card {

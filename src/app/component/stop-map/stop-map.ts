@@ -117,7 +117,7 @@ routes = this.routeHighlight.routes;
 
 
     this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
-    this.map.zoomControl.setPosition('topright');
+    this.map.zoomControl.setPosition('bottomleft');
     L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
      // attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);

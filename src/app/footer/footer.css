@@ -1,10 +1,9 @@
-/* app.css — sostituisce blocco morto .np-hero/.np-nav */
 .np-footer {
     background: var(--blu-notte);
     color: rgba(255, 253, 249, 0.6);
     max-width: 100dvw;
     margin-inline: auto;
-    margin-top: auto;
+    margin-top: 64px;
 }
 
 
@@ -13,6 +12,7 @@
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
     gap: 32px;
+    align-items: start;
 }
 
 .np-footer-brand {
@@ -24,13 +24,6 @@
     font-weight: 600;
     font-size: 1.1rem;
     margin-bottom: 8px;
-}
-
-.np-logo-mark-sm {
-    width: 20px;
-    height: 20px;
-    border-radius: 5px;
-    background: conic-gradient(from 45deg, var(--maiolica), var(--sole), var(--azzurro), var(--maiolica));
 }
 
 .np-footer-copy {
