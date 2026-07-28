@@ -203,7 +203,6 @@ button { font-family: inherit; cursor: pointer; }
   margin: 24px 0 12px;
 }
 
-/* stop-form / line-form: add-row + chip list (was np-stop-*/np-line-* duplicated identically) */
 .np-picker-add-row { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 12px; }
 .np-picker-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 
