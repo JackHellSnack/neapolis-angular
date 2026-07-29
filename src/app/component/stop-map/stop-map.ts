@@ -53,12 +53,12 @@ export class StopMap implements OnInit, OnDestroy {
   private geolocationService = inject(GeolocationService);
   private lineService     = inject(LineService);
   private poiService      = inject(PointOfInterestService);
-  private authService     = inject(AuthService);
   private routeHighlight  = inject(RouteHighlightService);
   private journeyService  = inject(JourneyService);
   private router = inject(Router);
   private stopTimesById = new Map<number, { arrival?: string; departure?: string }>();
-
+  authService     = inject(AuthService);
+  
   
 
   private readonly ROUTE_COLORS = [
@@ -106,7 +106,7 @@ export class StopMap implements OnInit, OnDestroy {
       const routes = this.routeHighlight.routes();
       const selectedIndex = this.routeHighlight.selectedIndex();
       const ready = this.dataReady(); // now tracked reactively
-
+    
       if (!ready) return;
 
       if (routes.length > 0) {
