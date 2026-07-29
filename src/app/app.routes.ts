@@ -14,9 +14,9 @@ import { Register } from './component/register/register';
 import { HomeMap } from './component/home-map/home-map';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: Home,},
-  { path: 'login', component: Login },
+  { path: '', redirectTo: 'home.map', pathMatch: 'full', data: {hideChrome: true} },
+  { path: 'home-map', component: HomeMap, data: {hideChrome: true}},
+  { path: 'login', component: Login, },
   { path: 'home-map', component: HomeMap, data: {hideChrome: true}},
   { path: 'ride-search', component: RideSearchForm },
   { path: 'poi-search', component: PoiSearchForm },
