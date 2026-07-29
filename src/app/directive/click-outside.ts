@@ -12,16 +12,20 @@ export class ClickOutside implements OnDestroy {
   private isFirstClick = true;
 
   constructor() {
-    this.listener = this.renderer.listen('document', 'click', (e: Event) => {
-      if (this.isFirstClick) {
-        this.isFirstClick = false;
-        return;
-      }
-      if (!this.elementRef.nativeElement.contains(e.target)) {
-        this.clickOutside.emit();
-      }
-    });
-  }
+  this.listener = this.renderer.listen('document', 'click', (e: Event) => {
+    if (this.isFirstClick) {
+      this.isFirstClick = false;
+      return;
+    }
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+    if (target.closest('.cdk-overlay-container')) return;
+    if (target === document.body || target === document.documentElement) return;
+    if (!this.elementRef.nativeElement.contains(target)) {
+      this.clickOutside.emit();
+    }
+  });
+}
 
   ngOnDestroy() {
     this.listener?.();
