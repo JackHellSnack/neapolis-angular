@@ -9,15 +9,15 @@
                         <circle cx="12" cy="12" r="10" />
                         <polyline points="12 6 12 12 16 14" />
                     </svg>
-                    Cerca Corsa
+                    <span class="np-tab-label">Cerca Corsa</span>
                 </button>
                 <button class="np-tab" [class.np-tab-active]="activeTab() === 'poi' && isOpen()"
                     (click)="setTab('poi')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                        <circle cx="12" cy="10" r="3" />
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
                     </svg>
-                    Cerca Punto di Interesse
+                    <span class="np-tab-label">Cerca punto di interesse</span>
                 </button>
             </div>
 
@@ -47,7 +47,6 @@
             @if (authService.isLoggedIn()) {
             <a squircle routerLink="/dashboard" routerLinkActive="active">Ciao, {{ authService.username() }}</a>
             <button squircle class="np-btn np-btn-primary np-btn-sm" (click)="logout()">Esci</button>
-
             }
             @if (authService.isAdmin()) {
             <a squircle routerLink="/admin" routerLinkActive="active" class="np-topnav-admin">Admin</a>
@@ -78,23 +77,23 @@
                             <circle cx="12" cy="12" r="10" />
                             <polyline points="12 6 12 12 16 14" />
                         </svg>
-                        Cerca Corsa
+                        <span class="np-tab-label">Cerca Corsa</span>
                     </button>
                     <button class="np-tab" [class.np-tab-active]="activeTab() === 'poi' && isOpen()"
                         (click)="setTab('poi')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                            <circle cx="12" cy="10" r="3" />
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
                         </svg>
-                        Cerca Punto di Interesse
+                        <span class="np-tab-label">Cerca punto di interesse</span>
                     </button>
                 </div>
 
                 <div class="np-search-body-wrapper" [class.np-open]="isOpen()">
                     <div class="np-search-body-inner">
                         <div class="np-search-body">
-                            @if (activeTab() === 'ride') {
+                            @if (activeTab() === 'poi') {
                             <app-ride-search-form></app-ride-search-form>
                             } @else {
                             <app-poi-search-form></app-poi-search-form>
@@ -123,11 +122,10 @@
         </button>
 
         <!-- Mobile menu drawer -->
-        @if (menuOpen()) {
+        <div class="np-mobile-menu-backdrop" [class.np-open]="menuOpen()" (click)="closeMenu()"></div>
 
-        <div class="np-mobile-menu">
-            <a squircle routerLink="/home" (click)="closeMenu()">Home</a>
-            <a squircle routerLink="/stop-map" (click)="closeMenu()">Mappa fermate</a>
+        <div class="np-mobile-menu" [class.np-open]="menuOpen()">
+            <a squircle routerLink="/home-map" (click)="closeMenu()">Home</a>
             @if (authService.isLoggedIn()) {
             <a squircle routerLink="/dashboard" (click)="closeMenu()">La mia area</a>
             }
@@ -145,14 +143,10 @@
                 }
             </div>
         </div>
-        }
     </div>
-
-
     <a class="np-topnav-logo-mobile" routerLink="#" (click)="closeMenu()">
-        <span squircle class="np-logo-mark"></span>
+        <span class="np-logo-mark"></span>
         <span class="np-logo-text">NeaPolis</span>
     </a>
-
 </nav>
 }

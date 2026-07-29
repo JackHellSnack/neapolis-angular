@@ -89,7 +89,7 @@
     gap: 10px;
     text-decoration: none;
     color: var(--carta);
-    padding: 5px 0;
+    padding: 2px 24px;
     height: fit-content;
 }
 
@@ -114,6 +114,15 @@
     display: flex;
 }
 
+.np-tabs:has(.np-tab-active) {
+    gap: 0;
+}
+
+.np-tabs:has(.np-tab-active) .np-tab:not(.np-tab-active) {
+    flex: 0;
+    padding: 0;
+}
+
 .np-tab {
     display: flex;
     align-items: center;
@@ -125,12 +134,12 @@
     padding: 8px 12px;
     font-weight: 700;
     cursor: pointer;
-    transition: flex 5s cubic-bezier(0.4, 0, 0.2, 1),
-        padding 5s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 5s ease,
-        background-color 5s ease,
-        color 5s ease,
-        width 5s ease,
+    transition: flex 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease,
+        background-color 0.3s ease,
+        color 0.3s ease,
+        width 0.3s ease,
     ;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -146,13 +155,15 @@
     border-bottom-color: var(--maiolica) !important;
 }
 
-.np-tabs:has(.np-tab-active) {
-    gap: 0;
+.np-tab svg {
+    flex-shrink: 0; /* l'icona non si rimpicciolisce mai */
 }
 
-.np-tabs:has(.np-tab-active) .np-tab:not(.np-tab-active) {
-    flex: 0;
-    padding: 0;
+.np-tab-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0; /* necessario perché un flex item non collassa sotto il content-size di default */
 }
 
 .np-search-body-wrapper {
@@ -171,41 +182,116 @@
 
 .mobile-top-row {
     display: flex;
-    background-color: var(--blu-notte);
     border-radius: 18px;
-    align-items: center;
+    align-items: flex-start; /* era center */
+    width: min-content;
+}
 
+.np-mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 35, 46, 0.35);
+    z-index: 1002;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
 
+.np-mobile-menu-backdrop.np-open {
+    opacity: 1;
+    pointer-events: all;
 }
 
 .np-mobile-menu {
-    display: none;
+    position: fixed;
+    top: 50px;
+    right: 15px;
+    bottom: 12px;
+    width: min(78vw, 320px);
+    height: fit-content;
+    z-index: 1003;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--space-5) var(--space-4);
+
+
+    background: var(--carta);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-float);
+
+    transform: translateX(calc(100% + 24px)); /* fuori dal viewport, distaccato */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.np-mobile-menu.np-open {
+    transform: translateX(0);
+}
+
+.np-mobile-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--inchiostro);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: background 0.15s;
+}
+
+.np-mobile-menu a:hover,
+.np-mobile-menu a.active {
+    background: var(--crema);
+}
+
+.np-mobile-menu a.admin-link {
+    color: var(--maiolica);
+}
+
+.np-mobile-auth {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--riga);
+}
+
+.np-mobile-user {
+    font-size: 0.85rem;
+    color: var(--grigio-testo);
+    font-weight: 600;
+    padding: 0 12px;
 }
 
 .np-topnav-logo-mobile {
-
     display: flex;
     align-items: center;
 
-    justify-self: center;
+    align-self: flex-start;   
 
     gap: 10px;
     text-decoration: none;
     color: var(--carta);
-    padding: 5px 0;
+    padding: 2px 40px;         
     height: fit-content;
-    margin-top: auto;
-
-
+    margin-top: auto;          
 }
+
 
 .np-hamburger {
     display: none;
-    max-height: min-content;
     border: none;
-    background-color: transparent;
+    max-height: min-content;
+    background-color: var(--blu-notte);
     color: rgba(255, 253, 249, 0.6);
     line-height: 1;
+    padding:  6px 7px;
+    margin: 0 2px;
+
 }
 
 

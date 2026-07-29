@@ -34,8 +34,8 @@ export abstract class BasePickerComponent<T> implements OnDestroy {
       .position()
       .flexibleConnectedTo(this.triggerInput)
       .withPositions([
-        { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: -1, offsetX: -15 },
-        { originX: 'end', originY: 'top',    overlayX: 'end', overlayY: 'bottom',     offsetX: -15 },
+        { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetX: -15 },
+        { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetX: -15 },
       ])
       .withFlexibleDimensions(true)
       .withPush(true);

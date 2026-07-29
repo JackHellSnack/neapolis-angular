@@ -58,7 +58,7 @@ export class RideSearchForm {
 
     this.errorMessage.set(null);
 
-    this.showAlternativePrompt.set(false);
+  //  this.showAlternativePrompt.set(false);
 
     const start = this.startStop();
 
@@ -120,7 +120,7 @@ export class RideSearchForm {
 
         this.routeHighlight.setResult(legs);
 
-        this.showAlternativePrompt.set(true);
+   //     this.showAlternativePrompt.set(true);
 
       },
 
@@ -152,7 +152,7 @@ export class RideSearchForm {
 
   useCurrentRoute() {
 
-    this.showAlternativePrompt.set(false);
+    // this.showAlternativePrompt.set(false);
 
     this.router.navigate(['/home-map']);
 
@@ -168,7 +168,7 @@ export class RideSearchForm {
 
     this.loading.set(true);
 
-    this.showAlternativePrompt.set(false);
+    // this.showAlternativePrompt.set(false);
 
     this.rideService.searchRideOptions(request).subscribe({
 
