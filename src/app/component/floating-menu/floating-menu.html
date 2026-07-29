@@ -25,10 +25,8 @@
                 <div class="np-search-body-inner">
                     <div class="np-search-body">
                         @if (activeTab() === 'ride') {
-                        <app-ride-search-form></app-ride-search-form>
-                        } @else {
-                        <app-poi-search-form></app-poi-search-form>
-                        }
+                        <app-ride-search-form (searchSubmit)="isOpen.set(false)"></app-ride-search-form> } @else {
+                        <app-poi-search-form (searchSubmit)="isOpen.set(false)"></app-poi-search-form> }
                     </div>
                 </div>
             </div>
@@ -94,10 +92,8 @@
                     <div class="np-search-body-inner">
                         <div class="np-search-body">
                             @if (activeTab() === 'ride') {
-                            <app-ride-search-form></app-ride-search-form>
-                            } @else {
-                            <app-poi-search-form></app-poi-search-form>
-                            }
+                            <app-ride-search-form (searchSubmit)="isOpen.set(false)"></app-ride-search-form> } @else {
+                            <app-poi-search-form (searchSubmit)="isOpen.set(false)"></app-poi-search-form> }
                         </div>
                     </div>
                 </div>
