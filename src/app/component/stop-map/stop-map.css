@@ -36,7 +36,7 @@
 .np-map-overlay {
   position: absolute;
   top: 50px;
-  left: 46%;
+  left: 50%;
   transform: translateX(-50%);
   z-index: 500;
   background: var(--carta);

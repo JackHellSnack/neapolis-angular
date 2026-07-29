@@ -8,8 +8,8 @@ export class RouteHighlightService {
 
   readonly routes = signal<RouteLeg[][]>([]);
   readonly selectedIndex = signal<number>(0);
+  readonly journeyInProgress = signal<boolean>(false);
 
-  /** La route attualmente "attiva" (quella selezionata dall'utente). */
   readonly legs = computed<RouteLeg[] | null>(() => {
     const routes = this.routes();
     const idx = this.selectedIndex();
@@ -19,11 +19,31 @@ export class RouteHighlightService {
   setResult(legs: RouteLeg[]): void {
     this.routes.set([legs]);
     this.selectedIndex.set(0);
+    this.journeyInProgress.set(false);
   }
 
   setResults(routes: RouteLeg[][]): void {
     this.routes.set(this.dedupeRoutes(routes));
     this.selectedIndex.set(0);
+    this.journeyInProgress.set(false);
+  }
+
+  setActiveJourney(legs: RouteLeg[]): void {
+    this.routes.set([legs]);
+    this.selectedIndex.set(0);
+    this.journeyInProgress.set(true);
+  }
+
+  selectRoute(index: number): void {
+    if (index >= 0 && index < this.routes().length) {
+      this.selectedIndex.set(index);
+    }
+  }
+
+  clear(): void {
+    this.routes.set([]);
+    this.selectedIndex.set(0);
+    this.journeyInProgress.set(false);
   }
 
   private dedupeRoutes(routes: RouteLeg[][]): RouteLeg[][] {
@@ -39,15 +59,5 @@ export class RouteHighlightService {
       }
     }
     return result;
-  }
-  selectRoute(index: number): void {
-    if (index >= 0 && index < this.routes().length) {
-      this.selectedIndex.set(index);
-    }
-  }
-
-  clear(): void {
-    this.routes.set([]);
-    this.selectedIndex.set(0);
   }
 }

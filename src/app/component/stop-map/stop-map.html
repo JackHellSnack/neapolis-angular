@@ -4,15 +4,15 @@
   @if (routeActive()) {
   <div class="np-map-overlay">
     <div class="map-start">
-      @if(authService.isLoggedIn()){
+      @if (!journeyInProgress()) {
       <button class="np-btn np-btn-primary np-btn-sm" (click)="startJourneyFromMap()" [disabled]="startingJourney()">
-          @if (startingJourney()) {
-          <span class="np-spinner" style="width:14px;height:14px;border-width:2px"></span>
-          }
-          🚌 Inizia viaggio
-        </button>
+        @if (startingJourney()) {
+        <span class="np-spinner" style="width:14px;height:14px;border-width:2px"></span>
+        }
+        🚌 Inizia viaggio
+      </button>
       }
-    <button class="np-btn np-btn-ghost np-btn-sm" (click)="clearRoute()">
+      <button class="np-btn np-btn-ghost np-btn-sm" (click)="clearRoute()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
@@ -25,9 +25,9 @@
     @if (routes().length > 1) {
     <div class="np-map-options">
       @for (route of routes(); track $index) {
-      <button type="button" class="np-route-option " [class.np-route-option-active]="selectedIndex() === $index"
+      <button type="button" class="np-route-option" [class.np-route-option-active]="selectedIndex() === $index"
         (click)="selectRoute($index)">
-        Opzione {{ $index + 1 }}
+        {{ route[0].departureTime.slice(0,5) }} · {{ route.length }} {{ route.length === 1 ? 'tratta' : 'tratte' }}
       </button>
       }
     </div>

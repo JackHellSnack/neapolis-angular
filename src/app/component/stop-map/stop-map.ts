@@ -49,17 +49,17 @@ import { DEFAULT_POSITION } from '../../model/default-location';
   styleUrl: './stop-map.css'
 })
 export class StopMap implements OnInit, OnDestroy {
-  private stopService     = inject(StopService);
+  private stopService = inject(StopService);
   private geolocationService = inject(GeolocationService);
-  private lineService     = inject(LineService);
-  private poiService      = inject(PointOfInterestService);
-  private routeHighlight  = inject(RouteHighlightService);
-  private journeyService  = inject(JourneyService);
+  private lineService = inject(LineService);
+  private poiService = inject(PointOfInterestService);
+  private routeHighlight = inject(RouteHighlightService);
+  private journeyService = inject(JourneyService);
   private router = inject(Router);
   private stopTimesById = new Map<number, { arrival?: string; departure?: string }>();
-  authService     = inject(AuthService);
-  
-  
+  authService = inject(AuthService);
+
+
 
   private readonly ROUTE_COLORS = [
     '#B00020', // best route
@@ -85,7 +85,7 @@ export class StopMap implements OnInit, OnDestroy {
 
   startingJourney = signal(false);
   startJourneyError = signal<string | null>(null);
- 
+
   private stopsById = new Map<number, Stop>();
   private linesById = new Map<number, Line>();
   private dataReady = signal(false); // was: private dataReady = false;
@@ -96,6 +96,7 @@ export class StopMap implements OnInit, OnDestroy {
 
   routes = this.routeHighlight.routes;
   selectedIndex = this.routeHighlight.selectedIndex;
+  journeyInProgress = this.routeHighlight.journeyInProgress;
 
   selectRoute(index: number) {
     this.routeHighlight.selectRoute(index);
@@ -106,7 +107,7 @@ export class StopMap implements OnInit, OnDestroy {
       const routes = this.routeHighlight.routes();
       const selectedIndex = this.routeHighlight.selectedIndex();
       const ready = this.dataReady(); // now tracked reactively
-    
+
       if (!ready) return;
 
       if (routes.length > 0) {
@@ -140,68 +141,68 @@ export class StopMap implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-  (window as any).neapolisPoiClick = (poiId: number) => this.onPoiButtonClick(poiId);
-  (window as any).neapolisSelectRoute = (routeIndex: number) => this.selectRoute(routeIndex);
+    (window as any).neapolisPoiClick = (poiId: number) => this.onPoiButtonClick(poiId);
+    (window as any).neapolisSelectRoute = (routeIndex: number) => this.selectRoute(routeIndex);
 
-  this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
-  this.map.zoomControl.setPosition('bottomleft');
-  L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {}).addTo(this.map);
+    this.map = L.map('stop-map-container').setView([40.85, 14.27], 13);
+    this.map.zoomControl.setPosition('bottomleft');
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {}).addTo(this.map);
 
-  this.allStopsLayer = L.layerGroup().addTo(this.map);
-  this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
-  this.linesLayer       = L.layerGroup().addTo(this.map);
-  this.poiLayer         = L.layerGroup().addTo(this.map);
-  this.highlightLayer   = L.layerGroup().addTo(this.map);
+    this.allStopsLayer = L.layerGroup().addTo(this.map);
+    this.nearbyStopsLayer = L.layerGroup().addTo(this.map);
+    this.linesLayer = L.layerGroup().addTo(this.map);
+    this.poiLayer = L.layerGroup().addTo(this.map);
+    this.highlightLayer = L.layerGroup().addTo(this.map);
 
-  forkJoin({
-    stops: this.stopService.findAll(),
-    lines: this.lineService.findAll(),
-    pois:  this.authService.isLoggedIn()
-      ? this.poiService.findByUserInterests()
-      : this.poiService.findAll()
-  }).subscribe({
-    next: ({ stops, lines, pois }) => {
-    lines.forEach(line => this.linesById.set(line.id!, line));
-    stops.forEach(stop => {
-      this.stopsById.set(stop.id!, stop);
-      this.addStopMarker(stop, this.allStopsLayer);
-    });
-    lines.forEach(line => this.drawLine(line));
-    pois.forEach(poi => this.addPoiMarker(poi));
+    forkJoin({
+      stops: this.stopService.findAll(),
+      lines: this.lineService.findAll(),
+      pois: this.authService.isLoggedIn()
+        ? this.poiService.findByUserInterests()
+        : this.poiService.findAll()
+    }).subscribe({
+      next: ({ stops, lines, pois }) => {
+        lines.forEach(line => this.linesById.set(line.id!, line));
+        stops.forEach(stop => {
+          this.stopsById.set(stop.id!, stop);
+          this.addStopMarker(stop, this.allStopsLayer);
+        });
+        lines.forEach(line => this.drawLine(line));
+        pois.forEach(poi => this.addPoiMarker(poi));
 
-    // If a route is already active in-memory (e.g. user just came from a
-    // search), keep that — don't overwrite it with the backend journey.
-    if (this.routeHighlight.routes().length > 0) {
-      this.dataReady.set(true);
-      return;
-    }
-
-    // Otherwise, check if the user has an active journey on the backend
-    // and hydrate the highlighted route from it (survives page reloads).
-    if (this.authService.isLoggedIn()) {
-      this.journeyService.getStatus().subscribe({
-        next: (status: JourneyStatus) => {
-          if (status && !status.finished) {
-            const legs = status.legs?.length
-              ? status.legs
-              : status.currentLeg
-                ? [status.currentLeg]
-                : null;
-            if (legs) {
-              this.routeHighlight.setResult(legs);
-            }
-          }
+        // If a route is already active in-memory (e.g. user just came from a
+        // search), keep that — don't overwrite it with the backend journey.
+        if (this.routeHighlight.routes().length > 0) {
           this.dataReady.set(true);
-        },
-        error: () => this.dataReady.set(true) // no active journey — fine
-      });
-    } 
-    else {
-      this.dataReady.set(true);
-    }
-  },
-    error: err => console.error(err)
-      });
+          return;
+        }
+
+        // Otherwise, check if the user has an active journey on the backend
+        // and hydrate the highlighted route from it (survives page reloads).
+        if (this.authService.isLoggedIn()) {
+          this.journeyService.getStatus().subscribe({
+            next: (status: JourneyStatus) => {
+              if (status && !status.finished) {
+                const legs = status.legs?.length
+                  ? status.legs
+                  : status.currentLeg
+                    ? [status.currentLeg]
+                    : null;
+                if (legs) {
+                  this.routeHighlight.setActiveJourney(legs);
+                }
+              }
+              this.dataReady.set(true);
+            },
+            error: () => this.dataReady.set(true) // no active journey — fine
+          });
+        }
+        else {
+          this.dataReady.set(true);
+        }
+      },
+      error: err => console.error(err)
+    });
 
     this.geolocationService.getCurrentPosition().subscribe({
       next: pos => {
@@ -268,7 +269,7 @@ export class StopMap implements OnInit, OnDestroy {
   private onPoiButtonClick(poiId: number) {
     this.searchError.set(null);
     this.searching.set(true);
-     this.geolocationService.getCurrentPosition().subscribe({
+    this.geolocationService.getCurrentPosition().subscribe({
       next: pos => this.searchRouteToPoi(poiId, pos.coords.latitude, pos.coords.longitude),
       error: () => {
         // Fall back silently to Napoli Centrale instead of blocking the search.
@@ -315,137 +316,139 @@ export class StopMap implements OnInit, OnDestroy {
   }
 
   private renderHighlightedRoute(legs: RouteLeg[]) {
-  this.highlightLayer.clearLayers();
-  this.stopTimesById.clear();
-  // Hide all stops — only show route stops
-  this.map.removeLayer(this.allStopsLayer);
-  this.map.removeLayer(this.nearbyStopsLayer);
+    this.highlightLayer.clearLayers();
+    this.stopTimesById.clear();
+    // Hide all stops — only show route stops
+    this.map.removeLayer(this.allStopsLayer);
+    this.map.removeLayer(this.nearbyStopsLayer);
 
-  const highlightedIds = new Set<number>();
-  const bounds: L.LatLngExpression[] = [];
-
-  legs.forEach(leg => {
-    // Record the times we actually know: departure at the origin stop,
-    // arrival at the destination stop of this leg.
-    const dep = this.stopTimesById.get(leg.fromStopId) ?? {};
-    dep.departure = leg.departureTime;
-    this.stopTimesById.set(leg.fromStopId, dep);
-
-    const arr = this.stopTimesById.get(leg.toStopId) ?? {};
-    arr.arrival = leg.arrivalTime;
-    this.stopTimesById.set(leg.toStopId, arr);
-
-    const line = this.linesById.get(leg.lineId);
-    if (!line?.stopIds?.length) return;
-    const orderedIds = [...line.stopIds].sort((a, b) => a.delta - b.delta).map(e => e.id);
-    const fromIdx = orderedIds.indexOf(leg.fromStopId);
-    const toIdx = orderedIds.indexOf(leg.toStopId);
-    if (fromIdx === -1 || toIdx === -1) return;
-    const [start, end] = fromIdx <= toIdx ? [fromIdx, toIdx] : [toIdx, fromIdx];
-    const segIds = orderedIds.slice(start, end + 1);
-    const path: L.LatLngExpression[] = [];
-    segIds.forEach(id => {
-      const s = this.stopsById.get(id);
-      if (!s) return;
-      highlightedIds.add(id);
-      path.push([s.lat, s.lon]);
-    });
-    if (path.length >= 2) {
-      L.polyline(path, { color: this.ROUTE_COLORS[0], weight: 6, opacity: 0.9 })
-        .addTo(this.highlightLayer).bindPopup(`<strong>${leg.lineName}</strong><br>${leg.fromStopName} → ${leg.toStopName}`);
-      bounds.push(...path);
-    }
-  });
-
-  highlightedIds.forEach(id => {
-    const s = this.stopsById.get(id);
-    if (!s) return;
-    L.circleMarker([s.lat, s.lon], {
-      radius: 8, color: this.ROUTE_COLORS[0],
-      fillColor: '#fff', fillOpacity: 1, weight: 3
-    }).addTo(this.highlightLayer).bindPopup(this.stopPopupContent(s));
-  });
-
-  if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
-}
-
-private stopPopupContent(stop: Stop): string {
-  const times = this.stopTimesById.get(stop.id!);
-  let timesHtml = '';
-  if (times?.arrival) timesHtml += `<br>Arrivo: <strong>${times.arrival}</strong>`;
-  if (times?.departure) timesHtml += `<br>Partenza: <strong>${times.departure}</strong>`;
-  return `<strong>${stop.name}</strong>${timesHtml}`;
-}
-
- private renderHighlightedRoutes(routes: RouteLeg[][], selectedIndex: number = 0) {
-  this.highlightLayer.clearLayers();
-  this.stopTimesById.clear();
-
-  this.map.removeLayer(this.allStopsLayer);
-  this.map.removeLayer(this.nearbyStopsLayer);
-
-  const highlightedStops = new Set<number>();
-  const bounds: L.LatLngExpression[] = [];
-
-  routes.forEach((legs, routeIndex) => {
-    const isSelected = routeIndex === selectedIndex;
-    const color = isSelected ? this.ROUTE_COLORS[0] : '#9aa5ab';
-    const weight = isSelected ? 7 : 4;
-    const opacity = isSelected ? 0.95 : 0.55;
+    const highlightedIds = new Set<number>();
+    const bounds: L.LatLngExpression[] = [];
 
     legs.forEach(leg => {
-      if (isSelected) {
-        const dep = this.stopTimesById.get(leg.fromStopId) ?? {};
-        dep.departure = leg.departureTime;
-        this.stopTimesById.set(leg.fromStopId, dep);
+      // Record the times we actually know: departure at the origin stop,
+      // arrival at the destination stop of this leg.
+      const dep = this.stopTimesById.get(leg.fromStopId) ?? {};
+      dep.departure = leg.departureTime;
+      this.stopTimesById.set(leg.fromStopId, dep);
 
-        const arr = this.stopTimesById.get(leg.toStopId) ?? {};
-        arr.arrival = leg.arrivalTime;
-        this.stopTimesById.set(leg.toStopId, arr);
-      }
+      const arr = this.stopTimesById.get(leg.toStopId) ?? {};
+      arr.arrival = leg.arrivalTime;
+      this.stopTimesById.set(leg.toStopId, arr);
 
       const line = this.linesById.get(leg.lineId);
       if (!line?.stopIds?.length) return;
-
       const orderedIds = [...line.stopIds].sort((a, b) => a.delta - b.delta).map(e => e.id);
-      const from = orderedIds.indexOf(leg.fromStopId);
-      const to = orderedIds.indexOf(leg.toStopId);
-      if (from === -1 || to === -1) return;
-
-      const start = Math.min(from, to);
-      const end = Math.max(from, to);
+      const fromIdx = orderedIds.indexOf(leg.fromStopId);
+      const toIdx = orderedIds.indexOf(leg.toStopId);
+      if (fromIdx === -1 || toIdx === -1) return;
+      const [start, end] = fromIdx <= toIdx ? [fromIdx, toIdx] : [toIdx, fromIdx];
+      const segIds = orderedIds.slice(start, end + 1);
       const path: L.LatLngExpression[] = [];
-
-      orderedIds.slice(start, end + 1).forEach(id => {
-        const stop = this.stopsById.get(id);
-        if (!stop) return;
-        if (isSelected) highlightedStops.add(id);
-        path.push([stop.lat, stop.lon]);
+      segIds.forEach(id => {
+        const s = this.stopsById.get(id);
+        if (!s) return;
+        highlightedIds.add(id);
+        path.push([s.lat, s.lon]);
       });
-
       if (path.length >= 2) {
-        const polyline = L.polyline(path, { color, weight, opacity })
-          .addTo(this.highlightLayer)
-          .bindPopup(
-            `<strong>Opzione ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}` +
-            (isSelected ? '' : `<br><button class="lf-btn" onclick="window.neapolisSelectRoute(${routeIndex})">✓ Usa questa</button>`)
-          );
-        polyline.on('click', () => this.selectRoute(routeIndex));
-        if (isSelected) bounds.push(...path);
+        L.polyline(path, { color: this.ROUTE_COLORS[0], weight: 6, opacity: 0.9 })
+          .addTo(this.highlightLayer).bindPopup(`<strong>${leg.lineName}</strong><br>${leg.fromStopName} → ${leg.toStopName}`);
+        bounds.push(...path);
       }
     });
-  });
 
-  highlightedStops.forEach(id => {
-    const stop = this.stopsById.get(id);
-    if (!stop) return;
-    L.circleMarker([stop.lat, stop.lon], {
-      radius: 8, color: '#333', fillColor: '#fff', fillOpacity: 1, weight: 2
-    }).addTo(this.highlightLayer).bindPopup(this.stopPopupContent(stop));
-  });
+    highlightedIds.forEach(id => {
+      const s = this.stopsById.get(id);
+      if (!s) return;
+      L.circleMarker([s.lat, s.lon], {
+        radius: 8, color: this.ROUTE_COLORS[0],
+        fillColor: '#fff', fillOpacity: 1, weight: 3
+      }).addTo(this.highlightLayer).bindPopup(this.stopPopupContent(s));
+    });
 
-  if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
-}
+    if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
+  }
+
+  private stopPopupContent(stop: Stop): string {
+    const times = this.stopTimesById.get(stop.id!);
+    let timesHtml = '';
+    if (times?.arrival) timesHtml += `<br>Arrivo: <strong>${times.arrival}</strong>`;
+    if (times?.departure) timesHtml += `<br>Partenza: <strong>${times.departure}</strong>`;
+    return `<strong>${stop.name}</strong>${timesHtml}`;
+  }
+
+  private renderHighlightedRoutes(routes: RouteLeg[][], selectedIndex: number = 0) {
+    this.highlightLayer.clearLayers();
+    this.stopTimesById.clear();
+
+    this.map.removeLayer(this.allStopsLayer);
+    this.map.removeLayer(this.nearbyStopsLayer);
+
+    const highlightedStops = new Set<number>();
+    const bounds: L.LatLngExpression[] = [];
+
+    routes.forEach((legs, routeIndex) => {
+      const isSelected = routeIndex === selectedIndex;
+      const color = isSelected
+        ? this.ROUTE_COLORS[0]
+        : this.ROUTE_COLORS[(routeIndex % (this.ROUTE_COLORS.length - 1)) + 1];
+      const weight = isSelected ? 7 : 4;
+      const opacity = isSelected ? 0.95 : 0.55;
+
+      legs.forEach(leg => {
+        if (isSelected) {
+          const dep = this.stopTimesById.get(leg.fromStopId) ?? {};
+          dep.departure = leg.departureTime;
+          this.stopTimesById.set(leg.fromStopId, dep);
+
+          const arr = this.stopTimesById.get(leg.toStopId) ?? {};
+          arr.arrival = leg.arrivalTime;
+          this.stopTimesById.set(leg.toStopId, arr);
+        }
+
+        const line = this.linesById.get(leg.lineId);
+        if (!line?.stopIds?.length) return;
+
+        const orderedIds = [...line.stopIds].sort((a, b) => a.delta - b.delta).map(e => e.id);
+        const from = orderedIds.indexOf(leg.fromStopId);
+        const to = orderedIds.indexOf(leg.toStopId);
+        if (from === -1 || to === -1) return;
+
+        const start = Math.min(from, to);
+        const end = Math.max(from, to);
+        const path: L.LatLngExpression[] = [];
+
+        orderedIds.slice(start, end + 1).forEach(id => {
+          const stop = this.stopsById.get(id);
+          if (!stop) return;
+          if (isSelected) highlightedStops.add(id);
+          path.push([stop.lat, stop.lon]);
+        });
+
+        if (path.length >= 2) {
+          const polyline = L.polyline(path, { color, weight, opacity })
+            .addTo(this.highlightLayer)
+            .bindPopup(
+              `<strong>Opzione ${routeIndex + 1}</strong><br>${leg.lineName}<br>${leg.fromStopName} → ${leg.toStopName}` +
+              (isSelected ? '' : `<br><button class="lf-btn" onclick="window.neapolisSelectRoute(${routeIndex})">✓ Usa questa</button>`)
+            );
+          polyline.on('click', () => this.selectRoute(routeIndex));
+          if (isSelected) bounds.push(...path);
+        }
+      });
+    });
+
+    highlightedStops.forEach(id => {
+      const stop = this.stopsById.get(id);
+      if (!stop) return;
+      L.circleMarker([stop.lat, stop.lon], {
+        radius: 8, color: '#333', fillColor: '#fff', fillOpacity: 1, weight: 2
+      }).addTo(this.highlightLayer).bindPopup(this.stopPopupContent(stop));
+    });
+
+    if (bounds.length) this.map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
+  }
 
   private clearHighlight() {
     this.highlightLayer.clearLayers();
@@ -466,6 +469,6 @@ private stopPopupContent(stop: Stop): string {
     this.map?.remove();
   }
 
-  
+
 
 }
