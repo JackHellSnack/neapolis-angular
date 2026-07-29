@@ -14,7 +14,7 @@ import { Register } from './component/register/register';
 import { HomeMap } from './component/home-map/home-map';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home.map', pathMatch: 'full', data: {hideChrome: true} },
+  { path: '', redirectTo: 'home-map', pathMatch: 'full', data: {hideChrome: true} },
   { path: 'home-map', component: HomeMap, data: {hideChrome: true}},
   { path: 'login', component: Login, },
   { path: 'home-map', component: HomeMap, data: {hideChrome: true}},
@@ -26,5 +26,6 @@ export const routes: Routes = [
   { path: 'line-form', component: LineForm, canActivate: [authGuard, adminGuard] },
   { path: 'poi-form', component: PoiForm, canActivate: [authGuard, adminGuard] },
   { path: 'register', component: Register},
+  { path: '**', redirectTo: 'home-map'},
 
 ];

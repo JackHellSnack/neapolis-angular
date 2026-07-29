@@ -58,8 +58,8 @@ export class StopMap implements OnInit, OnDestroy {
   private router = inject(Router);
   private stopTimesById = new Map<number, { arrival?: string; departure?: string }>();
   authService     = inject(AuthService);
-  
-  
+
+
 
   private readonly ROUTE_COLORS = [
     '#B00020', // best route
@@ -70,6 +70,7 @@ export class StopMap implements OnInit, OnDestroy {
     '#e73749'
   ];
   private readonly DEFAULT_STOP_COLOR = '#2C8FBF';
+  private readonly WALK_COLOR = '#5b6b74';
 
   private map!: L.Map;
   private allStopsLayer!: L.LayerGroup;
@@ -85,7 +86,7 @@ export class StopMap implements OnInit, OnDestroy {
 
   startingJourney = signal(false);
   startJourneyError = signal<string | null>(null);
- 
+
   private stopsById = new Map<number, Stop>();
   private linesById = new Map<number, Line>();
   private dataReady = signal(false); // was: private dataReady = false;
@@ -106,7 +107,7 @@ export class StopMap implements OnInit, OnDestroy {
       const routes = this.routeHighlight.routes();
       const selectedIndex = this.routeHighlight.selectedIndex();
       const ready = this.dataReady(); // now tracked reactively
-    
+
       if (!ready) return;
 
       if (routes.length > 0) {
@@ -195,7 +196,7 @@ export class StopMap implements OnInit, OnDestroy {
         },
         error: () => this.dataReady.set(true) // no active journey — fine
       });
-    } 
+    }
     else {
       this.dataReady.set(true);
     }
@@ -314,6 +315,69 @@ export class StopMap implements OnInit, OnDestroy {
     return `hsl(${(id * 47) % 360}, 65%, 45%)`;
   }
 
+  /** A "Walk" leg has no real Line behind it (lineId 0 / lineName "Walk"). */
+  private isWalkLeg(leg: RouteLeg): boolean {
+    return leg.lineId === 0 || leg.lineName?.toLowerCase() === 'walk';
+  }
+
+  private bearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const toRad = (d: number) => d * Math.PI / 180;
+    const toDeg = (r: number) => r * 180 / Math.PI;
+    const dLon = toRad(lon2 - lon1);
+    const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+    const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+              Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
+  }
+
+  /**
+   * Draws a walking leg as a dashed line directly between the two stops,
+   * with small chevron arrows along it pointing in the walking direction.
+   * `showChevrons` lets callers skip the arrows for non-selected alternative
+   * routes (kept visually quieter than the active one).
+   */
+  private drawWalkSegment(
+    from: Stop,
+    to: Stop,
+    layer: L.LayerGroup,
+    popupHtml: string,
+    opts: { color?: string; weight?: number; opacity?: number; showChevrons?: boolean } = {}
+  ): L.LatLngExpression[] {
+    const color = opts.color ?? this.WALK_COLOR;
+    const weight = opts.weight ?? 3;
+    const opacity = opts.opacity ?? 0.85;
+    const showChevrons = opts.showChevrons ?? true;
+
+    const path: L.LatLngExpression[] = [[from.lat, from.lon], [to.lat, to.lon]];
+
+    L.polyline(path, {
+      color,
+      weight,
+      opacity,
+      dashArray: '2 10',
+      lineCap: 'round',
+    }).addTo(layer).bindPopup(popupHtml);
+
+    if (showChevrons) {
+      const angle = this.bearing(from.lat, from.lon, to.lat, to.lon);
+      const steps = 3;
+      for (let i = 1; i <= steps; i++) {
+        const t = i / (steps + 1);
+        const lat = from.lat + (to.lat - from.lat) * t;
+        const lon = from.lon + (to.lon - from.lon) * t;
+        const icon = L.divIcon({
+          className: 'np-walk-chevron',
+          html: `<div style="transform: rotate(${angle}deg)">&rsaquo;</div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
+        });
+        L.marker([lat, lon], { icon, interactive: false }).addTo(layer);
+      }
+    }
+
+    return path;
+  }
+
   private renderHighlightedRoute(legs: RouteLeg[]) {
   this.highlightLayer.clearLayers();
   this.stopTimesById.clear();
@@ -334,6 +398,20 @@ export class StopMap implements OnInit, OnDestroy {
     const arr = this.stopTimesById.get(leg.toStopId) ?? {};
     arr.arrival = leg.arrivalTime;
     this.stopTimesById.set(leg.toStopId, arr);
+
+    if (this.isWalkLeg(leg)) {
+      const from = this.stopsById.get(leg.fromStopId);
+      const to = this.stopsById.get(leg.toStopId);
+      if (!from || !to) return;
+      highlightedIds.add(leg.fromStopId);
+      highlightedIds.add(leg.toStopId);
+      const path = this.drawWalkSegment(
+        from, to, this.highlightLayer,
+        `<strong>A piedi</strong><br>${leg.fromStopName} → ${leg.toStopName}`
+      );
+      bounds.push(...path);
+      return;
+    }
 
     const line = this.linesById.get(leg.lineId);
     if (!line?.stopIds?.length) return;
@@ -404,6 +482,24 @@ private stopPopupContent(stop: Stop): string {
         this.stopTimesById.set(leg.toStopId, arr);
       }
 
+      if (this.isWalkLeg(leg)) {
+        const from = this.stopsById.get(leg.fromStopId);
+        const to = this.stopsById.get(leg.toStopId);
+        if (!from || !to) return;
+        if (isSelected) {
+          highlightedStops.add(leg.fromStopId);
+          highlightedStops.add(leg.toStopId);
+        }
+        const path = this.drawWalkSegment(
+          from, to, this.highlightLayer,
+          `<strong>A piedi</strong><br>${leg.fromStopName} → ${leg.toStopName}` +
+          (isSelected ? '' : `<br><button class="lf-btn" onclick="window.neapolisSelectRoute(${routeIndex})">✓ Usa questa</button>`),
+          { color: isSelected ? this.WALK_COLOR : '#c3cacd', weight: isSelected ? 3 : 2, opacity, showChevrons: isSelected }
+        );
+        if (isSelected) bounds.push(...path);
+        return;
+      }
+
       const line = this.linesById.get(leg.lineId);
       if (!line?.stopIds?.length) return;
 
@@ -465,7 +561,5 @@ private stopPopupContent(stop: Stop): string {
     }
     this.map?.remove();
   }
-
-  
 
 }
