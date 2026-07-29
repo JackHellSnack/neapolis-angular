@@ -22,10 +22,24 @@ export class RouteHighlightService {
   }
 
   setResults(routes: RouteLeg[][]): void {
-    this.routes.set(routes);
+    this.routes.set(this.dedupeRoutes(routes));
     this.selectedIndex.set(0);
   }
 
+  private dedupeRoutes(routes: RouteLeg[][]): RouteLeg[][] {
+    const seen = new Set<string>();
+    const result: RouteLeg[][] = [];
+    for (const route of routes) {
+      const key = route
+        .map(leg => `${leg.lineId}-${leg.fromStopId}-${leg.toStopId}`)
+        .join('|');
+      if (!seen.has(key)) {
+        seen.add(key);
+        result.push(route);
+      }
+    }
+    return result;
+  }
   selectRoute(index: number): void {
     if (index >= 0 && index < this.routes().length) {
       this.selectedIndex.set(index);
