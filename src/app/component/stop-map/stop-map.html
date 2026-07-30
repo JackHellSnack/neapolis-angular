@@ -4,7 +4,7 @@
   @if (routeActive()) {
   <div class="np-map-overlay">
     <div class="map-start">
-      @if (!journeyInProgress()) {
+      @if (!journeyInProgress() && authService.isLoggedIn()) {
       <button class="np-btn np-btn-primary np-btn-sm" (click)="startJourneyFromMap()" [disabled]="startingJourney()">
         @if (startingJourney()) {
         <span class="np-spinner" style="width:14px;height:14px;border-width:2px"></span>

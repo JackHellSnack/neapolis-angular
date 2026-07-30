@@ -10,9 +10,7 @@ Front-end per app neapolis
 - 
 
 ## To-do
-- Homepage (prendere come esempio trainline)
-- View da stazione più vicina a stazione desiderata (aspettare back-end implementation)   
-- 
+- cambiare tratte in cambi
 
 ### site-map
 - home (component) 
